@@ -1,19 +1,22 @@
 ---
 name: fantastic-ui
 description: >-
-  Design and build "instrument-grade" marketing and landing pages — pages that
-  read like the product itself, not like marketing about the product. Distilled
-  from the sectorRRG "The Instrument" landing redesign: dark editorial ground,
-  single-accent color discipline, serif display + monospace data type pairing,
-  a live Canvas hero as product proof, zero-webfont performance, and
-  accessibility gates baked in. Use this skill whenever the user asks for a
-  landing page, marketing page, hero section, or homepage redesign; says "make
-  it look premium / expensive / high-end / less generic"; complains a page
-  looks like a template; or wants a marketing surface for a data-heavy,
-  technical, developer, or finance product — even if they don't say "design".
+  Design and build "instrument-grade" UI — marketing pages AND in-product
+  surfaces (app pages, dashboards, panels, subpanels) that read like the
+  product itself, not like a template. Distilled from the sectorRRG "The
+  Instrument" landing redesign: dark editorial ground, single-accent color
+  discipline, serif display + monospace data type pairing, live data as proof,
+  zero-webfont performance, and accessibility gates baked in. Use this skill
+  whenever the user asks for a landing page, marketing page, hero section, or
+  homepage redesign; wants to restyle or modify existing app pages, panels,
+  subpanels, or dashboards; asks to "apply the same style across the app" or
+  make screens consistent; says "make it look premium / expensive / high-end /
+  less generic"; complains a page looks like a template; or wants any surface
+  for a data-heavy, technical, developer, or finance product — even if they
+  don't say "design".
 ---
 
-# Fantastic UI — instrument-grade marketing pages
+# Fantastic UI — instrument-grade marketing pages and product surfaces
 
 ## The core idea
 
@@ -30,6 +33,14 @@ This is a **flexible** skill: adapt the principles to the product's actual
 character. The worked example is a dark finance terminal, but the discipline
 (one accent, semantic color, live proof, performance and accessibility gates)
 transfers to any product that has real data or real behavior to show.
+
+The same philosophy applies **inside the product**: app pages, dashboards,
+panels, and subpanels are instruments too, and they fail the same way
+(uniform card grids, decorative color, shadow soup, default focus rings).
+For marketing pages, follow the five disciplines and page rhythm below. For
+modifying existing product surfaces, start at
+[Applying the disciplines to product surfaces](#applying-the-disciplines-to-product-surfaces-pages-panels-subpanels)
+— the disciplines are the same; the procedure and anatomy differ.
 
 ## Step 0 — Write the one-sentence brief first
 
@@ -165,14 +176,57 @@ These are pass/fail, checked before shipping:
 - Marquee/ticker content duplicated in a visually-hidden static list
 - Semantic landmarks: `nav`, `header`, `section` with ids, `footer`
 
+## Applying the disciplines to product surfaces (pages, panels, subpanels)
+
+Same five disciplines, two shifts in how they're applied. Full procedure,
+panel anatomy, and state patterns:
+[references/product-surfaces.md](references/product-surfaces.md) — read it
+before touching any app page or panel.
+
+**Shift 1 — the brief and the tokens belong to the app, not the page.**
+A marketing page can own its look; product surfaces can't, or the app becomes
+a costume party. Write ONE one-sentence brief for the whole application, lift
+the token block to the app shell (`:root` or the app's root class), and
+forbid page-local color definitions. Every page, panel, and subpanel draws
+from the same ground scale, ink scale, one accent, and semantic set. A panel
+that needs "its own color" is almost always misusing decoration where it
+needs hierarchy.
+
+**Shift 2 — rhythm becomes hierarchy.** A landing page alternates texture
+bands to keep a scrolling reader engaged; an app screen is *operated*, so
+composition follows attention instead: summary before detail, primary panel
+visibly primary (span, position, density — not louder color), and nesting
+depth encoded by the ground scale (each subpanel level exactly one ground
+step lighter, hairline-separated — never stacked shadows, max ~3 levels).
+
+**Retrofit procedure for existing screens** (details in the reference):
+
+1. **Audit** — inventory every page/panel/subpanel; screenshot before;
+   extract every color, face, radius, and shadow in use. The audit usually
+   finds 30+ greys and 3 accents; the target is one scale and one accent.
+2. **Brief** — one sentence for the whole app, tested against real screens.
+3. **Tokens first** — install the shared token block and map old values to
+   tokens *without* redesigning anything yet. This is the mechanical commit.
+4. **Primitives second** — build the shared panel/eyebrow/stat/table/state
+   primitives once, from the tokens.
+5. **Migrate surface by surface** — highest-traffic screen first, one PR per
+   screen, information identical, presentation rebuilt from primitives.
+   Never fork a token locally to "match the old look".
+6. **Consistency gate** — cross-screen pass at the end: same accent meaning,
+   same focus ring, same panel anatomy everywhere; grep for hex literals
+   outside the token file (there should be none).
+
 ## CSS architecture
 
 Use a CSS module (or equivalent scoping) with **every rule scoped under the
 page root class** — no bare element selectors that leak into the rest of the
-app. Tokens live on `.page`; shared primitives (`.wrap`, `.eyebrow`, `.btn`,
-`.mono`, `.focusable`, `.srOnly`) compose via multiple classes. Reveal-on-
-scroll is one `[data-reveal]` attribute + an `isIn` class toggled by a single
-IntersectionObserver. Full patterns and the token block:
+app. For a single marketing page, tokens live on `.page`; for product
+surfaces, tokens are promoted to the app shell and pages scope only their
+layout rules. Shared primitives (`.wrap`, `.eyebrow`, `.btn`, `.mono`,
+`.focusable`, `.srOnly`, and for apps `.panel`, `.panelHead`, `.stat`)
+compose via multiple classes. Reveal-on-scroll is one `[data-reveal]`
+attribute + an `isIn` class toggled by a single IntersectionObserver. Full
+patterns and the token block:
 [references/css-architecture.md](references/css-architecture.md).
 
 ## Ship checklist
@@ -192,6 +246,19 @@ Run through this before calling the page done:
 - [ ] Copy pass: numbers concrete, fine print honest, zero hype adjectives
       ("revolutionary", "powerful", "seamless" are banned)
 
+Additional gates when the work touched product surfaces:
+
+- [ ] No hex/rgb literals outside the token file (grep proves it)
+- [ ] Every panel uses the shared anatomy (eyebrow header, hairline
+      separation, actions right) — no one-off panel styles
+- [ ] Subpanel nesting encoded by ground-scale steps, ≤ 3 levels, no
+      stacked shadows
+- [ ] Empty, loading, and error states designed for every migrated panel
+      (skeletons on ground scale, semantic color only on real errors)
+- [ ] Cross-screen pass: accent means the same thing on every page; focus
+      rings identical; density comparable between sibling panels
+- [ ] Before/after screenshots captured for each migrated screen
+
 ## References
 
 - [references/css-architecture.md](references/css-architecture.md) — the full
@@ -203,3 +270,7 @@ Run through this before calling the page done:
 - [references/ai-atmosphere.md](references/ai-atmosphere.md) — generating and
   compressing AI atmosphere backgrounds (prompt recipe + pipeline script).
   Read when a section needs an atmospheric background image.
+- [references/product-surfaces.md](references/product-surfaces.md) — the full
+  retrofit procedure for existing app pages, panel and subpanel anatomy,
+  nesting/depth rules, state design (empty/loading/error), and density
+  guidance. Read whenever modifying or restyling in-product UI.

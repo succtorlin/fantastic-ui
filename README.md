@@ -1,6 +1,6 @@
 # fantastic-ui
 
-**An agent skill that teaches Claude to build instrument-grade landing pages — pages that read like the product itself, not like marketing about the product.**
+**An agent skill that teaches Claude to build instrument-grade UI — landing pages that read like the product itself, and product surfaces (app pages, dashboards, panels, subpanels) held to the same discipline.**
 
 <p align="center">
   <img src="assets/showcase.png" alt="A landing page built with this skill: dark warm-charcoal ground, serif display headline, single amber accent, and a live canvas visualization of sectors rotating through four quadrants" width="900" />
@@ -26,6 +26,15 @@ It's not a component library and not a theme. It's the **decision discipline**, 
 4. **Page rhythm** — alternating texture bands: stat tape, thesis explainer, asymmetric bento with painted sparklines, an AI-generated atmosphere band (≤30 KB webp), an interactive ARIA-correct toggle, honest fine print.
 5. **Performance and accessibility as gates, not polish** — a pass/fail ship checklist: reduced-motion paths for every animation, skip link, designed focus rings, no horizontal overflow at 320px, RAF verified stopped when the tab hides.
 
+## Beyond the landing page: product surfaces
+
+The same five disciplines apply *inside* the product. The skill includes a dedicated workflow for modifying existing app pages, panels, and subpanels:
+
+- **App-level brief and tokens** — one one-sentence direction and one token block on the app shell; page-local colors are forbidden, so every screen draws from the same ground scale and single accent.
+- **A six-step retrofit procedure** — audit (inventory + color-literal grep baseline) → brief → mechanical tokens-first commit → shared primitives → screen-by-screen migration (one PR each, highest-traffic first) → a cross-screen consistency gate.
+- **Panel anatomy and nesting rules** — a uniform panel skeleton (mono eyebrow head, hairline separation, actions right), depth encoded by ground-scale steps instead of shadows, maximum three nesting levels.
+- **States as first-class design** — skeleton loading on the ground scale, honest empty states, error red confined to actual errors, stale-data timestamps.
+
 ## Install
 
 **Claude Code (recommended):**
@@ -50,6 +59,8 @@ Once installed, Claude picks it up automatically when you ask for things like:
 - *"Build a landing page for my API monitoring tool"*
 - *"Redesign our homepage, it looks like a template"*
 - *"Make this page feel premium"*
+- *"Restyle the dashboard panels to match the landing page"*
+- *"Apply the same style across all the app's pages and subpanels"*
 
 Or invoke it explicitly: `/fantastic-ui`.
 
@@ -62,7 +73,9 @@ skills/fantastic-ui/
     ├── css-architecture.md         # full token system, scoped CSS-module rules, shared primitives
     ├── canvas-hero.md              # annotated live-canvas hero, sparklines, scroll reveals —
     │                               #   with the complete lifecycle contract (DPR / visibility / reduced-motion / cleanup)
-    └── ai-atmosphere.md            # prompt recipe + pipeline for ≤30 KB AI atmosphere backgrounds
+    ├── ai-atmosphere.md            # prompt recipe + pipeline for ≤30 KB AI atmosphere backgrounds
+    └── product-surfaces.md         # retrofit procedure for app pages/panels/subpanels: audit → tokens →
+                                    #   primitives → migration, panel anatomy, nesting depth, state design
 ```
 
 The skill is framework-light: the worked code is React + CSS modules, but the disciplines (and most of the CSS) transfer directly to Vue, Svelte, or plain HTML.
