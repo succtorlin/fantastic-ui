@@ -1,0 +1,205 @@
+---
+name: fantastic-ui
+description: >-
+  Design and build "instrument-grade" marketing and landing pages — pages that
+  read like the product itself, not like marketing about the product. Distilled
+  from the sectorRRG "The Instrument" landing redesign: dark editorial ground,
+  single-accent color discipline, serif display + monospace data type pairing,
+  a live Canvas hero as product proof, zero-webfont performance, and
+  accessibility gates baked in. Use this skill whenever the user asks for a
+  landing page, marketing page, hero section, or homepage redesign; says "make
+  it look premium / expensive / high-end / less generic"; complains a page
+  looks like a template; or wants a marketing surface for a data-heavy,
+  technical, developer, or finance product — even if they don't say "design".
+---
+
+# Fantastic UI — instrument-grade marketing pages
+
+## The core idea
+
+A marketing page for a serious product should feel like **holding the
+instrument**, not reading a brochure about it. Most landing pages fail because
+they dress the product in someone else's clothes: gradient blobs, stock
+screenshots in tilted browser frames, three-column feature grids with icon
+libraries. The methodology here inverts that: take the product's own visual
+language (its data, its density, its color logic) and elevate it to editorial
+quality. The visitor should feel they've already started using the product by
+the time they reach the CTA.
+
+This is a **flexible** skill: adapt the principles to the product's actual
+character. The worked example is a dark finance terminal, but the discipline
+(one accent, semantic color, live proof, performance and accessibility gates)
+transfers to any product that has real data or real behavior to show.
+
+## Step 0 — Write the one-sentence brief first
+
+Before any code, commit to a named direction in one sentence. Example from the
+worked case:
+
+> "Dark, instrument-grade market terminal elevated to editorial: warm-charcoal
+> ground, single sodium-amber accent, teal/red only as semantic signal colors,
+> humanist serif display over monospace data."
+
+Every later decision gets tested against this sentence. If you can't write it,
+you don't have a direction yet — interrogate the product first: What does it
+actually look like in use? What's its most impressive live behavior? What
+color already *means something* in it? A vague brief ("clean, modern") produces
+template output; a specific one produces a point of view.
+
+## The five disciplines
+
+### 1. Single-accent color system
+
+Build the palette as a scale from one ground hue, with exactly **one** accent
+and a small set of **semantic** colors that are never used decoratively:
+
+- **Ground scale** — 4–5 steps of near-black tinted *toward the accent's
+  warmth* (e.g. warm charcoal `#0b0b0a` → panel `#151309`), so even empty
+  space carries the direction.
+- **Hairlines, not shadows** — 1px borders from the ground scale
+  (`--hair`, `--hair-lit`) define surfaces. Dark UIs read cheap when they lean
+  on drop shadows.
+- **Ink scale** — 3 steps of off-white text tinted the same direction
+  (`--ink`, `--ink-2`, `--muted`). Pure `#fff` on near-black glares.
+- **One accent + one highlight** of it (`--sodium: #f2a83c`,
+  `--sodium-hi: #ffc164`). The accent marks *what matters*: eyebrows, CTAs,
+  focus rings, the brand mark, selection color. If it's everywhere, it's
+  nowhere.
+- **Semantic colors stay semantic** — if the domain has meaning-colors (up
+  teal / down red, pass green / fail red), they appear **only** with that
+  meaning, never as decoration. This is what makes a page feel like an
+  instrument: color is information.
+
+Define all of it as CSS custom properties on the page root so the direction is
+auditable in one place. Full token block in
+[references/css-architecture.md](references/css-architecture.md).
+
+### 2. Three-face typography, zero webfonts
+
+Pair three type roles using **system font stacks only** — no font requests, no
+FOUT, no layout shift:
+
+- **Display serif** for headlines — a humanist serif stack
+  (`"Iowan Old Style", "Palatino Linotype", Palatino, ui-serif, Georgia`)
+  gives editorial gravity that default sans headlines can't. `text-wrap:
+  balance`, tight letter-spacing, `clamp()` sizing, an italic `<em>` in the
+  accent-highlight color for the one word that matters.
+- **Monospace** for data, eyebrows, buttons, microcopy — with
+  `font-variant-numeric: tabular-nums`. Mono is what makes numbers feel
+  *measured* rather than claimed. Eyebrow kickers: mono, uppercase, ~0.22em
+  tracking, accent color, a short rule-line before the text.
+- **System sans** for body prose.
+
+The serif/mono contrast does the aesthetic work that webfonts usually get
+hired for, at zero performance cost.
+
+### 3. Live proof over screenshots
+
+The hero visual should be the product **actually running**, drawn on a
+`<canvas>` — not a screenshot, not a stock illustration. A screenshot says
+"trust us"; a live rendering says "look at it go". Simulated data is fine
+(random walks tuned to look plausible); the honesty is in the *mechanics*
+being real.
+
+Non-negotiables for any canvas animation (full annotated pattern in
+[references/canvas-hero.md](references/canvas-hero.md)):
+
+- DPR-aware sizing, capped at 2, re-applied on resize
+- Pause via `visibilitychange` when the tab is hidden
+- `prefers-reduced-motion` renders **one static frame** — same composition,
+  no loop
+- Full effect cleanup: cancel RAF, remove every listener
+- Colors pulled from the same palette tokens as the CSS
+
+Smaller instances of the same idea (sparklines painted into feature cards)
+make the whole page feel alive without any animation library.
+
+### 4. Page rhythm — dense, alternating, specific
+
+Structure the page as alternating **texture bands** rather than uniform
+sections. The worked skeleton, generalizable:
+
+1. **Sticky nav** — transparent until scrolled, then blur + hairline
+2. **Hero** — copy left, live canvas right; trust stats under the CTA
+3. **Stat tape** — a slow marquee of real numbers (with an `srOnly` static
+   list for screen readers, marquee `aria-hidden`)
+4. **Thesis explainer** — diagram + editorial copy; teach the product's core
+   mental model in one section
+5. **Feature bento** — asymmetric grid (3+3 / 2+2+2 columns, 6→2→1
+   responsive), each card carrying a *proof artifact* (sparkline, pill row,
+   mini-table), never an icon
+6. **Atmosphere band** — full-bleed section over a subtle AI-generated
+   background (see [references/ai-atmosphere.md](references/ai-atmosphere.md))
+   carrying the accountability/credibility content
+7. **Interactive toggle section** — one real state switch (markets, plans,
+   platforms) with proper ARIA tabs, proving the page is an application
+8. **Principles trio** — the "why trust us" values, stated plainly
+9. **Final CTA + honest fine print**
+
+Copywriting voice: numbers are the protagonists (`5,000+ tickers`, `±70 mints
+a call`); microcopy in monospace reads like terminal output; fine print is
+honest ("Not investment advice · Track record is paper trading") — candor is
+a premium signal. Headlines state a thesis, not a feature list ("The market is
+always in rotation. See it turn first.").
+
+### 5. Performance and accessibility as gates, not polish
+
+These are pass/fail, checked before shipping:
+
+**Performance**
+- Zero webfonts, zero animation/UI libraries — the page needs only the
+  framework it lives in
+- Any raster asset ≤ ~30 KB (generate large, compress hard to webp)
+- Motion on compositor properties only (`transform`, `opacity`); scroll work
+  via IntersectionObserver, never scroll handlers doing layout reads
+- Explicit dimensions on media; hero canvas gets width/height attributes
+
+**Accessibility**
+- Every animation (canvas, reveals, marquee, pulse) gated behind
+  `prefers-reduced-motion` — reveals appear instantly, canvas draws one frame
+- Skip link as the first focusable element
+- A shared `.focusable` class: `outline: 2px solid var(--accent);
+  outline-offset: 3px` on `:focus-visible` — designed focus, not default
+- Real ARIA on interactive widgets (`role="tablist"` / `aria-selected` on
+  toggles); decorative canvases `aria-hidden="true"`
+- Marquee/ticker content duplicated in a visually-hidden static list
+- Semantic landmarks: `nav`, `header`, `section` with ids, `footer`
+
+## CSS architecture
+
+Use a CSS module (or equivalent scoping) with **every rule scoped under the
+page root class** — no bare element selectors that leak into the rest of the
+app. Tokens live on `.page`; shared primitives (`.wrap`, `.eyebrow`, `.btn`,
+`.mono`, `.focusable`, `.srOnly`) compose via multiple classes. Reveal-on-
+scroll is one `[data-reveal]` attribute + an `isIn` class toggled by a single
+IntersectionObserver. Full patterns and the token block:
+[references/css-architecture.md](references/css-architecture.md).
+
+## Ship checklist
+
+Run through this before calling the page done:
+
+- [ ] The one-sentence brief still describes the shipped page
+- [ ] One accent color; semantic colors appear only with their meaning
+- [ ] No webfonts, no new dependencies, assets ≤ 30 KB each
+- [ ] Hero shows the product *running*, not a picture of it
+- [ ] `prefers-reduced-motion`: every animation has a static path (verify by
+      toggling the OS setting or DevTools emulation)
+- [ ] Keyboard pass: skip link, visible focus rings, tabs operable
+- [ ] Responsive pass at 320 / 768 / 1024 / 1440 — bento collapses cleanly,
+      no horizontal overflow
+- [ ] Tab-hidden pass: canvas RAF actually stops (check via Performance panel)
+- [ ] Copy pass: numbers concrete, fine print honest, zero hype adjectives
+      ("revolutionary", "powerful", "seamless" are banned)
+
+## References
+
+- [references/css-architecture.md](references/css-architecture.md) — the full
+  token system, scoping rules, shared primitives, and responsive patterns.
+  Read when writing the stylesheet.
+- [references/canvas-hero.md](references/canvas-hero.md) — annotated live
+  canvas hero + sparkline + scroll-reveal code with all lifecycle handling.
+  Read when building any canvas or reveal behavior.
+- [references/ai-atmosphere.md](references/ai-atmosphere.md) — generating and
+  compressing AI atmosphere backgrounds (prompt recipe + pipeline script).
+  Read when a section needs an atmospheric background image.
