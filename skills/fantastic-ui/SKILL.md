@@ -11,9 +11,11 @@ description: >-
   homepage redesign; wants to restyle or modify existing app pages, panels,
   subpanels, or dashboards; asks to "apply the same style across the app" or
   make screens consistent; says "make it look premium / expensive / high-end /
-  less generic"; complains a page looks like a template; or wants any surface
-  for a data-heavy, technical, developer, or finance product — even if they
-  don't say "design".
+  less generic"; complains a page looks like a template; asks for an
+  accessibility or WCAG audit, accessibility fixes, or contrast / keyboard /
+  screen-reader compliance work on any web UI; or wants any surface for a
+  data-heavy, technical, developer, or finance product — even if they don't
+  say "design".
 ---
 
 # Fantastic UI — instrument-grade marketing pages and product surfaces
@@ -216,6 +218,46 @@ step lighter, hairline-separated — never stacked shadows, max ~3 levels).
    same focus ring, same panel anatomy everywhere; grep for hex literals
    outside the token file (there should be none).
 
+## The accessibility phase — check and fix (WCAG 2.2 AA)
+
+Discipline 5 states the gates; this phase is **how you actually pass them**.
+It is a required workflow phase, not an optional polish step — run it on
+every build and on every retrofitted screen. Full audit procedure, contrast
+math, manual pass scripts, and fix patterns:
+[references/wcag-audit.md](references/wcag-audit.md) — read it when you
+enter this phase.
+
+The phase runs at three moments:
+
+1. **Token time — validate contrast once, inherit it everywhere.** Before
+   any component is styled, compute the contrast matrix for every ink×ground
+   and accent×ground token pair (script in the reference). Every text token
+   must clear 4.5:1 on every ground step it will sit on (3:1 for large
+   text); accent-as-UI-component and focus rings must clear 3:1 against
+   adjacent colors. Fixing a failing pair means adjusting the *token*, never
+   a local override — one fix repairs every screen at once. Record the
+   passing matrix as a comment in the token file.
+2. **Build time — semantics as you go.** Landmarks, heading order, real
+   ARIA on widgets, canvas/marquee alternatives, labels on every input —
+   cheaper to build in than to bolt on (patterns in the reference).
+3. **Pre-ship — audit, fix, re-audit.** Automated sweep (axe-core with
+   WCAG 2.2 AA tags + Lighthouse a11y) plus the four manual passes no tool
+   can do: keyboard traversal, screen-reader walkthrough, reduced-motion
+   toggle, and 320 px / 200 % zoom reflow. Triage: axe critical/serious
+   findings and any manual-pass failure are **ship blockers**; moderates are
+   fixed or explicitly documented; minors go to the backlog. Fix, then
+   re-run to zero blockers — an audit without the re-run is theater.
+
+Two rules that keep fixes on-system:
+
+- **Fix at the highest level possible.** Token > primitive > component >
+  instance. A contrast failure fixed on one card will recur on the next
+  screen; fixed in the token it can never recur.
+- **Accessibility fixes must not fork the design.** If a fix seems to
+  require a new color or a louder style, re-read the failing criterion —
+  the compliant answer is almost always *within* the system (a lighter ink
+  step, a thicker hairline, a visible focus ring from the existing accent).
+
 ## CSS architecture
 
 Use a CSS module (or equivalent scoping) with **every rule scoped under the
@@ -245,6 +287,10 @@ Run through this before calling the page done:
 - [ ] Tab-hidden pass: canvas RAF actually stops (check via Performance panel)
 - [ ] Copy pass: numbers concrete, fine print honest, zero hype adjectives
       ("revolutionary", "powerful", "seamless" are banned)
+- [ ] **Accessibility phase completed**: token contrast matrix validated,
+      axe-core (wcag2a/wcag2aa/wcag22aa tags) at zero critical/serious,
+      keyboard + screen-reader + reduced-motion + reflow manual passes done,
+      findings fixed and re-audited (see references/wcag-audit.md)
 
 Additional gates when the work touched product surfaces:
 
@@ -274,3 +320,8 @@ Additional gates when the work touched product surfaces:
   retrofit procedure for existing app pages, panel and subpanel anatomy,
   nesting/depth rules, state design (empty/loading/error), and density
   guidance. Read whenever modifying or restyling in-product UI.
+- [references/wcag-audit.md](references/wcag-audit.md) — the accessibility
+  check-and-fix phase: token contrast matrix script, automated sweep
+  (axe-core / Lighthouse), the four manual passes, WCAG 2.2 new criteria,
+  fix patterns keyed to the design system, and the report/re-audit loop.
+  Read when entering the accessibility phase or on any a11y/WCAG request.

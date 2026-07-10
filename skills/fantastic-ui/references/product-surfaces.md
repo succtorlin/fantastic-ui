@@ -171,7 +171,9 @@ no place in-product; every moving pixel must encode a data change.
 
 - One screen (or one panel family) per PR. Each PR: before/after
   screenshots, information preserved exactly, presentation rebuilt from
-  primitives.
+  primitives, and the accessibility phase run on the migrated screen —
+  axe sweep in every designed state plus the keyboard pass, findings table
+  included in the PR (see `wcag-audit.md`).
 - Highest-traffic screen first — it forces the primitives to be right and
   pays back immediately. Settings and admin screens last.
 - Mid-migration inconsistency is expected; a `docs/ui-migration.md` tracker
@@ -198,4 +200,7 @@ Run after the last screen migrates; these are pass/fail:
       network and kill the API to verify, don't assume)
 - [ ] Responsive pass per screen at 320/768/1024/1440 — panels reflow to a
       single column without horizontal overflow
+- [ ] Accessibility phase exit criteria met app-wide (`wcag-audit.md`
+      Step 6): axe clean incl. wcag22aa, token contrast matrix recorded,
+      manual passes done on the two most complex screens
 - [ ] Before/after screenshot pairs archived for every screen

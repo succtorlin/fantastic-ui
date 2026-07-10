@@ -35,6 +35,16 @@ The same five disciplines apply *inside* the product. The skill includes a dedic
 - **Panel anatomy and nesting rules** — a uniform panel skeleton (mono eyebrow head, hairline separation, actions right), depth encoded by ground-scale steps instead of shadows, maximum three nesting levels.
 - **States as first-class design** — skeleton loading on the ground scale, honest empty states, error red confined to actual errors, stale-data timestamps.
 
+## The accessibility phase
+
+Accessibility isn't a checklist item here — it's a required **check-and-fix phase** targeting WCAG 2.2 AA, run at three moments:
+
+1. **Token time** — a runnable contrast-matrix script validates every ink×ground and accent×ground pair once (4.5:1 text, 3:1 UI/focus), so every screen inherits compliance; failing pairs are fixed in the token, never locally.
+2. **Build time** — landmarks, heading order, real ARIA, canvas/marquee text alternatives built in as you go.
+3. **Pre-ship** — automated sweep (axe-core with `wcag22aa` tags + Lighthouse) plus four manual passes (keyboard, screen reader, reduced motion, 320 px / 200 % reflow), a severity triage where critical/serious findings block the ship, then fix and **re-audit to zero blockers**.
+
+The reference includes fix patterns keyed to the design system (two-layer focus rings, semantic-color text variants, ≥24 px target sizes, `aria-live` on refreshing panels) and covers the new WCAG 2.2 criteria most audits miss.
+
 ## Install
 
 **Claude Code (recommended):**
@@ -61,6 +71,8 @@ Once installed, Claude picks it up automatically when you ask for things like:
 - *"Make this page feel premium"*
 - *"Restyle the dashboard panels to match the landing page"*
 - *"Apply the same style across all the app's pages and subpanels"*
+- *"Run a WCAG audit on this page and fix what fails"*
+- *"Make the app accessible / fix the contrast and keyboard issues"*
 
 Or invoke it explicitly: `/fantastic-ui`.
 
@@ -74,8 +86,10 @@ skills/fantastic-ui/
     ├── canvas-hero.md              # annotated live-canvas hero, sparklines, scroll reveals —
     │                               #   with the complete lifecycle contract (DPR / visibility / reduced-motion / cleanup)
     ├── ai-atmosphere.md            # prompt recipe + pipeline for ≤30 KB AI atmosphere backgrounds
-    └── product-surfaces.md         # retrofit procedure for app pages/panels/subpanels: audit → tokens →
-                                    #   primitives → migration, panel anatomy, nesting depth, state design
+    ├── product-surfaces.md         # retrofit procedure for app pages/panels/subpanels: audit → tokens →
+    │                               #   primitives → migration, panel anatomy, nesting depth, state design
+    └── wcag-audit.md               # WCAG 2.2 AA check-and-fix phase: contrast-matrix script, axe/Lighthouse
+                                    #   sweep, four manual passes, on-system fix patterns, re-audit loop
 ```
 
 The skill is framework-light: the worked code is React + CSS modules, but the disciplines (and most of the CSS) transfer directly to Vue, Svelte, or plain HTML.
