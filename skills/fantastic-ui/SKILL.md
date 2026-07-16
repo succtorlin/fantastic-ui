@@ -9,8 +9,9 @@ description: >-
   zero-webfont performance, and accessibility gates baked in. Use this skill
   whenever the user asks for a landing page, marketing page, hero section, or
   homepage redesign; wants to restyle or modify existing app pages, panels,
-  subpanels, or dashboards; asks to "apply the same style across the app" or
-  make screens consistent; says "make it look premium / expensive / high-end /
+  subpanels, or dashboards; asks to "apply the same style across the app",
+  "polish every page/surface", or sweep/retrofit the whole app recursively;
+  says "make it look premium / expensive / high-end /
   less generic"; complains a page looks like a template; asks for an
   accessibility or WCAG audit, accessibility fixes, or contrast / keyboard /
   screen-reader compliance work on any web UI; or wants any surface for a
@@ -218,6 +219,28 @@ step lighter, hairline-separated — never stacked shadows, max ~3 levels).
    same focus ring, same panel anatomy everywhere; grep for hex literals
    outside the token file (there should be none).
 
+## Recursive whole-app polish mode
+
+When the scope is **every surface of the application** — "polish every page",
+"apply this across the whole app", "make sure nothing is missed" — the
+per-screen retrofit procedure alone is not enough: it has no traversal, no
+persistent progress tracking, and no provable end. Use the sweep mode in
+[references/recursive-polish.md](references/recursive-polish.md) — read it
+before starting any whole-app job. It adds, on top of everything above:
+
+- **Inventory by recursive traversal** of every route's import tree —
+  including modals, drawers, toasts, dropdowns, and command palettes, which
+  are in scope — deduplicating shared components into single work items
+- **Prior-art reconciliation** — detect an existing token system and recover
+  its brief instead of writing a competing one
+- **Shared-primitives-first ordering**, then routes by traffic (with a stated
+  fallback ranking when no analytics exist)
+- **Batches of 3–5 surfaces** with a presentation-only diff gate, per-batch
+  a11y pass, and a persistent ledger file that survives session boundaries
+- **Loop-until-dry completion**: re-run the inventory from scratch at the end;
+  the job is done only when a fresh sweep finds zero non-done surfaces and the
+  mechanical proofs (hex-grep zero, axe-core zero critical/serious) pass
+
 ## The accessibility phase — check and fix (WCAG 2.2 AA)
 
 Discipline 5 states the gates; this phase is **how you actually pass them**.
@@ -320,6 +343,10 @@ Additional gates when the work touched product surfaces:
   retrofit procedure for existing app pages, panel and subpanel anatomy,
   nesting/depth rules, state design (empty/loading/error), and density
   guidance. Read whenever modifying or restyling in-product UI.
+- [references/recursive-polish.md](references/recursive-polish.md) — the
+  whole-app sweep mode: recursive surface inventory, prior-art reconciliation,
+  shared-first ordering, batch loop with ledger, loop-until-dry completion.
+  Read whenever the scope is every surface of the app rather than one screen.
 - [references/wcag-audit.md](references/wcag-audit.md) — the accessibility
   check-and-fix phase: token contrast matrix script, automated sweep
   (axe-core / Lighthouse), the four manual passes, WCAG 2.2 new criteria,

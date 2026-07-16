@@ -35,6 +35,16 @@ The same five disciplines apply *inside* the product. The skill includes a dedic
 - **Panel anatomy and nesting rules** — a uniform panel skeleton (mono eyebrow head, hairline separation, actions right), depth encoded by ground-scale steps instead of shadows, maximum three nesting levels.
 - **States as first-class design** — skeleton loading on the ground scale, honest empty states, error red confined to actual errors, stale-data timestamps.
 
+## Whole-app recursive polish
+
+When the scope is *every* surface — "polish every page, don't miss anything" — a per-screen procedure isn't enough. The skill includes a sweep mode that adds coverage mechanics on top of the retrofit workflow:
+
+- **Inventory by recursive traversal** — walk every route's import tree from the code (modals, drawers, toasts, and command palettes included), deduplicating shared components into single work items; never trust a route-count estimate.
+- **Prior-art reconciliation** — detect an existing token system, recover its brief instead of writing a competing one, and extend any existing style-guard tests rather than creating parallel ones. Dual-theme apps get one token vocabulary with light/dark values per token, contrast-validated in both.
+- **Shared-primitives-first ordering**, then routes by traffic, with a stated fallback ranking when no analytics exist.
+- **Batched migration** — 3–5 surfaces per batch (the batch is the PR unit in sweep mode), a presentation-only diff gate, per-batch a11y pass, and a persistent ledger file that survives session boundaries.
+- **Loop-until-dry completion** — the job is done only when a *fresh* re-inventory finds zero unpolished surfaces and the mechanical proofs pass (zero color literals outside the token file, zero axe-core critical/serious). Early stops are recorded as explicitly deferred, never silently dropped.
+
 ## The accessibility phase
 
 Accessibility isn't a checklist item here — it's a required **check-and-fix phase** targeting WCAG 2.2 AA, run at three moments:
@@ -71,6 +81,7 @@ Once installed, Claude picks it up automatically when you ask for things like:
 - *"Make this page feel premium"*
 - *"Restyle the dashboard panels to match the landing page"*
 - *"Apply the same style across all the app's pages and subpanels"*
+- *"Polish every single surface of the app — make sure nothing is missed"*
 - *"Run a WCAG audit on this page and fix what fails"*
 - *"Make the app accessible / fix the contrast and keyboard issues"*
 
@@ -88,8 +99,10 @@ skills/fantastic-ui/
     ├── ai-atmosphere.md            # prompt recipe + pipeline for ≤30 KB AI atmosphere backgrounds
     ├── product-surfaces.md         # retrofit procedure for app pages/panels/subpanels: audit → tokens →
     │                               #   primitives → migration, panel anatomy, nesting depth, state design
-    └── wcag-audit.md               # WCAG 2.2 AA check-and-fix phase: contrast-matrix script, axe/Lighthouse
-                                    #   sweep, four manual passes, on-system fix patterns, re-audit loop
+    ├── wcag-audit.md               # WCAG 2.2 AA check-and-fix phase: contrast-matrix script, axe/Lighthouse
+    │                               #   sweep, four manual passes, on-system fix patterns, re-audit loop
+    └── recursive-polish.md         # whole-app sweep mode: recursive surface inventory, prior-art
+                                    #   reconciliation, batch loop with ledger, loop-until-dry completion
 ```
 
 The skill is framework-light: the worked code is React + CSS modules, but the disciplines (and most of the CSS) transfer directly to Vue, Svelte, or plain HTML.
