@@ -54,6 +54,55 @@ worked case:
 > ground, single sodium-amber accent, teal/red only as semantic signal colors,
 > humanist serif display over monospace data."
 
+### Step 0a — Run the preset check FIRST (do not skip, do not skip silently)
+
+Before writing a brief, decide whether one of the eleven presets in
+[references/theme-presets.md](references/theme-presets.md) already is the brief.
+Work the gates in order and stop at the first that answers:
+
+1. **Did the user name a direction?** Any preset name, or a described look
+   ("monochrome architectural", "warm cream deck"). → Use it. Their words win,
+   including when they ask for something you would not have chosen.
+2. **Does the codebase already have a token system?** Grep the global
+   stylesheet for token names, accent variables, shared primitive classes. If
+   one exists → **no preset.** Recover its brief and extend it (Phase B of
+   `recursive-polish.md`). A preset here would run a second design system in
+   parallel, which is the exact failure Shift 1 forbids.
+3. **Otherwise, score the request** against the signal table in
+   `theme-presets.md` — medium, domain, imagery, density — and apply each
+   preset's disqualifier.
+
+Then act on the confidence you actually have:
+
+| Result | What you do |
+|---|---|
+| One preset matches on ≥2 signals with no disqualifier hit | **Adopt it.** State the choice in one line and continue without asking. |
+| Two or more are plausible | **Ask**, offering at most three, each with the one differentiator that decides it. |
+| A preset half-fits, or a disqualifier fires | **Say so and write a fresh brief.** A stretched preset produces exactly the template output the Anti-Template Policy exists to prevent. |
+| Nothing fits | Fresh brief via Step 0. Note which preset was closest and why it failed. |
+
+**Always announce the outcome in one line before building**, so the user can
+redirect before code exists:
+
+> Using **Terracotta Commerce** — retail storefront, product photography,
+> soft-shadow cards. Say the word if you'd rather I write a fresh direction.
+
+> No preset fits: this is a data-dense operator console, and every preset
+> either fails at density or has no accent to encode state. Writing a fresh
+> brief.
+
+**Known gap, state it rather than forcing a fit:** all eleven presets are
+content- or product-led. **Data-heavy analytics, developer tools, dashboards
+and trading/finance surfaces are still not covered.** Two presets are dark, but
+Midnight Showroom sells objects and has no data grammar at all — no monospace
+numerals, no chart treatment, no semantic up/down. Those surfaces want the dark
+instrument direction of the worked example above. Route them there or to a
+fresh brief; do not reach for Midnight Showroom because it is dark, or
+Blueprint Mono because it looks technical.
+
+One preset per application. Marketing surfaces may diverge from the app;
+screens inside one product may not.
+
 Every later decision gets tested against this sentence. If you can't write it,
 you don't have a direction yet — interrogate the product first: What does it
 actually look like in use? What's its most impressive live behavior? What
@@ -271,7 +320,7 @@ The phase runs at three moments:
    fixed or explicitly documented; minors go to the backlog. Fix, then
    re-run to zero blockers — an audit without the re-run is theater.
 
-Two rules that keep fixes on-system:
+Four rules that keep fixes on-system:
 
 - **Fix at the highest level possible.** Token > primitive > component >
   instance. A contrast failure fixed on one card will recur on the next
@@ -280,6 +329,23 @@ Two rules that keep fixes on-system:
   require a new color or a louder style, re-read the failing criterion —
   the compliant answer is almost always *within* the system (a lighter ink
   step, a thicker hairline, a visible focus ring from the existing accent).
+- **Never dim text with `opacity-*`.** Use an ink token. Opacity survives
+  code review — every class references an approved token — while silently
+  failing contrast, and it **compounds**: `opacity-60` on a card times
+  `opacity-70` on its counter renders at 0.42 alpha, measured 1.83:1. It
+  also creates a stacking context that blinds the auditor, so it hides the
+  bug it causes. `disabled:`, `hover:` and transient states stay fine.
+- **`incomplete` is not `violations`.** axe returns both; the DevTools
+  extension paints them with the same red SERIOUS card, so an `incomplete`
+  gets reported as a violation the API never raised. It means "could not
+  compute" — neither a pass nor a failure. Measure every one by hand: on a
+  real audit, 0 violations and 14 incomplete concealed 9 genuine AA
+  failures, the worst at 1.83:1.
+
+When a dimming you are removing **encodes state** (unapproved, locked,
+inactive), find the replacement channel before deleting it — often another
+channel already carries it and the opacity was redundant. Procedure and the
+trap that follows it are in the reference.
 
 ## CSS architecture
 
@@ -311,9 +377,11 @@ Run through this before calling the page done:
 - [ ] Copy pass: numbers concrete, fine print honest, zero hype adjectives
       ("revolutionary", "powerful", "seamless" are banned)
 - [ ] **Accessibility phase completed**: token contrast matrix validated,
-      axe-core (wcag2a/wcag2aa/wcag22aa tags) at zero critical/serious,
-      keyboard + screen-reader + reduced-motion + reflow manual passes done,
-      findings fixed and re-audited (see references/wcag-audit.md)
+      axe-core (wcag2a/wcag2aa/wcag22aa tags) at zero critical/serious
+      *violations*, every *incomplete* node measured and recorded, zero bare
+      `opacity-*` on text, keyboard + screen-reader + reduced-motion + reflow
+      manual passes done, findings fixed and re-audited (see
+      references/wcag-audit.md)
 
 Additional gates when the work touched product surfaces:
 
@@ -330,6 +398,13 @@ Additional gates when the work touched product surfaces:
 
 ## References
 
+- [references/theme-presets.md](references/theme-presets.md) — eleven named
+  directions with contrast-validated token blocks and component grammar, the
+  selection signal table, a disambiguation note for the four warm-yellow
+  directions, the shared device set, and the procedure for adding a preset:
+  Coastal Editorial, Blueprint Mono, Marigold Report, Atelier Warm, Terracotta
+  Commerce, Midnight Showroom, Broadcast Light, Studio Kinetic, Campus Bright,
+  Charter Navy, Dispatch Yellow. Read at Step 0, before writing a brief.
 - [references/css-architecture.md](references/css-architecture.md) — the full
   token system, scoping rules, shared primitives, and responsive patterns.
   Read when writing the stylesheet.
@@ -348,7 +423,12 @@ Additional gates when the work touched product surfaces:
   shared-first ordering, batch loop with ledger, loop-until-dry completion.
   Read whenever the scope is every surface of the app rather than one screen.
 - [references/wcag-audit.md](references/wcag-audit.md) — the accessibility
-  check-and-fix phase: token contrast matrix script, automated sweep
-  (axe-core / Lighthouse), the four manual passes, WCAG 2.2 new criteria,
-  fix patterns keyed to the design system, and the report/re-audit loop.
+  check-and-fix phase: token contrast matrix script, semantic tints as
+  grounds, the opacity rule and why it compounds, automated sweep
+  (axe-core / Lighthouse) with `violations` vs `incomplete` triage, how to
+  validate your own contrast checker (and the four bugs that make one lie),
+  auditing the surface that actually renders, the four manual passes, WCAG 2.2
+  new criteria, fix patterns keyed to the design system — including never
+  faking a grid role, and replacing a dimming that encodes state — guard tests
+  with mutation checks, and the report/re-audit loop.
   Read when entering the accessibility phase or on any a11y/WCAG request.

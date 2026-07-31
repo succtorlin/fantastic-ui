@@ -33,6 +33,26 @@ Build the surface tree from the code, not from the user's route count:
    subpanel | overlay`. A subpanel gets its own row only if it is reused
    elsewhere or independently complex; otherwise it is covered by its parent's
    pass.
+5. **Drop the dead components.** A file that renders UI but has zero importers
+   is not a surface — it is deletable code. Confirm every row has a consumer
+   before it earns a batch slot, or the sweep spends real effort making
+   unreachable components beautiful and accessible. (Seen: a drag-and-drop grid
+   with no consumers that also hardcoded `rooms[0]` into every cell — it had
+   never worked, and nobody noticed because nothing rendered it.)
+6. **Cross-check the inventory against the running app.** Static traversal tells
+   you what *could* render; the running page tells you what *does*. Open each
+   route and compare. Two failure modes this catches:
+   - the component you inventoried is not the one the route mounts —
+     near-identical filenames, an older sibling, a re-export
+   - the route is showing an **error or empty state**, so everything you audit
+     next describes that shell rather than the surface. Fix the data or auth
+     path first; a local dev gate that returns nothing makes a surface
+     unauditable, and the findings table will look complete while being fiction
+7. **Add state variants as their own coverage items** wherever styling branches:
+   loading, empty, error, and state-dependent looks (selected, approved, locked,
+   disabled). They ship as often as the happy path and get swept approximately
+   never — and because they are awkward to reach, they accumulate the shortcuts
+   (dimming, ad-hoc colors) that the main state was cleaned of.
 
 Expect the real inventory to be 1.5–2× the route count once panels and
 overlays are unpacked. If the count lands far beyond what the user's request
@@ -142,7 +162,15 @@ re-sweep:
 2. **Cross-screen consistency gate** (from the ship checklist): one accent
    meaning, identical focus rings, comparable sibling-panel density.
 3. **Mechanical proof**: grep for hex/rgb literals outside the token file
-   returns zero; axe-core zero critical/serious app-wide.
+   returns zero; grep for bare `opacity-*` on text returns zero; axe-core zero
+   critical/serious **violations** app-wide, with every `incomplete` node
+   measured and its ratio recorded (see
+   [wcag-audit.md](wcag-audit.md) — `incomplete` is not a violation and not a
+   pass, and a residue of it is normal, so "incomplete = 0" is the wrong bar).
+4. **Guards for every class of bug the sweep fixed**, each mutation-tested by
+   reintroducing the bug and confirming the guard goes red. A sweep should
+   leave the app more protected, not just prettier — otherwise the next
+   feature reintroduces what you removed.
 
 Stopping because "the important screens are done" is not completion — it's an
 unfinished sweep with an honest name. If the user wants to stop early, record
