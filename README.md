@@ -103,6 +103,8 @@ Once installed, Claude picks it up automatically when you ask for things like:
 
 Or invoke it explicitly: `/fantastic-ui`.
 
+**Want to see how a session actually goes?** [docs/USE-CASES.md](docs/USE-CASES.md) walks through six scenarios end to end — what to say, what the skill does, what it asks you, and what you get.
+
 ## What's inside
 
 ```
