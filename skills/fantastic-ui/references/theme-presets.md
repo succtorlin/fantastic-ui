@@ -993,6 +993,58 @@ If neither fits, write a fresh Step 0 brief rather than bending one of these —
 a preset stretched past its intent produces exactly the template output the
 Anti-Template Policy exists to prevent.
 
+
+## Verifying an applied preset
+
+`scripts/verify-preset.mjs` runs a preset's gates against a live page.
+`scripts/preset-gates.json` holds the declaration for all eleven — accent and
+radii transcribed from each token block, separation from the comparison table,
+traps from each direction's own trap paragraph. Change a preset here, change it
+there.
+
+```bash
+node ~/.claude/skills/fantastic-ui/scripts/verify-preset.mjs \
+  --url http://localhost:3000 --preset F
+# with themes:  --theme-key app-theme --themes dark,light
+# scoped:       --scope "#main"
+```
+
+Run it from a project that has `playwright` and `@axe-core/playwright`
+installed; the script resolves them from the working directory.
+
+**Seven universal gates** (from the disciplines, identical for every preset):
+contrast in every declared theme · zero webfonts · assets ≤30 KB · reflow
+320→1920 · a `:focus-visible` outline rule for every interactive element · a
+`prefers-reduced-motion` block · every required token role defined.
+
+**Per-preset gates:** the accent (or, for B/D/G/H, its declared absence) ·
+the separation strategy — E and H separate with shadows, everything else does
+not, and the file already forbids mixing the two · each direction's stated
+trap, including the universal *white is never the accent's partner*.
+
+**Deviations are handled.** The accent gate resolves `--accent-fill`/`--accent`
+from the page and falls back to the published hex, so a stated deviation (say,
+swapping F's amber for a product's own accent) is still checked — against the
+colour actually used. The report prints which accent it tested and whether the
+page deviates.
+
+### What it deliberately does not check
+
+Density and "does this read as the direction" are **not gated**. Both are
+composition judgements, and a gate on either would hand back false confidence.
+A green run means no gate was violated; it is not a verdict on the design.
+
+### Gates must be mutation-tested
+
+A gate that never fires is worse than no gate, because it reads as coverage.
+When adding one, reintroduce the bug it targets and confirm it fails.
+
+The accent gate failed exactly this test on first write: it compared against
+the preset's *published* hex while the page under test used a deviating accent,
+so it passed a page rendering white-on-accent at 1.52:1. Resolving the live
+token fixed it. Two of three gates fired correctly on the first attempt; the
+third looked correct, passed its clean run, and was silently inert.
+
 ## Adding a preset
 
 1. Name the direction in one sentence, in the voice used above.

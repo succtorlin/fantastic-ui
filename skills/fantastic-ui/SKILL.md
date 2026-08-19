@@ -398,6 +398,12 @@ Additional gates when the work touched product surfaces:
 
 ## References
 
+- `scripts/verify-preset.mjs` + `scripts/preset-gates.json` — runnable gates for
+  all eleven presets: seven universal (contrast, webfonts, asset weight, reflow,
+  focus ring, reduced motion, token roles) plus per-preset accent, separation
+  strategy, and stated traps. Handles a stated accent deviation by resolving the
+  live token. Does NOT check density or whether the result reads as the
+  direction. See "Verifying an applied preset" in theme-presets.md.
 - [references/theme-presets.md](references/theme-presets.md) — eleven named
   directions with contrast-validated token blocks and component grammar, the
   selection signal table, a disambiguation note for the four warm-yellow

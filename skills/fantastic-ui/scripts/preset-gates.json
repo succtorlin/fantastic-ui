@@ -1,0 +1,164 @@
+{
+  "$comment": [
+    "Machine-checkable gates for the eleven presets in references/theme-presets.md.",
+    "Read by scripts/verify-preset.mjs. Every value here is transcribed from that",
+    "file — accent hexes and radii from each preset's token block, separation and",
+    "density from the 'Choosing between them' table, traps from each preset's own",
+    "stated trap paragraph. If a preset changes there, change it here.",
+    "",
+    "DELIBERATELY NOT GATED: density and 'does it feel like the direction'.",
+    "Density is declared for reporting only — it is a composition judgement, and a",
+    "gate on it would give false confidence. See the limits section in the runner."
+  ],
+
+  "universal": {
+    "$comment": "From the five disciplines + the ship checklist. Apply to every preset.",
+    "contrastMin": 4.5,
+    "contrastMinLarge": 3.0,
+    "largeTextPx": 24,
+    "largeBoldPx": 18.66,
+    "maxAssetKB": 30,
+    "webfontsAllowed": false,
+    "reflowWidths": [320, 375, 768, 1024, 1440, 1920],
+    "requireFocusRing": true,
+    "requireReducedMotionPath": true,
+    "forbidHexOutsideTokens": true,
+    "requiredTokenRoles": [
+      "ground", "ink", "ink-2", "muted", "hair"
+    ],
+    "universalTrap": {
+      "id": "white-never-partners-the-accent",
+      "rule": "White text on an accent FILL is forbidden in every preset — theme-presets.md states it once for all of them.",
+      "check": "no element may render #ffffff text on a background equal to the preset accent"
+    }
+  },
+
+  "presets": {
+    "A": {
+      "name": "Coastal Editorial",
+      "accent": "#9aa9c9",
+      "separation": "hairline",
+      "radii": { "sheet": 24, "panel": 20, "card": 16, "pill": 999 },
+      "density": "airy",
+      "traps": [
+        {
+          "id": "pale-card-white-text",
+          "rule": "Never ship the pale-card + white-text pairing.",
+          "kind": "forbidden-pairing"
+        }
+      ]
+    },
+    "B": {
+      "name": "Blueprint Mono",
+      "accent": null,
+      "accentNote": "This direction has NO accent. The gate inverts: assert no accent-like fill is doing the work of one.",
+      "separation": "hairline",
+      "radii": { "sheet": 28, "panel": 24, "card": 20, "pill": 999 },
+      "density": "dense",
+      "traps": []
+    },
+    "C": {
+      "name": "Marigold Report",
+      "accent": "#f5a32a",
+      "accentUsage": "fill-only",
+      "separation": "rule",
+      "radii": { "sheet": 0, "panel": 0, "card": 4 },
+      "density": "dense",
+      "traps": [
+        {
+          "id": "white-on-marigold",
+          "rule": "White text on --accent measures 2.07:1. The accent is FILL ONLY.",
+          "kind": "forbidden-pairing",
+          "measured": 2.07
+        }
+      ]
+    },
+    "D": {
+      "name": "Atelier Warm",
+      "accent": null,
+      "separation": "hairline",
+      "radii": { "sheet": 14, "panel": 12, "card": 8, "pill": 999 },
+      "density": "medium",
+      "traps": [
+        {
+          "id": "muted-is-material-not-text",
+          "rule": "--muted is a material tone at 3.35:1 — decorative only, never body copy.",
+          "kind": "token-usage",
+          "measured": 3.35
+        }
+      ]
+    },
+    "E": {
+      "name": "Terracotta Commerce",
+      "accent": "#d98b5f",
+      "separation": "shadow",
+      "separationNote": "One of only two shadow presets. theme-presets.md: do not mix shadow and hairline strategies inside one application.",
+      "radii": { "sheet": 0, "panel": 12, "card": 8, "pill": 999 },
+      "density": "medium",
+      "traps": []
+    },
+    "F": {
+      "name": "Midnight Showroom",
+      "accent": "#f2a02d",
+      "separation": "hairline",
+      "radii": { "sheet": 0, "panel": 0, "card": 2, "pill": 0 },
+      "density": "medium",
+      "traps": [
+        {
+          "id": "white-on-amber",
+          "rule": "On this dark ground the accent IS a text colour (9.11:1), but its FILL still needs dark ink — white on amber is 2.13:1.",
+          "kind": "forbidden-pairing",
+          "measured": 2.13
+        },
+        {
+          "id": "watermark-never-behind-copy",
+          "rule": "The ghost wordmark sits at 1.14:1. It is decorative texture and must never overlap body copy.",
+          "kind": "geometry",
+          "selector": ".ghost",
+          "mustNotOverlap": "h1, h2, p, li, dd, dt, a, button"
+        }
+      ]
+    },
+    "G": {
+      "name": "Broadcast Light",
+      "accent": null,
+      "separation": "hairline",
+      "radii": { "sheet": 16, "panel": 14, "card": 12, "pill": 999 },
+      "density": "medium",
+      "traps": []
+    },
+    "H": {
+      "name": "Studio Kinetic",
+      "accent": null,
+      "separation": "shadow",
+      "separationNote": "Second shadow preset — tilted cards need a cast shadow to sit above the grid.",
+      "radii": { "sheet": 20, "panel": 18, "card": 16, "pill": 999 },
+      "density": "medium",
+      "traps": []
+    },
+    "I": {
+      "name": "Campus Bright",
+      "accent": "#f7c13b",
+      "separation": "hairline",
+      "radii": { "sheet": 18, "panel": 16, "card": 14, "pill": 999 },
+      "density": "dense",
+      "traps": []
+    },
+    "J": {
+      "name": "Charter Navy",
+      "accent": "#d92b24",
+      "separation": "hairline",
+      "radii": { "sheet": 8, "panel": 8, "card": 6, "pill": 4 },
+      "density": "medium",
+      "traps": []
+    },
+    "K": {
+      "name": "Dispatch Yellow",
+      "accent": "#ffd400",
+      "separation": "flat",
+      "radii": { "sheet": 0, "panel": 0, "card": 6 },
+      "density": "medium",
+      "traps": []
+    }
+  }
+}
