@@ -26,6 +26,20 @@ It's not a component library and not a theme. It's the **decision discipline**, 
 4. **Page rhythm** — alternating texture bands: stat tape, thesis explainer, asymmetric bento with painted sparklines, an AI-generated atmosphere band (≤30 KB webp), an interactive ARIA-correct toggle, honest fine print.
 5. **Performance and accessibility as gates, not polish** — a pass/fail ship checklist: reduced-motion paths for every animation, skip link, designed focus rings, no horizontal overflow at 320px, RAF verified stopped when the tab hides.
 
+## The mechanics layer
+
+The five disciplines decide **direction**. They don't, on their own, stop a surface from looking amateur — a correct palette laid out with ad-hoc spacing and one global `line-height` still reads as assembled. The mechanics layer is where most "I can't say why this looks off" problems actually live:
+
+- **Hierarchy runs on color first, weight second, size last.** Most clutter is fixed by demoting something to `--muted`, not by enlarging what you want seen. To emphasise, de-emphasise everything around it.
+- **A spacing scale you actually obey**, and the ambiguous-spacing bug — a label equidistant from the field above and below — which breaks more forms than any amount of restyling.
+- **Line-height proportional to length and size**, never one global value; prose capped at 45–75 characters.
+- **HSL scale construction from three anchors**, with saturation *raised* at both extremes (or your tinted greys drift back to neutral) and **hue rotation** as a second brightness dial — toward 60/180/300 to lighten, 0/120/240 to darken, capped at 20–30°.
+- **Depth on a dark ground is lightness + hairline, not shadow** — shadows have nothing to block against near-black. This is the mechanism behind discipline 1's "hairlines, not shadows", and the reason a raised dark surface usually needs both cues: adjacent ramp steps are often under 1.3:1.
+- **Empty states are a designed surface**, with *empty*, *filtered to nothing* and *failed to load* kept as three distinct states.
+- **The AI-default checklist** — purple gradients, uniform max radius, three identical cards, blanket shadows, default indigo, hero→features→testimonials on a product that isn't a landing page. Plus the gut check: *would a developer guess this was generated?*
+
+This layer is adapted from [*Refactoring UI*](https://www.refactoringui.com/) by Adam Wathan & Steve Schoger. Several of the book's defaults **invert** on a dark ground, and those are marked `↯` in the reference rather than copied across. Where the mechanics and the disciplines disagree, the disciplines win: they are the direction, the mechanics are the mechanism.
+
 ## Eleven theme presets, with automatic selection
 
 The five disciplines say *how* to design; a preset is a pre-committed answer to *what direction*. The skill ships eleven contrast-validated directions — from Coastal Editorial and Blueprint Mono to Midnight Showroom and Dispatch Yellow — each with a full token block, type pairing, and component grammar.
@@ -125,6 +139,11 @@ skills/fantastic-ui/
     │                               #   incomplete triage, validating your own checker, auditing the real
     │                               #   rendered surface, four manual passes, on-system fix patterns,
     │                               #   mutation-tested guards, re-audit loop
+    ├── ui-mechanics.md             # the mechanics layer: hierarchy dials, spacing scale + ambiguous
+    │                               #   spacing, type scale and line-length coupling, HSL construction
+    │                               #   (saturation at the extremes, hue-rotation brightness, contrast
+    │                               #   escape hatches), depth on dark vs. light-source/two-part shadows,
+    │                               #   empty states, form mechanics, AI-default checklist
     └── recursive-polish.md         # whole-app sweep mode: recursive surface inventory (dead-code and
                                     #   running-app cross-checks, state variants as coverage items),
                                     #   prior-art reconciliation, batch loop with ledger, loop-until-dry

@@ -135,7 +135,10 @@ and a small set of **semantic** colors that are never used decoratively:
 
 Define all of it as CSS custom properties on the page root so the direction is
 auditable in one place. Full token block in
-[references/css-architecture.md](references/css-architecture.md).
+[references/css-architecture.md](references/css-architecture.md); **how to pick the
+actual HSL values** — three anchors, saturation at the extremes, hue rotation, tinted-grey
+ranges, and the two contrast escape hatches — in
+[references/ui-mechanics.md](references/ui-mechanics.md) §4.
 
 ### 2. Three-face typography, zero webfonts
 
@@ -155,6 +158,11 @@ FOUT, no layout shift:
 
 The serif/mono contrast does the aesthetic work that webfonts usually get
 hired for, at zero performance cost.
+
+Hand-pick the size scale rather than generating it from a ratio, and set line-height
+*proportionally* — tight for display, loose for small text — never one global value.
+Scale, line-length and letter-spacing mechanics in
+[references/ui-mechanics.md](references/ui-mechanics.md) §3.
 
 ### 3. Live proof over screenshots
 
@@ -227,6 +235,50 @@ These are pass/fail, checked before shipping:
   toggles); decorative canvases `aria-hidden="true"`
 - Marquee/ticker content duplicated in a visually-hidden static list
 - Semantic landmarks: `nav`, `header`, `section` with ids, `footer`
+
+## The mechanics layer
+
+The five disciplines decide **direction**. They do not, on their own, stop a surface
+from looking amateur — a correct palette laid out with ad-hoc spacing and one global
+line-height still reads as assembled. The mechanics below are the second layer, and
+they are where most "I don't know why this looks off" problems actually live.
+
+Full treatment in [references/ui-mechanics.md](references/ui-mechanics.md). The rules
+that change the most outcomes:
+
+- **Hierarchy runs on color first, weight second, size last.** Most clutter is fixed by
+  demoting something to `--muted`, not by enlarging what you want seen. To emphasise,
+  **de-emphasise everything around it**.
+- **Pick a spacing scale and obey it.** `4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 96 · 128`.
+  If two values need measuring to tell apart, one is surplus. **Ambiguous spacing** — a
+  label equidistant from the field above and below — is a real bug, not a nitpick.
+- **Start with too much white space and subtract.** The dense rhythm in discipline 4 is a
+  destination reached by removal; nobody ever loosens a cramped layout later.
+- **Line-height is proportional to line length and size**, never one global value. Prose
+  caps at 45–75 characters (`max-width: 65ch`). Display type tightens; small text loosens.
+- **Build color in HSL from three anchors**, and **raise saturation at both extremes** or
+  the ends of the ramp drift back to neutral — which defeats discipline 1's tinted ground.
+  Use **hue rotation** (toward 60/180/300 to lighten, 0/120/240 to darken, capped at
+  20–30°) as a second brightness dial that doesn't wash the color out.
+- **Depth on this ground is lightness + hairline, not shadow.** Shadows have nothing to
+  block against near-black. This is *why* discipline 1 says hairlines — and note a raised
+  dark surface usually needs both cues, since adjacent ramp steps are often under 1.3:1.
+- **Empty states are a designed surface.** Distinguish *empty* from *filtered to nothing*
+  from *failed to load* — three states, three messages. Collapsing them is a common bug.
+- **Never put grey text on a colored background.** Use a hue-shifted tint of the panel's
+  own color instead.
+
+### The AI-default tells
+
+Generated UI converges on the same handful of defaults. Before shipping, check for:
+purple/violet gradients · `rounded-2xl` on everything · three identical feature cards ·
+`shadow-lg` everywhere · indigo accent by default · hero→features→testimonials→CTA on a
+product that isn't a landing page · uniform section spacing · an icon on every card.
+
+The gut check: **would a developer guess this was generated?** If yes, the most generic
+element is almost always the color scheme or the layout skeleton — fix that one first.
+Discipline 4's bento is asymmetric and carries proof artifacts instead of icons precisely
+to break this pattern.
 
 ## Applying the disciplines to product surfaces (pages, panels, subpanels)
 
@@ -392,6 +444,11 @@ Additional gates when the work touched product surfaces:
       stacked shadows
 - [ ] Empty, loading, and error states designed for every migrated panel
       (skeletons on ground scale, semantic color only on real errors)
+- [ ] Mechanics pass: spacing values all on the scale; no ambiguous grouping; prose
+      ≤75ch; line-height varies with size; no grey text on a colored panel; empty /
+      filtered / failed states distinguished
+- [ ] AI-default sweep: no stray gradient, uniform radius, three-identical-cards row,
+      blanket shadow, default indigo, or icon-per-card
 - [ ] Cross-screen pass: accent means the same thing on every page; focus
       rings identical; density comparable between sibling panels
 - [ ] Before/after screenshots captured for each migrated screen
@@ -414,6 +471,14 @@ Additional gates when the work touched product surfaces:
 - [references/css-architecture.md](references/css-architecture.md) — the full
   token system, scoping rules, shared primitives, and responsive patterns.
   Read when writing the stylesheet.
+- [references/ui-mechanics.md](references/ui-mechanics.md) — the mechanics layer:
+  hierarchy dials, the spacing scale and ambiguous-spacing bug, type scale and
+  line-length/line-height coupling, HSL scale construction (saturation at the extremes,
+  hue-rotation brightness, tinted-grey ranges, two contrast escape hatches), depth on a
+  dark ground vs. the light-source/two-part-shadow mechanics, empty states, form
+  mechanics, and the AI-default checklist. Derived from *Refactoring UI* (Wathan &
+  Schoger) and adapted — rules that invert on this skill's dark ground are marked ↯.
+  Read when a surface looks off but the palette and structure are right.
 - [references/canvas-hero.md](references/canvas-hero.md) — annotated live
   canvas hero + sparkline + scroll-reveal code with all lifecycle handling.
   Read when building any canvas or reveal behavior.
