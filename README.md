@@ -1,6 +1,6 @@
 # fantastic-ui
 
-**An agent skill that teaches Claude to build instrument-grade UI — landing pages that read like the product itself, and product surfaces (app pages, dashboards, panels, subpanels) held to the same discipline.**
+**An agent skill for Codex and Claude Code that combines instrument-grade visual design with understandable interactions — from landing pages to app pages, dashboards, panels, and subpanels.**
 
 <p align="center">
   <img src="assets/showcase.png" alt="A landing page built with this skill: dark warm-charcoal ground, serif display headline, single amber accent, and a live canvas visualization of sectors rotating through four quadrants" width="900" />
@@ -17,6 +17,29 @@ Ask an AI for a landing page and you usually get the same page everyone gets: ce
 This skill was distilled from a real redesign that went the other way: a marketing page for a quantitative finance terminal that feels like **holding the instrument**. The methodology generalizes to any product with real data or real behavior to show — dev tools, analytics, infra, fintech, monitoring.
 
 It's not a component library and not a theme. It's the **decision discipline**, with working code for the hard parts.
+
+## Usability and visual-reference analysis
+
+The updated skill treats visual quality, interaction quality, and accessibility as one system. It bundles the interaction references directly, so these workflows do not require separate design-foundation or heuristic skills.
+
+- **Norman's interaction foundations:** affordances, signifiers, natural mapping, constraints, feedback, conceptual models, and recovery from human error. Trace a task through the seven stages of action to locate a gulf of execution or evaluation.
+- **Krug's usability rules:** make the purpose and primary action self-evident, support scanning and recognition, and use the Trunk Test to check whether users can orient themselves.
+- **Nielsen heuristic audits:** inspect the states a task actually traverses, report severity **0–4**, propose a fix, and name how it will be verified. Major task failures, keyboard blockers, inaccessible controls, and dark patterns block shipping.
+- **Two separate audit scores:** an interaction-foundation score and a heuristic-readiness score, each **0–10**, with evidence and failed rows. They are diagnostic summaries, not substitutes for observing users or proof of accessibility compliance.
+- **Reference-driven design:** analyze composition, hierarchy, typography geometry, color roles, and responsive constraints. Keep **Observed**, **Inferred**, and **Proposed adaptation** separate; a screenshot does not reveal its exact font, prompt, hidden settings, or working behavior.
+- **Implementation that preserves the product:** translate references into existing tokens, native text, shared components, and explicit constraints. Keep the chosen direction, meaningful interactions, performance budget, and accessibility gates intact.
+
+Choose the smallest workflow that fits:
+
+| Request | Starting point | Expected output |
+| --- | --- | --- |
+| Build or redesign a surface | Existing token system or preset check, then a one-sentence brief | Implemented surface and verified states |
+| Review usability | Critical tasks and heuristic audit | Severity-ranked findings, separate scores, fixes and verification methods |
+| Explain why a flow is confusing | Seven stages of action and the two gulfs | Evidence of where the task breaks and a targeted correction |
+| Review navigation or forms | Trunk Test, scanning rules, and Nielsen checks | Orientation, labels, feedback, recovery, and input recommendations |
+| Work from screenshots or a mood reference | Visual-reference analysis | Observations, labeled inferences, and a concrete implementation brief |
+
+Explore the bundled [design foundations](skills/fantastic-ui/references/design-everyday-things/), [usability heuristics](skills/fantastic-ui/references/ux-heuristics/), and [visual-reference analysis](skills/fantastic-ui/references/visual-reference-analysis.md).
 
 ## The five disciplines
 
@@ -86,11 +109,26 @@ The phase is hardened with lessons from real audits, where the tooling itself wa
 
 ## Install
 
-**Claude Code (recommended):**
+The commands below are for a fresh installation. If you already have a `fantastic-ui` skill, preserve local edits before replacing it. Install the complete skill directory, including `references/` and `scripts/`, not just `SKILL.md`.
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/succtorlin/fantastic-ui.git
-cp -r fantastic-ui/skills/fantastic-ui ~/.claude/skills/
+```
+
+**Codex** (global skill directory used by this package):
+
+```bash
+mkdir -p ~/.codex/skills
+cp -R fantastic-ui/skills/fantastic-ui ~/.codex/skills/
+```
+
+**Claude Code:**
+
+```bash
+mkdir -p ~/.claude/skills
+cp -R fantastic-ui/skills/fantastic-ui ~/.claude/skills/
 ```
 
 Or, if you use the `skills` CLI:
@@ -99,11 +137,11 @@ Or, if you use the `skills` CLI:
 npx skills add succtorlin/fantastic-ui
 ```
 
-Project-local install works too — copy into `<repo>/.claude/skills/` instead.
+For a project-local Claude Code installation, copy into `<repo>/.claude/skills/` instead. After installation, start a new session if your client has already loaded its skill list.
 
 ## Use
 
-Once installed, Claude picks it up automatically when you ask for things like:
+Once installed and available in your client's skill list, ask for things like:
 
 - *"Build a landing page for my API monitoring tool"*
 - *"Redesign our homepage, it looks like a template"*
@@ -114,8 +152,11 @@ Once installed, Claude picks it up automatically when you ask for things like:
 - *"Run a WCAG audit on this page and fix what fails"*
 - *"Make the app accessible / fix the contrast and keyboard issues"*
 - *"Build the site in the Marigold Report style"* (or any preset — or let the skill pick one)
+- *"Students cannot find the next step in this onboarding flow. Diagnose it and propose a fix."*
+- *"Audit this dashboard using Norman, Krug, and Nielsen; show evidence, severity, and separate scores."*
+- *"Use these screenshots to define the typography, composition, and responsive rules without replacing our existing design system."*
 
-Or invoke it explicitly: `/fantastic-ui`.
+Invoke it explicitly with `$fantastic-ui` in Codex or `/fantastic-ui` in Claude Code. State whether you want analysis only or implementation; asking for an audit does not by itself request code changes.
 
 **Want to see how a session actually goes?** [docs/USE-CASES.md](docs/USE-CASES.md) walks through six scenarios end to end — what to say, what the skill does, what it asks you, and what you get.
 
@@ -124,7 +165,16 @@ Or invoke it explicitly: `/fantastic-ui`.
 ```
 skills/fantastic-ui/
 ├── SKILL.md                        # the methodology + ship checklist
+├── scripts/
+│   ├── verify-preset.mjs            # runnable checks against a live page
+│   └── preset-gates.json           # universal and per-preset gate declarations
 └── references/
+    ├── visual-reference-analysis.md # composition, typography geometry, observation vs. inference,
+    │                               #   reusable briefs and responsive native UI translation
+    ├── design-everyday-things/     # ten references: Norman's foundations, action stages,
+    │                               #   execution/evaluation gulfs, human error and case studies
+    ├── ux-heuristics/              # seven references: Krug, Nielsen, audit template,
+    │                               #   conflicts, cultural UX, dark patterns and accessibility
     ├── css-architecture.md         # full token system, scoped CSS-module rules, shared primitives
     ├── canvas-hero.md              # annotated live-canvas hero, sparklines, scroll reveals —
     │                               #   with the complete lifecycle contract (DPR / visibility / reduced-motion / cleanup)
@@ -151,6 +201,12 @@ skills/fantastic-ui/
 ```
 
 The skill is framework-light: the worked code is React + CSS modules, but the disciplines (and most of the CSS) transfer directly to Vue, Svelte, or plain HTML.
+
+## Verification boundaries
+
+The existing mechanics layer and all eleven preset declarations and verification tools remain included. Run the preset checker from a project with `playwright` and `@axe-core/playwright` installed; see [Verifying an applied preset](skills/fantastic-ui/references/theme-presets.md#verifying-an-applied-preset) for the command and coverage.
+
+A passing automated check does not establish design quality, actual user comprehension, or full WCAG conformance. Manually verify keyboard and screen-reader behavior, reduced motion, reflow, and the relevant loading, error, permission, and recovery states. A visual reference establishes intent, not live data or proven interaction behavior.
 
 ## License
 

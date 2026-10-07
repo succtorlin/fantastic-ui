@@ -1,22 +1,16 @@
 ---
 name: fantastic-ui
 description: >-
-  Design and build "instrument-grade" UI — marketing pages AND in-product
-  surfaces (app pages, dashboards, panels, subpanels) that read like the
-  product itself, not like a template. Distilled from the sectorRRG "The
-  Instrument" landing redesign: dark editorial ground, single-accent color
-  discipline, serif display + monospace data type pairing, live data as proof,
-  zero-webfont performance, and accessibility gates baked in. Use this skill
-  whenever the user asks for a landing page, marketing page, hero section, or
-  homepage redesign; wants to restyle or modify existing app pages, panels,
-  subpanels, or dashboards; asks to "apply the same style across the app",
-  "polish every page/surface", or sweep/retrofit the whole app recursively;
-  says "make it look premium / expensive / high-end /
-  less generic"; complains a page looks like a template; asks for an
-  accessibility or WCAG audit, accessibility fixes, or contrast / keyboard /
-  screen-reader compliance work on any web UI; or wants any surface for a
-  data-heavy, technical, developer, or finance product — even if they don't
-  say "design".
+  Design and build instrument-grade marketing pages and in-product surfaces
+  (app pages, dashboards, panels, and subpanels) that feel like the product,
+  not a template. Use for landing, hero, homepage, premium/polished redesign,
+  whole-app visual retrofit, data-heavy or technical UI, and accessibility or
+  WCAG work. Also use for confusing or unintuitive interactions, affordance,
+  discoverability, mental-model, error-prevention, cognitive-walkthrough,
+  usability, navigation, form, heuristic, or dark-pattern analysis. Covers
+  editorial visual systems, live proof, performance, keyboard/screen-reader
+  access, Norman's interaction foundations, Krug's usability rules, and
+  Nielsen heuristic audits.
 ---
 
 # Fantastic UI — instrument-grade marketing pages and product surfaces
@@ -44,6 +38,139 @@ For marketing pages, follow the five disciplines and page rhythm below. For
 modifying existing product surfaces, start at
 [Applying the disciplines to product surfaces](#applying-the-disciplines-to-product-surfaces-pages-panels-subpanels)
 — the disciplines are the same; the procedure and anatomy differ.
+
+## Usability foundation: make the instrument understandable
+
+Fantastic visual treatment never compensates for an interface that makes
+people guess. Treat visual quality, interaction quality, and accessibility as
+one system. The following Norman/Krug/Nielsen principles are part of this
+skill, not an optional review after styling.
+
+### Route the work before designing
+
+Choose the smallest mode that covers the request:
+
+- **Build or redesign:** establish the visual brief and token system, then
+  apply the interaction foundations below while building each control and
+  state.
+- **Usability review:** run the [heuristic audit](#heuristic-audit-and-scoring),
+  report severity-ranked findings, and propose fixes that preserve
+  the product's visual language.
+- **Confusion or error investigation:** walk the critical task through the
+  [seven stages of action](references/design-everyday-things/seven-stages.md)
+  and the two gulfs before changing layout or copy.
+- **Navigation, forms, or content review:** use the Trunk Test, Krug's
+  scanning/satisficing rules, and the Nielsen checklist; test keyboard,
+  touch, zoom, and screen-reader paths as applicable.
+
+Do not treat a heuristic score as a substitute for observing real users. Use
+analytics, support tickets, session recordings, or a small task test to check
+whether the suspected problem occurs in context.
+
+### Bridge the two gulfs
+
+Every task has a **gulf of execution** (the user cannot tell what action is
+possible or how to perform it) and a **gulf of evaluation** (the user cannot
+tell what happened or whether the result is correct). Narrow both:
+
+- Use visible **affordances** and **signifiers**: controls look and read as
+  controls, icons have labels or accessible names, and hover is never the only
+  signal.
+- Use natural **mapping**: put controls near what they affect, mirror the
+  spatial or sequential relationship users expect, and keep labels consistent.
+- Use **constraints** and forgiving inputs to prevent slips and mistakes, but
+  preserve undo, cancel, back, and recovery paths.
+- Give timely **feedback**: acknowledge direct actions immediately, show
+  progress for long work, expose saved/loading/error state, and preserve user
+  input when something fails.
+- Make the system's **conceptual model** visible. Explain modes, scope,
+  defaults, and irreversible consequences in the interface rather than in a
+  manual.
+
+For a critical flow, trace: goal → plan → specify → perform → perceive →
+interpret → compare. The first four stages diagnose execution; the last three
+diagnose evaluation. See the detailed patterns in
+[the design-foundation references](references/design-everyday-things/).
+
+### Krug and Nielsen operating rules
+
+Apply these defaults unless the product context gives a documented reason not
+to:
+
+1. Make the primary action and the page's purpose self-evident; use plain,
+   action-oriented labels and remove happy-talk and jargon.
+2. Make each click confidence-building; click count is not the goal. Never
+   add friction to hide cancellation, pricing, terms, or data use.
+3. Keep users oriented: a page title, current location, hierarchy, major
+   options, and search (when relevant) should be findable in the Trunk Test.
+4. Keep system status visible; use specific errors that say what happened,
+   why, and what to do next. Never blame the user or erase their work.
+5. Prefer recognition over recall, progressive disclosure over a wall of
+   options, and undo over reflexive confirmation dialogs.
+6. Be consistent with product and platform conventions; one concept gets one
+   term, one behavior, and one visual treatment.
+7. Support novices and experts with accessible defaults plus shortcuts, bulk
+   actions, saved views, or command surfaces where they add real value.
+8. Keep every element purposeful. Minimalism means removing noise, not
+   removing required disclosure, context, or accessible names.
+
+The ten Nielsen checks are: visibility of system status; match to the real
+world; user control and freedom; consistency and standards; error prevention;
+recognition rather than recall; flexibility and efficiency; aesthetic and
+minimalist design; error recognition/diagnosis/recovery; and help/documentation.
+Use the detailed tables in
+[the heuristic references](references/ux-heuristics/), especially when a
+finding needs a concrete implementation or copy pattern.
+
+### Heuristic audit and scoring
+
+When auditing, inspect the critical tasks and every state they traverse
+(empty, loading, success, validation, permission, offline, destructive,
+failure, and recovery). Record each finding with:
+
+- screen, task, and user/context;
+- violated principle or heuristic;
+- evidence and the user's likely failure mode;
+- **severity 0–4**: 0 not a problem, 1 cosmetic, 2 minor friction, 3 major
+  task failure, 4 catastrophic blocker;
+- a fix at the highest useful level (token → primitive → component → copy →
+  instance), plus a verification method.
+
+Report two complementary scores, never one blended number:
+
+- **Interaction foundation score (0–10):** two points each for
+  discoverability, evaluation/feedback, error recovery, natural mapping, and
+  constraints/error prevention. State which rows failed.
+- **Heuristic readiness score (0–10):** start at 10 and subtract for failed
+  diagnostic rows, weighting severity-3/4 findings more heavily. State the
+  highest-severity issues and the specific changes needed to reach 10/10.
+
+Treat severity 3–4 findings, keyboard blockers, inaccessible names/focus,
+and dark patterns as ship blockers. Check for manipulative patterns such as
+forced continuity, roach motels, confirmshaming, and hidden costs; replace
+them with clear choices and equally easy exits. Resolve conflicts with
+progressive disclosure (simplicity vs flexibility), contextual prominence
+(consistency vs context), undo (efficiency vs prevention), and visible
+primary actions (discoverability vs minimalism).
+
+### Unified interaction checklist
+
+- Can a first-time user identify the page, primary action, and available
+  controls without a manual?
+- Do controls have clear affordances, labels, mappings, touch targets, and
+  keyboard behavior?
+- Does every action expose status and outcome, including delayed and failed
+  work?
+- Are invalid actions constrained before submission, and can users undo,
+  cancel, go back, and recover without losing input?
+- Are labels, navigation, focus, and system conventions consistent across
+  screens and responsive breakpoints?
+- Do empty/loading/error/success states explain what happened and what to do
+  next?
+- Does the design work without hover, with reduced motion, at 320 px and
+  200% zoom, and with a screen reader?
+- Has the fix been re-audited with the same task and evidence that exposed the
+  problem?
 
 ## Step 0 — Write the one-sentence brief first
 
@@ -108,6 +235,12 @@ you don't have a direction yet — interrogate the product first: What does it
 actually look like in use? What's its most impressive live behavior? What
 color already *means something* in it? A vague brief ("clean, modern") produces
 template output; a specific one produces a point of view.
+
+## Step 0b — Translate visual references into a concrete specification
+
+When reference screenshots, typography, logos or mood images are supplied, or the direction is too vague to implement, read [references/visual-reference-analysis.md](references/visual-reference-analysis.md). Specify composition and hierarchy before atmosphere. Describe typography through proportions, strokes, terminals/serifs, spacing and alignment, then select native fonts within the existing font policy. Record **Observed**, **Inferred** and **Proposed adaptation** separately; screenshots do not reveal exact prompts, fonts, hidden settings or interaction behavior.
+
+Turn the analysis into shared tokens, responsive constraints and native components, with explicit invariants, allowed variation and exclusions. Preserve meaningful product behavior and accessible DOM text. A reference establishes visual intent, not evidence of working interactions or live data. Use the existing brief and design system; this step adds no confirmation gate when the user has already chosen a direction.
 
 ## The five disciplines
 
@@ -455,6 +588,8 @@ Additional gates when the work touched product surfaces:
 
 ## References
 
+- [references/visual-reference-analysis.md](references/visual-reference-analysis.md) — observable image and typography analysis, inference boundaries, reusable briefs, exclusions, and translation into responsive native UI. Read at Step 0b for reference-driven design.
+
 - `scripts/verify-preset.mjs` + `scripts/preset-gates.json` — runnable gates for
   all eleven presets: seven universal (contrast, webfonts, asset weight, reflow,
   focus ring, reduced motion, token roles) plus per-preset accent, separation
@@ -503,3 +638,15 @@ Additional gates when the work touched product surfaces:
   faking a grid role, and replacing a dimming that encodes state — guard tests
   with mutation checks, and the report/re-audit loop.
   Read when entering the accessibility phase or on any a11y/WCAG request.
+
+### Consolidated interaction references
+
+The following references are bundled with this skill so the former standalone
+frameworks remain available without invoking a second skill:
+
+- [Design foundations](references/design-everyday-things/) — affordances,
+  signifiers, mappings, constraints, feedback, conceptual models, human error,
+  the two gulfs, and the seven stages of action.
+- [Krug and Nielsen heuristics](references/ux-heuristics/) — heuristic detail
+  tables, audit template, severity guidance, cultural UX, dark-pattern
+  recognition, conflict resolution, and accessibility checklists.
