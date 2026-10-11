@@ -31,6 +31,7 @@ diagram: no axes, no labels, no legible structure.
 | Time series, history | layered horizon lines |
 | Network, dependencies | a sparse web of nodes, most edges faint |
 | Onboarding, first run | a path of points leading off the frame |
+| Setups, breakouts, pre-signal | a compressed coil of fine lines, one bright streak lifting off it |
 
 Use one motif per route. Sibling routes share the register and finish (§2)
 so the set reads as one system; only the motif changes.
@@ -48,8 +49,21 @@ Five parts, in this order:
    [ground colour]; the figure sits in the right-centre third". Under
    `center-band`, "the centre is empty; the figure lives at both edges".
    Under `phone-strip`, "the figure fills the top band".
-4. **Finish:** "gentle depth of field, subtle film grain, restrained,
-   editorial".
+   **Keep the figure in the middle band of the frame.** A strip slot under
+   `cover` shows only a horizontal slice: a 1170x90 header shows the middle
+   ~38% of a 1600x320 image's height; a phone strip is anchored at the top
+   and shows the top 85% at 375 px but only the top 53% at 600 px.
+   Say "the whole figure sits in the vertical middle third" for header and
+   state slots. On one route the coil the prompt asked for landed in the
+   bottom fifth and was cropped out of the header entirely; only its streak
+   showed. When a render puts the figure at the top or bottom, re-roll the
+   one entry (`batch --reroll-ai --only NAME`) rather than ship a crop that
+   lost the motif.
+4. **Finish:** "gentle depth of field, very fine film grain, restrained,
+   editorial". Keep grain fine: heavy grain over the whole frame lifts the
+   raw visibility number without showing anything, which is why `score`
+   also reports `structure` (visibility after a blur that averages grain
+   away).
 5. **Hard negatives:** "no text, no words, no letters, no numbers, no logos,
    no people, no faces, no UI, no chart axes, no grid lines". `ai` appends
    its own as well.

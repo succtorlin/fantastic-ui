@@ -266,7 +266,7 @@ describe("composite and visibility on a synthetic buffer", () => {
     const blueHalf = { axis: "x", along: new Float32Array([0, 0, 255, 0.5]), perp: new Uint8Array([1]) };
     const img = { data: new Uint8ClampedArray([0, 255, 0, 0]) }; // fully transparent image pixel
     const px = I.compositeSlot({ w: 1, h: 1, base: PAGE, below: [red], image: img, above: [blueHalf] });
-    assert.deepEqual(Array.from(px.rgb), [127.5, 0, 127.5]);
+    assert.deepEqual(Array.from(px.rgb), [128, 0, 128]); // 127.5 → 8-bit
   });
 
   test("a darker-than-page plate under header-band scores far below the floor", () => {
@@ -371,6 +371,14 @@ describe("plate-check-shot.mjs", () => {
     const h = run(["--help"]);
     assert.equal(h.status, 0);
     assert.match(h.stdout, /usage/i);
+  });
+  test("--floors takes 4 or 6 numbers (6 adds the structure floors)", () => {
+    const six = run(["http://127.0.0.1:9/", "--floors", "8,1,8,1,4.5,3"], { PLATE_CHECK_NO_PLAYWRIGHT: "1" });
+    assert.equal(six.status, 2);
+    assert.match(six.stderr, /Playwright is not installed/); // parsed fine, stopped at the Playwright check
+    const bad = run(["http://127.0.0.1:9/", "--floors", "8,1,3"]);
+    assert.equal(bad.status, 2);
+    assert.match(bad.stderr, /struct11,struct13/);
   });
   test("rejects a bad --widths value with exit 2", () => {
     const r = run(["http://127.0.0.1:9/", "--widths", "wide"]);
@@ -520,5 +528,124 @@ describe("M1 / LOW 4: loadImage falls back to <img> and times out", () => {
   test("a decode that hangs times out too", async () => {
     const r = await I.loadImage("hang.webp", { timeoutMs: 50, fetch: okFetch, createImageBitmap: () => new Promise(() => {}) });
     assert.equal(r.detail, "timeout");
+  });
+});
+
+// ── round 3: STRUCTURE (visibility after a box blur at the displayed size) ────
+describe("STRUCTURE: box blur", () => {
+  const brute = (a, w, h, ch, r) => {
+    const cl = (v, n) => Math.min(n - 1, Math.max(0, v));
+    const tmp = new Float64Array(a.length), out = new Float64Array(a.length);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) for (let c = 0; c < ch; c++) {
+      let s = 0; for (let i = -r; i <= r; i++) s += a[(y * w + cl(x + i, w)) * ch + c]; tmp[(y * w + x) * ch + c] = s / (2 * r + 1);
+    }
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) for (let c = 0; c < ch; c++) {
+      let s = 0; for (let i = -r; i <= r; i++) s += tmp[(cl(y + i, h) * w + x) * ch + c]; out[(y * w + x) * ch + c] = s / (2 * r + 1);
+    }
+    return out;
+  };
+  test("running-sum blur equals a brute-force clamp-to-edge mean (x then y) for several r", () => {
+    const w = 9, h = 6, ch = 4;
+    const a = Array.from({ length: w * h * ch }, (_, i) => (i * 37) % 251);
+    for (const r of [1, 2, 3, 7]) {
+      const got = I.boxBlur(a, w, h, ch, r), want = brute(a, w, h, ch, r);
+      for (let i = 0; i < a.length; i++) near(got[i], want[i], 1e-3, `r=${r} i=${i}`);
+    }
+  });
+  test("radius: max(2, floor(0.03 × displayed height + 0.5))", () => {
+    assert.equal(I.structureRadius(234), 7); // 1600×320 under cover in 1170×90
+    assert.equal(I.structureRadius(75), 2);  // phone strip at 375 wide
+    assert.equal(I.structureRadius(10), 2);
+    assert.equal(I.structureRadius(320), 10);
+  });
+  test("placeTile crops the displayed image into the slot (offsets, uncovered alpha 0)", () => {
+    const tile = new Float32Array(4 * 4 * 4).map((_, i) => (i % 4 === 3 ? 255 : Math.floor(i / 4)));
+    const out = I.placeTile(tile, 4, 4, { x: -1, y: 1, w: 4, h: 4, repeatX: false, repeatY: false }, 3, 3, 1);
+    assert.equal(out[3], 0); // row 0 is above the image
+    assert.equal(out[(1 * 3 + 0) * 4], 1); // slot (0,1) = tile (1,0)
+    assert.equal(out[(2 * 3 + 2) * 4], 7); // slot (2,2) = tile (3,1)
+  });
+});
+
+describe("STRUCTURE vs gen_atmosphere score (synthetic plates, numbers from `score`)", () => {
+  // mulberry32, seed 7: page colour + symmetric uniform grey noise of ±64 per pixel
+  const rng = (seed) => () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const grain = (() => { const r = rng(7), d = new Uint8ClampedArray(IW * IH * 4); for (let i = 0; i < IW * IH; i++) { const n = Math.round((r() * 2 - 1) * 64); d.set([10 + n, 9 + n, 7 + n, 255], i * 4); } return d; })();
+  const motif = (() => { const d = new Uint8ClampedArray(IW * IH * 4); for (let y = 0; y < IH; y++) for (let x = 0; x < IW; x++) { const g = plateAt(x + 0.5, y + 0.5); d.set([g, g, g, 255], (y * IW + x) * 4); } return d; })();
+  const OK = (a) => `oklab(0.140138 0.000313625 0.00516728 / ${a})`;
+  const HEADER = {
+    backgroundImage: `linear-gradient(90deg, ${OK(0.94)} 0%, ${OK(0.86)} 40%, rgba(0, 0, 0, 0) 58%, rgba(0, 0, 0, 0) 78%, ${OK(0.85)} 90%, ${OK(0.88)} 100%), url("p.webp")`,
+    backgroundSize: "cover", backgroundPositionX: "100%", backgroundPositionY: "50%", backgroundRepeat: "no-repeat",
+  };
+  // The displayed image, resampled the way `score` does (PIL LANCZOS: a = 3, support widened when
+  // downsampling, 8-bit result), so grain keeps the same amplitude on both sides.
+  const sinc = (x) => (x === 0 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x));
+  function lanczos1d(src, sw, sh, dn, axis) {
+    const n = axis === 0 ? sw : sh, scale = n / dn, f = Math.max(1, scale), sup = 3 * f;
+    const ow = axis === 0 ? dn : sw, oh = axis === 0 ? sh : dn, out = new Float32Array(ow * oh * 4);
+    const L = axis === 0 ? sh : sw;
+    for (let j = 0; j < dn; j++) {
+      const c = (j + 0.5) * scale, lo = Math.max(0, Math.floor(c - sup)), hi = Math.min(n, Math.ceil(c + sup));
+      const ws = []; let tot = 0;
+      for (let i = lo; i < hi; i++) { const t = (i + 0.5 - c) / f; const v = Math.abs(t) < 3 ? sinc(t) * sinc(t / 3) : 0; ws.push(v); tot += v; }
+      for (let l = 0; l < L; l++) for (let ch = 0; ch < 4; ch++) {
+        let acc = 0;
+        for (let i = lo; i < hi; i++) acc += src[(axis === 0 ? l * sw + i : i * sw + l) * 4 + ch] * ws[i - lo];
+        out[(axis === 0 ? l * ow + j : j * ow + l) * 4 + ch] = Math.min(255, Math.max(0, Math.round(acc / tot)));
+      }
+    }
+    return out;
+  }
+  const displayed = (src, tw, th) => lanczos1d(lanczos1d(src, IW, IH, tw, 0), tw, IH, th, 1);
+  function measure(src, W, H, style) {
+    const plan = I.planSlot({ W, H, style, img: { w: IW, h: IH }, resolveColor: I.parseColor });
+    const tw = Math.round(plan.imgRect.w), th = Math.round(plan.imgRect.h);
+    const tile = displayed(src, tw, th);
+    const data = I.placeTile(tile, tw, th, plan.imgRect, W, H, 1);
+    const st = I.structureData(tile, tw, th, plan, W, H, 1);
+    const { px, structPx, mask } = I.rasterSlot(plan, { w: W, h: H, k: 1, data, structData: st.data, base: PAGE });
+    return { plan, radius: st.radius, m: I.measurePixels({ px, structPx, w: W, h: H, mask, page: PAGE }) };
+  }
+  test("grain in a 1170×90 header-band: raw passes, structure fails (score: 16.16/4.61 raw, 8.6/0.0 structure)", () => {
+    const { radius, m } = measure(grain, 1170, 90, HEADER);
+    assert.equal(radius, 7);
+    near(m.visibility.ge_1_1, 16.16, 0.1, "raw ge_1_1");
+    near(m.visibility.ge_1_3, 4.61, 0.1, "raw ge_1_3");
+    assert.ok(m.visible, JSON.stringify(m.visibility));
+    near(m.structure.ge_1_1, 8.6, 0.1, "structure ge_1_1");
+    assert.equal(m.structure.ge_1_3, 0);
+    assert.equal(m.structOk, false);
+    assert.ok(m.reasons.some((r) => /structure .* below floor .*grain/.test(r)), m.reasons.join("; "));
+  });
+  test("smooth motif in a 1170×90 header-band passes both (score: 24.07/13.24 raw, 24.17/13.12 structure)", () => {
+    const { m } = measure(motif, 1170, 90, HEADER);
+    near(m.visibility.ge_1_1, 24.07, 0.1); near(m.visibility.ge_1_3, 13.24, 0.1);
+    near(m.structure.ge_1_1, 24.17, 0.1); near(m.structure.ge_1_3, 13.12, 0.1);
+    assert.ok(m.visible && m.structOk);
+    assert.deepEqual(m.reasons, []);
+  });
+  test("the strip mask applies to structure too (phone strip 343×150; score motif 35.86/21.17, grain 12.4/0.0)", () => {
+    const mo = measure(motif, 343, 150, STRIP_STYLE);
+    assert.equal(mo.plan.fit, "strip");
+    assert.equal(mo.radius, 2); // displayed height 68.6 → 69 → r = 2
+    near(mo.m.structure.ge_1_1, 35.86, 0.1); near(mo.m.structure.ge_1_3, 21.17, 0.1);
+    const gr = measure(grain, 343, 150, STRIP_STYLE);
+    near(gr.m.structure.ge_1_1, 12.4, 0.1);
+    assert.equal(gr.m.structure.ge_1_3, 0);
+    assert.equal(gr.m.structOk, false);
+    // unclipped, the rows under the 92% scrim would dilute structure: clipping must raise it
+    const unclipped = I.visibility(I.rasterSlot({ ...mo.plan, fit: "band" }, { w: 343, h: 150, k: 1, data: I.placeTile(displayed(motif, 343, 69), 343, 69, mo.plan.imgRect, 343, 150, 1), structData: I.structureData(displayed(motif, 343, 69), 343, 69, mo.plan, 343, 150, 1).data, base: PAGE }).structPx.lum, I.coverMask(mo.plan.imgRect, 343, 150, 1), I.luminance(10, 9, 7));
+    assert.ok(unclipped.ge_1_1 < mo.m.structure.ge_1_1 - 2);
+  });
+  test("custom structure floors and the default floor shape", () => {
+    assert.equal(I.DEFAULT_FLOORS.struct11, 8);
+    assert.equal(I.DEFAULT_FLOORS.struct13, 1);
+    const { px, structPx, mask } = (() => {
+      const plan = I.planSlot({ W: 1170, H: 90, style: HEADER, img: { w: IW, h: IH }, resolveColor: I.parseColor });
+      const tw = Math.round(plan.imgRect.w), th = Math.round(plan.imgRect.h), tile = displayed(grain, tw, th);
+      return I.rasterSlot(plan, { w: 1170, h: 90, k: 1, data: I.placeTile(tile, tw, th, plan.imgRect, 1170, 90, 1), structData: I.structureData(tile, tw, th, plan, 1170, 90, 1).data, base: PAGE });
+    })();
+    const lax = I.measurePixels({ px, structPx, w: 1170, h: 90, mask, page: PAGE, floors: { struct11: 5, struct13: 0 } });
+    assert.equal(lax.structOk, true);
   });
 });

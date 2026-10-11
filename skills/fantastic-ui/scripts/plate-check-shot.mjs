@@ -2,7 +2,7 @@
 // plate-check-shot.mjs — plate-check.js on TRUE pixels, via Playwright (optional; not a dependency).
 //
 //   node skills/fantastic-ui/scripts/plate-check-shot.mjs <url> [--widths 1440,375] [--height 900]
-//        [--hosts SEL] [--layer SEL] [--page '#hex'] [--floors 8,1,4.5,3]
+//        [--hosts SEL] [--layer SEL] [--page '#hex'] [--floors 8,1,4.5,3 | 8,1,8,1,4.5,3]
 //        [--expect '[{"selector":".plate--header","property":"background-image","includes":"rgba(0, 0, 0, 0) 58%"}]']
 //        [--wait MS] [--json]
 //
@@ -10,6 +10,9 @@
 // computed styles, then set `color: transparent` on the text inside the hosts, screenshot each
 // plate layer, and measure the screenshot (what the browser actually composited) with the same
 // metrics: visibility over the image-covered area, text p90/p10 under each text run.
+// STRUCTURE (visibility after a box blur) needs the plate alone, at its full displayed size, before
+// the scrim — a screenshot has neither — so each host's `structure` comes from the computed raster
+// (browser-decoded plate pixels, the same blur as gen_atmosphere) and is marked structureSource:"computed".
 // Prints { mode: "shot", url, widths: [{ width, report }], pass }.
 //
 // Playwright is resolved from the current directory first (your project), then from here.
@@ -22,7 +25,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CHECKER = join(HERE, "plate-check.js");
 const USAGE = `usage: node plate-check-shot.mjs <url> [--widths 1440,375] [--height 900] [--hosts SEL] [--layer SEL]
-                                [--page '#hex'] [--floors ge11,ge13,text,large] [--expect JSON] [--wait MS] [--json]`;
+                                [--page '#hex'] [--floors ge11,ge13[,struct11,struct13],text,large] [--expect JSON] [--wait MS] [--json]`;
 
 function usage(msg, code = 2) {
   if (msg) process.stderr.write(`plate-check-shot: ${msg}\n`);
@@ -56,8 +59,8 @@ function parseArgs(argv) {
     else if (a === "--page") o.page = value(a);
     else if (a === "--floors") {
       const f = value(a).split(",").map(Number);
-      if (f.length !== 4 || f.some((n) => !Number.isFinite(n))) usage("--floors takes four numbers: ge11,ge13,text,large");
-      o.floors = { ge11: f[0], ge13: f[1], text: f[2], large: f[3] };
+      if (![4, 6].includes(f.length) || f.some((n) => !Number.isFinite(n))) usage("--floors takes ge11,ge13,text,large or ge11,ge13,struct11,struct13,text,large");
+      o.floors = f.length === 4 ? { ge11: f[0], ge13: f[1], text: f[2], large: f[3] } : { ge11: f[0], ge13: f[1], struct11: f[2], struct13: f[3], text: f[4], large: f[5] };
     } else if (a === "--expect") {
       try { o.expect = JSON.parse(value(a)); } catch { usage("--expect must be JSON: [{selector, property, includes}]"); }
       if (!Array.isArray(o.expect)) usage("--expect must be a JSON array");
@@ -138,7 +141,12 @@ async function runWidth(browser, opts, width, checkerSrc) {
       try {
         const buf = await page.locator(`[data-plate-check-index="${geometry.index}"]`).screenshot({ animations: "disabled", caret: "hide", scale: "css" });
         const m = await page.evaluate(measureShotInPage, { b64: buf.toString("base64"), geometry, page: h.page, floors });
-        hosts.push({ ...rest, ...m, computed: { visibility: h.visibility, worstText: h.worstText }, pass: m.visible && m.textPass });
+        // STRUCTURE needs the plate alone at its displayed size, which a screenshot cannot give; keep the
+        // computed raster's value (browser-decoded plate pixels, same blur) and fold it into the verdict.
+        const reasons = [...m.reasons.filter((r) => !r.startsWith("structure")), ...(h.reasons || []).filter((r) => r.startsWith("structure") || r.startsWith("measurement partial"))];
+        const ok = m.visible && m.textPass && h.structOk !== false && h.measured !== "partial";
+        hosts.push({ ...rest, ...m, structure: h.structure, structOk: h.structOk, structureSource: "computed", reasons,
+          computed: { visibility: h.visibility, structure: h.structure, worstText: h.worstText }, pass: ok });
       } catch (e) {
         hosts.push({ ...rest, error: "screenshot_failed", detail: String(e && e.message ? e.message : e).split("\n")[0], pass: false });
       }
@@ -156,7 +164,9 @@ function printTable(result) {
     for (const h of report.hosts) {
       if (h.error) { console.log(`${width}px  ${h.selector}  ERROR ${h.error}${h.url ? " " + h.url : ""}`); continue; }
       const wt = h.worstText ? `${h.worstText.ratio}:1 (need ${h.worstText.need}) "${h.worstText.text}"` : "no text";
-      console.log(`${width}px  ${h.pass ? "PASS" : "FAIL"}  ${h.selector}  ${h.box} ${h.fit}  ge_1_1 ${h.visibility.ge_1_1}%  ge_1_3 ${h.visibility.ge_1_3}%  worst text ${wt}`);
+      const st = h.structure ? `  structure ${h.structure.ge_1_1}/${h.structure.ge_1_3}` : "";
+      console.log(`${width}px  ${h.pass ? "PASS" : "FAIL"}  ${h.selector}  ${h.box} ${h.fit}  ge_1_1 ${h.visibility.ge_1_1}%  ge_1_3 ${h.visibility.ge_1_3}%${st}  worst text ${wt}`);
+      for (const r of h.reasons || []) console.log(`        ${r}`);
     }
   }
 }

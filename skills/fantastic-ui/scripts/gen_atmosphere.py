@@ -832,6 +832,11 @@ FIT_POSITION = {"cover": (0.5, 0.5), "band": (0.5, 0.5), "strip": (1.0, 0.0)}
 DEFAULT_STRIP = 64       # px: the phone strip's height
 STRIP_FEATHER = 16       # px: the phone strip's scrim ramps in over this
 DEFAULT_MIN_TEXT = 4.5   # body text; 3 for large text (>= 24px, or >= 18.66px bold)
+# STRUCTURE floors: the visibility floors, applied after the blur. Calibrated
+# 2026-10-11 on the RRGPy plates (3 AI + 8 token, header-band and state-band:
+# lowest 12.9/2.55) against symmetric page +-noise grain (ge_1_3 0.00 after
+# the blur at every amplitude, even +-64 that clears 16/4.5 raw in the slot).
+DEFAULT_MIN_STRUCTURE = (8.0, 1.0)
 
 
 def _scrim_from_json(spec) -> dict:
@@ -939,14 +944,50 @@ def _placement(iw: int, ih: int, slot: dict) -> Tuple[int, int, int, int]:
     return sw, sh, w - sw, 0
 
 
-def place_in_slot(pixels, slot: dict, page_rgb):
+# STRUCTURE: visibility of the plate after a box blur, so grain or noise
+# spread over the frame cannot pass for a motif. The blur is a separable mean
+# filter of radius r (window 2r+1) along x, then y, on the image at its
+# DISPLAYED size (after the fit's resize, before cropping into the slot and
+# before the scrim), on the 8-bit sRGB values as floats (no rounding until
+# the composite), with clamp-to-edge (edge pixels repeated) at the image's
+# own borders. r = max(2, floor(0.03 x displayed image height + 0.5)) px;
+# the displayed height is the scaled image's full height (sh in _placement),
+# not the slot's.
+STRUCTURE_FRAC = 0.03
+STRUCTURE_MIN_RADIUS = 2
+
+
+def structure_radius(displayed_h: int) -> int:
+    return max(STRUCTURE_MIN_RADIUS, int(math.floor(STRUCTURE_FRAC * displayed_h + 0.5)))
+
+
+def _box_1d(a, r: int, axis: int):
+    """Mean over a 2r+1 window along `axis`, clamp-to-edge."""
+    pad = [(0, 0)] * a.ndim
+    pad[axis] = (r + 1, r)
+    c = np.cumsum(np.pad(a, pad, mode="edge"), axis=axis)
+    n = a.shape[axis]
+    hi = np.take(c, np.arange(2 * r + 1, 2 * r + 1 + n), axis=axis)
+    lo = np.take(c, np.arange(0, n), axis=axis)
+    return (hi - lo) / float(2 * r + 1)
+
+
+def box_blur(img, r: int):
+    """Separable mean filter (x, then y) of an HxWx3 float image, clamp-to-edge."""
+    return _box_1d(_box_1d(np.asarray(img, dtype=np.float64), r, 1), r, 0)
+
+
+def place_in_slot(pixels, slot: dict, page_rgb, blur: bool = False):
     """(HxWx3 float 0..255 canvas, HxW covered mask): the image scaled and
-    cropped into the slot; pixels it does not cover show the page."""
+    cropped into the slot; pixels it does not cover show the page. blur: the
+    STRUCTURE box blur, applied at the displayed size before cropping."""
     src = np.asarray(pixels)[..., :3]
     ih, iw = src.shape[:2]
     sw, sh, ox, oy = _placement(iw, ih, slot)
     if (sw, sh) != (iw, ih):
         src = np.asarray(Image.fromarray(src.astype(np.uint8)).resize((sw, sh), Image.LANCZOS))
+    if blur:
+        src = box_blur(src, structure_radius(sh))
     w, h = slot["w"], slot["h"]
     canvas = np.empty((h, w, 3), dtype=np.float64)
     canvas[:] = page_rgb
@@ -958,11 +999,12 @@ def place_in_slot(pixels, slot: dict, page_rgb):
     return canvas, covered
 
 
-def composite_slot(pixels, page: str, slot: dict):
+def composite_slot(pixels, page: str, slot: dict, blur: bool = False):
     """(HxWx3 uint8 composite, HxW mask of the pixels visibility counts).
-    out = a*page + (1-a)*plate in gamma-encoded sRGB, as browsers blend."""
+    out = a*page + (1-a)*plate in gamma-encoded sRGB, as browsers blend,
+    rounded to the nearest integer. blur=True composites the STRUCTURE view."""
     page_rgb = np.array(parse_color(page), dtype=np.float64) * 255.0
-    canvas, covered = place_in_slot(pixels, slot, page_rgb)
+    canvas, covered = place_in_slot(pixels, slot, page_rgb, blur)
     a = scrim_alpha(slot)[..., None]
     comp = np.clip(np.round(a * page_rgb + (1.0 - a) * canvas), 0, 255).astype(np.uint8)
     if slot["fit"] == "strip":
@@ -1000,25 +1042,46 @@ def text_check(comp, mask, text: str, page: str, need: float) -> dict:
             "pass": ratio >= need}
 
 
+def structure_of(pixels, page: str, slot: dict) -> dict:
+    """{ge_1_1, ge_1_3}: visibility of the blurred plate, scrim composited,
+    over the same pixels as `visibility` (what a motif keeps and grain loses)."""
+    comp, vmask = composite_slot(pixels, page, slot, blur=True)
+    vis = visibility(comp[vmask], page)
+    return {"ge_1_1": vis["ge_1_1"], "ge_1_3": vis["ge_1_3"]}
+
+
+def structure_reason(st: dict, min_structure: Tuple[float, float]) -> Optional[str]:
+    if passes_visibility(st, min_structure):
+        return None
+    return (f"structure {st['ge_1_1']}/{st['ge_1_3']} below floor "
+            f"(grain or noise, not a motif)")
+
+
 def score_pixels(pixels, page: str, slot: dict, text: Optional[str] = None,
                  min_visible: Tuple[float, float] = DEFAULT_MIN_VISIBLE,
-                 min_text: float = DEFAULT_MIN_TEXT) -> dict:
+                 min_text: float = DEFAULT_MIN_TEXT,
+                 min_structure: Optional[Tuple[float, float]] = None) -> dict:
     """Score a plate as the slot shows it: visibility over the pixels the
-    image covers (after the scrim) and, with `text`, the text gate."""
+    image covers (after the scrim), STRUCTURE (the same after a box blur)
+    and, with `text`, the text gate."""
+    min_structure = DEFAULT_MIN_STRUCTURE if min_structure is None else min_structure
     comp, vmask = composite_slot(pixels, page, slot)
     vis = visibility(comp[vmask], page)
+    st = structure_of(pixels, page, slot)
     a, b = min_visible
     reasons = []
     if vis["ge_1_1"] < a:
         reasons.append(f"ge_1_1 {vis['ge_1_1']}% < {a:g}%")
     if vis["ge_1_3"] < b:
         reasons.append(f"ge_1_3 {vis['ge_1_3']}% < {b:g}%")
+    if structure_reason(st, min_structure):
+        reasons.append(structure_reason(st, min_structure))
     tres = None
     if text:
         tres = text_check(comp, text_region_mask(slot), text, page, min_text)
         if not tres["pass"]:
             reasons.append(f"text {tres['ratio']}:1 < {min_text:g}:1")
-    return {**slot_fields(slot), "visibility": vis, "text": tres,
+    return {**slot_fields(slot), "visibility": vis, "structure": st, "text": tres,
             "pass": not reasons, "reasons": reasons}
 
 
@@ -1210,14 +1273,18 @@ def parse_focus(s: str) -> Tuple[float, float]:
     return x, y
 
 
-def parse_min_visible(s: str) -> Tuple[float, float]:
+def parse_min_visible(s: str, flag: str = "--min-visible") -> Tuple[float, float]:
     try:
         a, b = (float(t) for t in s.split(","))
     except ValueError:
-        raise CliError(f"--min-visible must be A,B percentages (e.g. 8,1), got {s!r}")
+        raise CliError(f"{flag} must be A,B percentages (e.g. 8,1), got {s!r}")
     if not all(math.isfinite(v) and 0 <= v <= 100 for v in (a, b)):
-        raise CliError("--min-visible values must be percentages within 0..100")
+        raise CliError(f"{flag} values must be percentages within 0..100")
     return a, b
+
+
+def parse_min_structure(s: str) -> Tuple[float, float]:
+    return parse_min_visible(s, "--min-structure")
 
 
 def parse_page(s: Optional[str]) -> Optional[str]:
@@ -1328,14 +1395,18 @@ def render_candidate(palette: List[str], style: str, seed: int, size: Tuple[int,
                      intensity: float, focus: Tuple[float, float], weight: float,
                      max_kb: float, page: str, slot: Optional[dict]) -> dict:
     """Render, encode under budget, and measure the DECODED pixels (what
-    ships): whole-file visibility and, with a slot, what the slot shows."""
+    ships): whole-file visibility and, with a slot, what the slot shows and
+    its STRUCTURE. (No slot: no structure - a plate without --slot is gated
+    as before; a whole-file blur at 3% of a 900 px height erases the sparse
+    highlights a good warp plate relies on.)"""
     pixels = render_plate(palette, style, seed, size[0], size[1], intensity, focus, weight)
     data, quality, blur = fit_webp(Image.fromarray(pixels), int(max_kb * 1024))
     decoded = _decode(data)
     cand = {"seed": seed, "data": data, "quality": quality, "blur": blur,
             "visibility": visibility(decoded, page)}
     if slot is not None:
-        cand["slotVisibility"] = score_pixels(decoded, page, slot)["visibility"]
+        res = score_pixels(decoded, page, slot)
+        cand.update(slotVisibility=res["visibility"], structure=res["structure"])
     return cand
 
 
@@ -1346,16 +1417,43 @@ def gate_vis(cand: dict) -> dict:
 
 def candidate_summary(cands: List[dict]) -> List[dict]:
     return [{"seed": c["seed"], "ge_1_1": gate_vis(c)["ge_1_1"],
-             "ge_1_3": gate_vis(c)["ge_1_3"]} for c in cands]
+             "ge_1_3": gate_vis(c)["ge_1_3"],
+             **({"structure": c["structure"]} if "structure" in c else {})} for c in cands]
+
+
+def _candidate_passes(c: dict, min_visible, min_structure) -> bool:
+    return (passes_visibility(gate_vis(c), min_visible)
+            and ("structure" not in c or passes_visibility(c["structure"], min_structure)))
+
+
+def gate_structure(cand: dict, min_structure: Tuple[float, float], where: str) -> None:
+    """Exit 4 when the slot's visibility is grain or noise, not a motif."""
+    if "structure" not in cand:
+        return
+    reason = structure_reason(cand["structure"], min_structure)
+    if reason is None:
+        return
+    a, b = min_structure
+    msg = (f"plate too faint{where}: {reason}; need {a:g}/{b:g} after the blur; nothing "
+           f"written. Use a smoother style (warp), raise --intensity, or pass --allow-faint")
+    raise CliError(msg, code=4, payload={"error": "too_faint", "message": msg,
+                                         "visibility": cand["visibility"],
+                                         "structure": cand["structure"],
+                                         "minStructure": [a, b],
+                                         **({"slotVisibility": cand["slotVisibility"]}
+                                            if "slotVisibility" in cand else {})})
 
 
 def pick_best(cands: List[dict], min_visible: Optional[Tuple[float, float]],
-              where: str = "", strict: bool = True) -> dict:
+              where: str = "", strict: bool = True,
+              min_structure: Optional[Tuple[float, float]] = None) -> dict:
     """The best candidate by (ge_1_3, then ge_1_1) among those passing the
-    gate (all of them when min_visible is None); the first seed wins a tie.
-    strict: none passing raises exit 4; otherwise the best overall returns."""
+    gate - visibility AND structure (all of them when min_visible is None,
+    i.e. --allow-faint); the first seed wins a tie. strict: none passing
+    raises exit 4; otherwise the best overall returns."""
+    ms = DEFAULT_MIN_STRUCTURE if min_structure is None else min_structure
     passing = [c for c in cands
-               if min_visible is None or passes_visibility(gate_vis(c), min_visible)]
+               if min_visible is None or _candidate_passes(c, min_visible, ms)]
     if not passing and strict:
         if len(cands) == 1:
             extra = ({"slotVisibility": cands[0]["slotVisibility"]}
@@ -1363,13 +1461,15 @@ def pick_best(cands: List[dict], min_visible: Optional[Tuple[float, float]],
             if extra:
                 extra["visibility"] = cands[0]["visibility"]
             gate_visibility(gate_vis(cands[0]), min_visible, where, extra)
+            gate_structure(cands[0], ms, where)
         a, b = min_visible
         msg = (f"no seed passes{where}: none of {len(cands)} reaches {a:g}% at 1.1:1 and "
-               f"{b:g}% at 1.3:1; nothing written. Try more seeds, raise --intensity or "
-               f"--weight, or use --style warp")
+               f"{b:g}% at 1.3:1 with structure {ms[0]:g}/{ms[1]:g}; nothing written. Try "
+               f"more seeds, raise --intensity or --weight, or use --style warp")
         raise CliError(msg, code=4, payload={"error": "too_faint", "message": msg,
                                              "candidates": candidate_summary(cands),
-                                             "minVisible": [a, b]})
+                                             "minVisible": [a, b],
+                                             "minStructure": list(ms)})
     pool = passing or cands
     return max(pool, key=lambda c: (gate_vis(c)["ge_1_3"], gate_vis(c)["ge_1_1"]))
 
@@ -1384,6 +1484,7 @@ def cmd_plate(a, argv) -> dict:
     weight = check_weight(a.weight)
     check_max_kb(a.max_kb)
     min_visible = parse_min_visible(a.min_visible)
+    min_structure = parse_min_structure(a.min_structure)
     seeds = plate_seeds(a.seed, a.seeds, a.pick)
     if not a.slot and (a.scrim or a.fit):
         raise _usage("--scrim and --fit need --slot WxH")
@@ -1391,7 +1492,8 @@ def cmd_plate(a, argv) -> dict:
     where = f" in slot {a.slot} ({slot['scrim']}, {slot['fit']})" if slot else ""
     cands = [render_candidate(palette, a.style, sd, (w, h), intensity, focus, weight,
                               a.max_kb, page, slot) for sd in seeds]
-    best = pick_best(cands, None if a.allow_faint else min_visible, where)
+    best = pick_best(cands, None if a.allow_faint else min_visible, where,
+                     min_structure=min_structure)
     write_atomic(Path(a.out), best["data"])
     data = best["data"]
     res = {"out": a.out, "bytes": len(data), "width": w, "height": h,
@@ -1400,7 +1502,8 @@ def cmd_plate(a, argv) -> dict:
            "visibility": best["visibility"]}
     extra: dict = {}
     if slot is not None:
-        extra.update(slot_fields(slot), slotVisibility=best["slotVisibility"])
+        extra.update(slot_fields(slot), slotVisibility=best["slotVisibility"],
+                     structure=best["structure"])
     if a.seeds:
         extra["candidates"] = candidate_summary(cands)
     out = {**res, "seed": best["seed"], "style": a.style, "palette": palette,
@@ -1658,10 +1761,11 @@ def cmd_score(a, argv) -> dict:
     slot = resolve_slot(a.slot or f"{iw}x{ih}", a.scrim, a.scrim_json, a.fit, a.strip)
     res = {"plate": a.plate, "page": page,
            **score_pixels(pixels, page, slot, parse_page(a.text),
-                          parse_min_visible(a.min_visible), check_min_text(a.min_text))}
-    v, t = res["visibility"], res["text"]
+                          parse_min_visible(a.min_visible), check_min_text(a.min_text),
+                          parse_min_structure(a.min_structure))}
+    v, st, t = res["visibility"], res["structure"], res["text"]
     log(f"score {a.plate} in {res['slot']} ({res['scrim']}, {res['fit']}): "
-        f"{v['ge_1_1']}%>=1.1 {v['ge_1_3']}%>=1.3"
+        f"{v['ge_1_1']}%>=1.1 {v['ge_1_3']}%>=1.3, structure {st['ge_1_1']}/{st['ge_1_3']}"
         + (f", text {t['ratio']}:1" if t else "") + (" pass" if res["pass"] else " FAIL"))
     if not res["pass"]:
         raise CliError("score below the floor: " + "; ".join(res["reasons"]), code=4, payload=res)
@@ -1682,12 +1786,14 @@ BATCH_TOP_KEYS = frozenset(("tokens", "page", "text", "out_dir", "ledger", "defa
 ENTRY_ONLY_KEYS = frozenset(("page", "map"))
 PLATE_KEYS = frozenset(("style", "seed", "seeds", "pick", "size", "intensity", "focus",
                         "weight", "max_kb", "slot", "scrim", "scrim_json", "fit", "strip",
-                        "palette", "text", "min_visible", "min_text")) | ENTRY_ONLY_KEYS
+                        "palette", "text", "min_visible", "min_text",
+                        "min_structure")) | ENTRY_ONLY_KEYS
 ENTRY_KEYS = PLATE_KEYS | {"name", "ai", "fallback"}
 BATCH_DEFAULTS = {"focus": "0.75,0.3", "weight": 1.0, "max_kb": DEFAULT_MAX_KB,
-                  "strip": DEFAULT_STRIP, "min_visible": "8,1", "min_text": DEFAULT_MIN_TEXT}
+                  "strip": DEFAULT_STRIP, "min_visible": "8,1", "min_text": DEFAULT_MIN_TEXT,
+                  "min_structure": "8,1"}
 LEDGER_DROP = ("ts", "argv", "raw")
-WRITTEN_SOURCES = ("rendered", "ai", "fallback")   # sources whose bytes batch writes
+WRITTEN_SOURCES = ("rendered", "ai", "fallback", "adopted")   # sources batch writes
 _NAME_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}")
 
 
@@ -1887,7 +1993,8 @@ def batch_plate_item(name: str, cfg: dict, ctx: dict, rel: str) -> dict:
     slot = cfg_slot(cfg, size)
     cands = [render_candidate(palette, style, sd, size, intensity, focus, weight, max_kb,
                               page, slot) for sd in seeds]
-    best = pick_best(cands, parse_min_visible(_csv(cfg["min_visible"])), strict=False)
+    best = pick_best(cands, parse_min_visible(_csv(cfg["min_visible"])), strict=False,
+                     min_structure=parse_min_structure(_csv(cfg["min_structure"])))
     row = {"tool": TOOL, "mode": "plate", "name": name, "style": style, "seed": best["seed"],
            "size": f"{size[0]}x{size[1]}", "palette": palette, "intensity": intensity,
            "focus": list(focus), "weight": weight, "out": rel, "quality": best["quality"],
@@ -2086,6 +2193,86 @@ def unselected_item(name: str, cfg: dict, ctx: dict, rel: str) -> dict:
             "source": "unselected", "note": "not selected (--only): verified, unchanged"}
 
 
+# ---- batch: adopting an approved ai candidate --------------------------------
+
+ADOPT_MODES = ("ai", "compress")
+
+
+def parse_adopt(s: Optional[str], adopt_ledger: Optional[str], man: dict) -> Dict[str, str]:
+    """--adopt NAME=PATH[,NAME=PATH] -> {name: path}; each NAME an ai entry."""
+    if not s:
+        if adopt_ledger:
+            raise _usage("--adopt-ledger needs --adopt NAME=PATH")
+        return {}
+    ai_names = {e.get("name") for e in man["plates"] if isinstance(e, dict) and "ai" in e}
+    out: Dict[str, str] = {}
+    for item in (t.strip() for t in s.split(",") if t.strip()):
+        name, sep, path = item.partition("=")
+        name, path = name.strip(), path.strip()
+        if not sep or not name or not path:
+            raise _usage(f"--adopt entries are NAME=PATH, got {item!r}")
+        if name not in ai_names:
+            raise _usage(f"--adopt {name!r}: not an `ai` entry of the manifest")
+        out[name] = path
+    return out
+
+
+def adopt_source(name: str, path: str, adopt_ledger: Optional[str]) -> Tuple[bytes, dict]:
+    """The file at PATH and the ledger row that recorded it (same sha256, made
+    by `ai` or `compress`): from --adopt-ledger, else any *.jsonl beside PATH.
+    An unrecorded file is never adopted."""
+    p = Path(path)
+    if not p.is_file():
+        raise CliError(f"--adopt {name}: {path} is not a file")
+    data = p.read_bytes()
+    sha = _sha(data)
+    ledgers = [Path(adopt_ledger)] if adopt_ledger else sorted(p.parent.glob("*.jsonl"))
+    found = None
+    for ledger in ledgers:
+        for row, _ in read_ledger_lines(str(ledger)):
+            if row and row.get("sha256") == sha and row.get("mode") in ADOPT_MODES:
+                found = row
+    if found is None:
+        where = ", ".join(str(x) for x in ledgers) or f"no *.jsonl beside {path}"
+        msg = (f"--adopt {name}: {path} (sha256 {sha[:12]}) has no `ai`/`compress` ledger row "
+               f"in {where}; an unrecorded file is never adopted")
+        raise CliError(msg, payload={"error": "adopt_unverified", "message": msg, "name": name,
+                                     "path": path, "sha256": sha,
+                                     "ledgers": [str(x) for x in ledgers]})
+    return data, found
+
+
+def adopted_item(name: str, entry: dict, cfg: dict, ctx: dict, rel: str) -> dict:
+    """An approved candidate brought in as-is: verified by its ledger row,
+    prompt checked against the entry, scored like any entry. No generation."""
+    prompt, provider = ai_spec(entry["ai"])
+    size = parse_size(str(cfg.get("size") or ""))
+    max_kb = check_max_kb(_float(cfg, "max_kb"))
+    path = ctx["adopt"][name]
+    data, row = adopt_source(name, path, ctx["args"].adopt_ledger)
+    if row.get("mode") == "ai" and row.get("prompt") not in (prompt, prompt + AI_SUFFIX):
+        msg = (f"--adopt {name}: {path} was generated for a different prompt "
+               f"({str(row.get('prompt'))[:80]!r}), not the entry's ({prompt[:80]!r})")
+        raise CliError(msg, payload={"error": "adopt_prompt_mismatch", "message": msg,
+                                     "name": name, "expected": prompt,
+                                     "found": row.get("prompt")})
+    try:
+        got = Image.open(io.BytesIO(data)).size
+    except OSError:
+        raise CliError(f"--adopt {name}: {path} is not a readable image")
+    if got != tuple(size) or len(data) > int(max_kb * 1024):
+        raise CliError(f"--adopt {name}: {path} is {got[0]}x{got[1]} / {len(data)} B; the "
+                       f"entry needs {size[0]}x{size[1]} within {max_kb:g} KB",
+                       payload={"error": "adopt_size_mismatch", "name": name})
+    stale = set(LEDGER_DROP) | {"out", "page", "visibility", "allowFaint"}
+    new_row = {**{k: v for k, v in row.items() if k not in stale}, "name": name, "out": rel,
+               "adopted": True}
+    new_row.setdefault("provider", provider)
+    log(f"plate {name!r}: adopting {path} (no generation, no credits)")
+    return {"name": name, "rel": rel, "cfg": cfg, "slot": cfg_slot(cfg, size),
+            "page": entry_page(cfg, ctx), "data": data, "row": new_row, "source": "adopted"}
+
+
 def batch_items(ctx: dict, items: List[dict]) -> None:
     """Build every entry into `items` (appended as it goes, so an abort can
     still save the ai images already paid for)."""
@@ -2100,6 +2287,8 @@ def batch_items(ctx: dict, items: List[dict]) -> None:
         try:
             if ctx["only"] is not None and name not in ctx["only"]:
                 item = unselected_item(name, cfg, ctx, rel)
+            elif name in ctx["adopt"]:
+                item = adopted_item(name, entry, cfg, ctx, rel)
             elif "ai" in entry:
                 item = batch_ai_item(name, entry, cfg, ctx, rel)
             else:
@@ -2118,13 +2307,14 @@ def score_item(item: dict, text: Optional[str]) -> None:
     text = parse_page(cfg["text"]) if "text" in cfg else text
     res = score_pixels(decoded, page, item["slot"], text,
                        parse_min_visible(_csv(cfg["min_visible"])),
-                       check_min_text(_float(cfg, "min_text")))
+                       check_min_text(_float(cfg, "min_text")),
+                       parse_min_structure(_csv(cfg["min_structure"])))
     row = item["row"]
-    for stale in ("slot", "scrim", "fit", "strip", "slotVisibility", "text"):
+    for stale in ("slot", "scrim", "fit", "strip", "slotVisibility", "structure", "text"):
         row.pop(stale, None)
     row.update(bytes=len(data), sha256=_sha(data), page=page,
                visibility=visibility(decoded, page), slotVisibility=res["visibility"],
-               **slot_fields(item["slot"]))
+               structure=res["structure"], **slot_fields(item["slot"]))
     if res["text"] is not None:
         row["text"] = res["text"]
     item["score"] = res
@@ -2144,19 +2334,21 @@ def item_summary(item: dict) -> dict:
     if res is None:
         return {**out, "pass": None, "reasons": [item.get("note", "not scored")]}
     return {**out, **slot_fields(item["slot"]), "visibility": res["visibility"],
-            "text": res["text"], "pass": res["pass"], "reasons": res["reasons"]}
+            "structure": res["structure"], "text": res["text"], "pass": res["pass"],
+            "reasons": res["reasons"]}
 
 
 def log_table(summary: List[dict]) -> None:
     log(f"{'name':<18} {'source':<10} {'seed':>5} {'slot':>9} {'scrim':<12} "
-        f"{'ge_1_1':>7} {'ge_1_3':>7} {'text':>6}  result")
+        f"{'ge_1_1':>7} {'ge_1_3':>7} {'struct':>11} {'text':>6}  result")
     for s in summary:
-        v, t = s.get("visibility") or {}, s.get("text") or {}
+        v, t, st = s.get("visibility") or {}, s.get("text") or {}, s.get("structure")
+        struct = f"{st['ge_1_1']}/{st['ge_1_3']}" if st else "-"
         result = (s["reasons"][0] if s["pass"] is None else
                   "pass" if s["pass"] else "FAIL " + "; ".join(s["reasons"]))
         log(f"{s['name']:<18} {s['source']:<10} {str(s.get('seed', '-')):>5} "
             f"{s.get('slot', '-'):>9} {s.get('scrim', '-'):<12} "
-            f"{str(v.get('ge_1_1', '-')):>7} {str(v.get('ge_1_3', '-')):>7} "
+            f"{str(v.get('ge_1_1', '-')):>7} {str(v.get('ge_1_3', '-')):>7} {struct:>11} "
             f"{str(t.get('ratio', '-')):>6}  {result}")
 
 
@@ -2304,6 +2496,9 @@ def cmd_batch(a, argv) -> dict:
     man = load_manifest(a.manifest)
     confine_paths(man, a.allow_outside)
     only = parse_only(a.only, man)
+    adopt = parse_adopt(a.adopt, a.adopt_ledger, man)
+    if only is not None:
+        only |= set(adopt)          # adopting an entry runs it
     tok = batch_tokens(man["tokens"]) if man.get("tokens") is not None else None
     # `page` must be stated, never inferred: inferring it from the token map
     # trusts the same map that may list a darker well first (the 2026-10-11
@@ -2314,7 +2509,7 @@ def cmd_batch(a, argv) -> dict:
                        "(getComputedStyle(document.body).backgroundColor), not the token map's guess")
     text = parse_page(man.get("text")) if man.get("text") else None
     lines = read_ledger_lines(man["ledger"])
-    ctx = {"man": man, "args": a, "only": only, "page": page, "base_palette": batch_palette(man, tok),
+    ctx = {"man": man, "args": a, "only": only, "adopt": adopt, "page": page, "base_palette": batch_palette(man, tok),
            "tokens_spec": man.get("tokens") if isinstance(man.get("tokens"), dict) else None,
            "defaults": man.get("defaults") or {}, "rows": [r for r, _ in lines if r]}
     items: List[dict] = []
@@ -2417,8 +2612,11 @@ def build_parser() -> argparse.ArgumentParser:
     pl.add_argument("--min-visible", default="8,1", metavar="A,B",
                     help="refuse (exit 4) unless >= A%% of pixels reach 1.1:1 and >= B%% reach "
                          "1.3:1 against the page ground (default 8,1)")
+    pl.add_argument("--min-structure", default="8,1", metavar="A,B",
+                    help="with --slot: the same floors after the STRUCTURE box blur, so "
+                         "grain or noise cannot pass for a motif (default 8,1)")
     pl.add_argument("--allow-faint", action="store_true",
-                    help="skip the visibility gate (the measure is still reported)")
+                    help="skip the visibility and structure gates (still reported)")
     pl.add_argument("--page", help="the page colour '#hex'; must equal the palette's first "
                                    "ground (exit 1 page_mismatch). Default: tokens.json `page`")
     pl.add_argument("--weight", type=float, default=1.0,
@@ -2477,6 +2675,10 @@ def build_parser() -> argparse.ArgumentParser:
     sc.add_argument("--text", help="text colour '#hex' to gate (omit to skip the text gate)")
     sc.add_argument("--min-visible", default="8,1", metavar="A,B",
                     help="floors: >= A%% at 1.1:1 and >= B%% at 1.3:1 (default 8,1)")
+    sc.add_argument("--min-structure", default="8,1", metavar="A,B",
+                    help="floors after the STRUCTURE box blur (default 8,1): r = max(2, "
+                         "round(0.03 x the image's displayed height)) px, at displayed scale, "
+                         "before the scrim, clamp-to-edge")
     sc.add_argument("--min-text", type=float, default=DEFAULT_MIN_TEXT, metavar="R",
                     help="text contrast floor (default 4.5; 3 for large text)")
     sc.set_defaults(fn=cmd_score)
@@ -2490,12 +2692,13 @@ def build_parser() -> argparse.ArgumentParser:
                     "plate on a raised panel) with its own `palette` or token `map`. Plates "
                     "are rendered (intensity defaults to 1.0 when the entry has a slot, else "
                     "0.6), ai entries verified against their ledger row, and everything is "
-                    "scored on its slot. Only if all pass are the new files staged next to "
+                    "scored on its slot (visibility, STRUCTURE and text). Only if all pass are the new files staged next to "
                     "their targets, verified, renamed in, and the ledger rewritten last: one "
                     "row per manifest plate, other rows kept verbatim (drop them with "
                     "--prune), sorted by out. An abort (exit 3 or 4) after paying for ai "
                     "images copies them to <out_dir>/.rejected/<timestamp>/. Exit 0 ok, 1 "
-                    "error / ledger_mismatch / page_mismatch / path_outside_project, 2 usage, "
+                    "error / ledger_mismatch / page_mismatch / path_outside_project / "
+                    "adopt_unverified / adopt_prompt_mismatch, 2 usage, "
                     "3 ai failed (no --fallback), 4 gate failed.")
     b.add_argument("--manifest", required=True, help="manifest JSON")
     b.add_argument("--reroll-ai", action="store_true",
@@ -2507,6 +2710,16 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("--only", metavar="NAME[,NAME]",
                    help="run only these entries; the others are verified against the ledger "
                         "and kept as they are, rows included")
+    b.add_argument("--adopt", metavar="NAME=PATH[,NAME=PATH]",
+                   help="bring an already-generated, approved candidate into ai entry NAME "
+                        "without generating (no credits): PATH must have an `ai`/`compress` "
+                        "ledger row with its sha256 (exit 1 adopt_unverified) and the entry's "
+                        "prompt (exit 1 adopt_prompt_mismatch); it is scored like any entry "
+                        "and swapped in with the rest, row marked adopted. Adopted entries "
+                        "also run under --only")
+    b.add_argument("--adopt-ledger", metavar="FILE",
+                   help="the ledger that recorded the --adopt files (default: any *.jsonl "
+                        "beside each PATH)")
     b.add_argument("--prune", action="store_true",
                    help="drop ledger rows whose out is not a manifest plate (default: keep "
                         "them verbatim); prints what it drops")

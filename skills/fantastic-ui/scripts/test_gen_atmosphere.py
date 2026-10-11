@@ -944,7 +944,8 @@ def test_score_text_gate():
         light = Path(tmp) / "light.png"
         _write_png(light, np.full((90, 400, 3), 240))
         rc, data, _ = run_cli("score", "--plate", str(light), "--page", "#f0f0f0",
-                              "--text", "#1a1a1a", "--min-visible", "0,0", check=True)
+                              "--text", "#1a1a1a", "--min-visible", "0,0",
+                              "--min-structure", "0,0", check=True)
         assert data["text"]["percentile"] == 10 and data["text"]["ratio"] > 12
 
 
@@ -1424,6 +1425,142 @@ def test_plate_slots_doc_css_matches_scrim_profiles():
     assert G.SCRIM_PROFILES["phone-strip"]["stops"] == (
         (0, 0), ("strip-16", 0), ("strip", .92), ("100%", .92))
     assert G.STRIP_FEATHER == 16 and G.DEFAULT_STRIP == 64
+
+
+# ---------------------------------------------------------------- structure + adopt
+
+
+def _pure_grain(amplitude=64, size=(320, 1600), seed=1):
+    """The page colour plus symmetric uniform +-noise, the same on all channels."""
+    noise = np.random.default_rng(seed).uniform(-amplitude, amplitude, size + (1,))
+    return np.clip(np.round(np.array([10, 9, 7]) + noise), 0, 255).astype(np.uint8)
+
+
+def test_box_blur_definition():
+    rng = np.random.default_rng(0)
+    img, r = rng.random((7, 9, 3)) * 255, 2
+    pad = np.pad(img, ((r, r), (r, r), (0, 0)), mode="edge")       # clamp-to-edge
+    want = np.array([[pad[y:y + 2 * r + 1, x:x + 2 * r + 1].mean((0, 1)) for x in range(9)]
+                     for y in range(7)])
+    assert np.abs(G.box_blur(img, r) - want).max() < 1e-9
+    # r = max(2, floor(0.03 x displayed height + 0.5)), the height after the fit
+    assert [G.structure_radius(h) for h in (40, 75, 234, 250, 900)] == [2, 2, 7, 8, 27]
+    hb = G.resolve_slot("1170x90", "header-band")
+    assert G._placement(1600, 320, hb)[1] == 234          # cover: 1600x320 shown at 1170x234
+
+
+def test_structure_fails_pure_grain_but_passes_a_warp_plate():
+    with tempfile.TemporaryDirectory() as tmp:
+        grain = Path(tmp) / "grain.png"
+        _write_png(grain, _pure_grain())
+        args = ["--page", "#0a0907", "--slot", "1170x90", "--scrim", "header-band"]
+        rc, data, _ = run_cli("score", "--plate", str(grain), *args)
+        assert rc == 4, data
+        v, st = data["visibility"], data["structure"]
+        assert v["ge_1_1"] >= 8 and v["ge_1_3"] >= 1, v          # raw visibility clears 8/1
+        assert st["ge_1_3"] < 1, st                               # but it is only grain
+        assert data["reasons"] == [f"structure {st['ge_1_1']}/{st['ge_1_3']} below floor "
+                                   f"(grain or noise, not a motif)"]
+        good = Path(tmp) / "good.webp"
+        rc, data, _ = run_cli("plate", "--palette", ",".join(REF_PALETTE), *REF_ARGS,
+                              "--out", str(good), "--slot", "1170x90", "--scrim", "header-band",
+                              check=True)
+        assert G.passes_visibility(data["structure"], (8, 1)) and data["slotVisibility"]
+        rc, data, _ = run_cli("score", "--plate", str(good), *args, check=True)
+        assert data["pass"] and data["structure"]["ge_1_3"] >= 1
+        # plate --slot gates structure too; --allow-faint bypasses both gates
+        bad = Path(tmp) / "g.webp"
+        pal = "#0a0907,#151311,#4c2a00,#f9a216,#ea8b00"
+        base = ["plate", "--palette", pal, "--style", "grain", "--seed", "3", "--size",
+                "1600x320", "--out", str(bad), "--slot", "1170x90", "--scrim", "header-band"]
+        rc, data, _ = run_cli(*base)
+        assert rc == 4 and "structure" in data["message"] and "grain or noise" in data["message"]
+        assert not bad.exists()
+        rc, data, _ = run_cli(*base, "--allow-faint", check=True)
+        assert bad.exists() and "structure" in data
+        rc, data, _ = run_cli(*base, "--min-structure", "0,0", check=True)
+        # without --slot, plate is gated as before (no structure measured)
+        _, data, _ = run_cli("plate", "--palette", pal, *REF_ARGS, "--out", str(good), check=True)
+        assert "structure" not in data
+
+
+def _candidate(root, prompt="particle trails", record=True, seed=7):
+    """An ai candidate the user approved elsewhere: a file plus its `ai` ledger row."""
+    cand = root / "candidates" / "crowding-v2.webp"
+    cand.parent.mkdir(parents=True, exist_ok=True)
+    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+        G.main(["plate", "--palette", ",".join(REF_PALETTE), "--style", "warp", "--seed",
+                str(seed), "--intensity", "1", "--size", "1600x320", "--focus", "0.70,0.45",
+                "--out", str(cand)])
+    if record:
+        row = {"ts": "2026-10-11T00:00:00+00:00", "tool": "gen_atmosphere", "mode": "ai",
+               "provider": "openai", "prompt": prompt + G.AI_SUFFIX, "size": "1600x320",
+               "out": str(cand), "raw": "x.raw.png", "argv": ["ai"],
+               "sha256": _sha256(cand.read_bytes())}
+        (cand.parent / "ai.jsonl").write_text(json.dumps(row) + "\n")
+    return cand
+
+
+def test_batch_adopt_brings_in_an_approved_candidate():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _batch_project(tmp, [TWO_PLATES[0], AI_ENTRY])
+        cand = _candidate(root)
+        rc, data, err = run_batch(root, "--adopt", "crowding=candidates/crowding-v2.webp",
+                                  env={"FAKE_AI_MODE": "fail"})          # never generates
+        assert rc == 0, (data, err)
+        crowd = [p for p in data["plates"] if p["name"] == "crowding"][0]
+        assert crowd["source"] == "adopted" and crowd["pass"] and "structure" in crowd
+        shipped = root / "web/public/plates/crowding.webp"
+        assert shipped.read_bytes() == cand.read_bytes()
+        row = [r for r in _rows(root) if r["name"] == "crowding"][0]
+        assert row["adopted"] is True and row["out"] == "web/public/plates/crowding.webp"
+        assert not {"ts", "raw", "argv"} & set(row) and row["sha256"] == _sha256(cand.read_bytes())
+        assert row["prompt"].startswith("particle trails") and row["structure"]
+        # the adopted file now verifies like any shipped ai image
+        rc, data, _ = run_batch(root)
+        assert rc == 0 and [p for p in data["plates"] if p["name"] == "crowding"][0][
+            "source"] == "verified"
+        # NAME must be an ai entry
+        rc, data, _ = run_batch(root, "--adopt", "today=candidates/crowding-v2.webp")
+        assert rc == 2 and data["error"] == "usage"
+
+
+def test_batch_adopt_refuses_unrecorded_or_mismatched_files():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _batch_project(tmp, [AI_ENTRY])
+        _candidate(root, record=False)
+        before = _snapshot(root)
+        rc, data, _ = run_batch(root, "--adopt", "crowding=candidates/crowding-v2.webp")
+        assert rc == 1 and data["error"] == "adopt_unverified", data
+        assert _snapshot(root) == before
+        _candidate(root, prompt="a different picture")
+        before = _snapshot(root)
+        rc, data, _ = run_batch(root, "--adopt", "crowding=candidates/crowding-v2.webp")
+        assert rc == 1 and data["error"] == "adopt_prompt_mismatch", data
+        assert data["expected"] == "particle trails" and _snapshot(root) == before
+        # --adopt-ledger names the ledger explicitly
+        (root / "candidates/ai.jsonl").rename(root / "elsewhere.jsonl")
+        rc, data, _ = run_batch(root, "--adopt", "crowding=candidates/crowding-v2.webp",
+                                "--adopt-ledger", "elsewhere.jsonl")
+        assert rc == 1 and data["error"] == "adopt_prompt_mismatch"
+
+
+def test_batch_adopt_with_only():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _batch_project(tmp, TWO_PLATES + [AI_ENTRY])
+        assert run_batch(root, "--reroll-ai")[0] == 0           # everything shipped once
+        before = _snapshot(root)
+        cand = _candidate(root)
+        rc, data, err = run_batch(root, "--only", "today", "--adopt",
+                                  "crowding=candidates/crowding-v2.webp")
+        assert rc == 0, (data, err)
+        src = {p["name"]: p["source"] for p in data["plates"]}
+        assert src == {"today": "rendered", "trades": "unselected", "crowding": "adopted"}
+        after = _snapshot(root)
+        assert after["web/public/plates/crowding.webp"] == cand.read_bytes()
+        assert after["web/public/plates/trades.webp"] == before["web/public/plates/trades.webp"]
+        rows = {r["name"]: r for r in _rows(root)}
+        assert rows["crowding"]["adopted"] is True and "adopted" not in rows["trades"]
 
 
 def test_help_for_new_subcommands():

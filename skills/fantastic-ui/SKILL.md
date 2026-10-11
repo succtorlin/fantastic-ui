@@ -592,7 +592,8 @@ Run through this before calling the page done:
       every asset (`plate`, `ai`, `compress`, `svg`) has an imagery-ledger line
 - [ ] Every plate slot measured with `scripts/plate-check.js` at 1440 and
       375 px behind a stale-CSS sentinel (`expect`): ≥8% ≥1.1:1 and ≥1%
-      ≥1.3:1 against the page, text ≥4.5:1 (3:1 large); numbers cited
+      ≥1.3:1 against the page, raw and after the structure blur (grain is
+      not a motif), text ≥4.5:1 (3:1 large); numbers cited
 - [ ] Every panel/subpanel empty and first-run state inherits the route's
       plate (or svg texture); populated panels carry none; plated branches
       audited — explicit `kind`, no error path falls through to empty copy

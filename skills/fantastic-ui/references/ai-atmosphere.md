@@ -361,6 +361,13 @@ python3 $GEN batch --manifest docs/imagery/plates.json             # render, sco
   them and lists what went.
 - `--only NAME[,NAME]` runs the named entries; the rest must still verify
   against their ledger rows and are left untouched.
+- `--adopt NAME=PATH` brings in an `ai` image that was already generated and
+  approved (say, a candidate compared side by side) without generating
+  again: the file must match an `ai`/`compress` ledger row by sha256 (from
+  `--adopt-ledger FILE`, or a `*.jsonl` beside it; else `adopt_unverified`),
+  its prompt must match the entry's (else `adopt_prompt_mismatch`), and it is
+  scored on the entry's slot like any other before it is swapped in. No
+  credits are spent.
 - A plate on a raised panel carries its own `page` (and its own `palette`
   or token `map`) in its entry; the manifest `page` is the default and is
   always required.
@@ -458,6 +465,17 @@ A plate can fail in two directions, and both are failures:
   image covers; under `strip`, the strip. A plate that fails visibility is as
   much a failure as one that fails text contrast; it costs bytes and says
   nothing.
+- **Structure gate** — the visibility is noise. The same count, with the
+  same 8% / 1% floors, on the plate after a box blur of radius
+  `max(2, round(0.03 × displayed image height))` px, applied at its displayed
+  size before the scrim. Film grain averages away under the blur; a motif
+  survives it. Calibrated on 11 shipped plates and synthetic grain: pure
+  grain at ±64 cleared raw visibility in the slot (16.0% / 4.5%) and scored
+  **0.00%** ≥1.3:1 after the blur, while every real plate held its numbers
+  (lowest 12.9% / 2.55%; an AI header 37.4% / 23.4% raw → 37.7% / 25.1%).
+  `score`, `plate --slot`, `batch` and `plate-check.js` all report
+  `structure` and gate on it (`--min-structure A,B`, exit 4 "grain or noise,
+  not a motif"); `--allow-faint` bypasses both gates.
 
 axe and token-pair checkers composite the gradient and ignore the `url()`
 layer, so they cannot see the plate. Measure in two places:

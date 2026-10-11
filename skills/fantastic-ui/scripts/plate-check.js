@@ -21,12 +21,16 @@
  *      or in one call:  (0, eval)(fileText); JSON.stringify(await plateCheck())
  *   Node (unit tests only — the pure helpers):  require("./plate-check.js")._internals
  *   True pixels instead of computed geometry:   node scripts/plate-check-shot.mjs <url>
+ *     (shot mode measures visibility and text on the screenshot; STRUCTURE needs the plate without the
+ *      scrim and beyond the slot's edges, which a screenshot does not have, so it is taken from the
+ *      computed raster — itself the browser-decoded plate pixels — and reported as such)
  *
  * OPTIONS  plateCheck({ hosts, layer, page, floors, expect, visibleOnly, stripPx, allowAllSkipped, imageTimeoutMs })
  *   hosts   CSS selector for hosts  (default "[data-plate-host], .plate-host, .route-plate-host, .desk-plate-host")
  *   layer   selector relative to the host (default ":scope > [data-plate], :scope > .plate, :scope > .route-plate, :scope > .desk-plate")
  *   page    CSS colour the plate is judged against (default: computed background walking up from the host)
- *   floors  { ge11: 8, ge13: 1, text: 4.5, large: 3 }
+ *   floors  { ge11: 8, ge13: 1, struct11: 8, struct13: 1, text: 4.5, large: 3 } — flat keys; any subset
+ *           overrides the defaults. ge* = visibility floors, struct* = STRUCTURE floors (below).
  *   expect  [{ selector, property, includes, pseudo? }] stale-CSS sentinel: if any computed value
  *           lacks `includes`, returns { stale: true } and measures nothing. Numbers that do not move
  *           after a CSS edit are stale until proven otherwise — use this.
@@ -45,9 +49,23 @@
  *   pass          true only if at least one host was measured and every host passes
  *   A measured host:
  *     { selector, box:"WxH", fit: strip|cover|contain|band|custom, page, url, measured: "full"|"partial",
- *       visibility:{ ge_1_1, ge_1_3 }, visible, text:[{ text, ratio, need, pass }], worstText, textPass,
- *       pass, stripPx?, unsupportedLayers?, unmodelled? }
+ *       visibility:{ ge_1_1, ge_1_3 }, structure:{ ge_1_1, ge_1_3 }, structureRadius, visible, structOk,
+ *       text:[{ text, ratio, need, pass }], worstText, textPass, reasons:[…], pass, stripPx?,
+ *       unsupportedLayers?, unmodelled? }
  *     visibility    % of image-covered pixels (for a strip: only rows above the strip) at ≥1.1:1 / ≥1.3:1
+ *                   against the page, on the composite rounded to 8-bit (as the screen and `score` hold it)
+ *     structure     the same count after blurring the plate, so film grain or noise cannot pass for a
+ *                   motif — identical to gen_atmosphere.py's STRUCTURE: the image is drawn at its
+ *                   DISPLAYED size (after the fit), box-blurred there (separable mean, window 2r+1, x then
+ *                   y, clamp-to-edge at the image's own borders, float values), then cropped into the slot,
+ *                   scrimmed and counted over the same mask as visibility. r = max(2, floor(0.03 × displayed
+ *                   image height + 0.5)) px (structureRadius, in raster px); e.g. a 1600×320 plate under cover
+ *                   in 1170×90 → height 234 → r 7; the phone strip at 375 → 75 → r 2.
+ *                   The image is resampled by the browser (smoothed drawImage), `score` uses PIL Lanczos:
+ *                   plates with a motif agree within ~1 point, but pixel-scale grain is averaged more by
+ *                   the browser and reads LOWER here than in `score` (both fail it).
+ *     pass          visible AND structOk (structure ≥ struct11/struct13) AND textPass AND measured:"full"
+ *     reasons       one line per failed gate, e.g. "structure 8.6/0 below floor 8/1 (grain or noise, not a motif)"
  *     unsupportedLayers  [{ position: "above"|"below", layer, reason }] layers the raster could not draw
  *                   (radial/conic/angled gradients, image-set, an unparsed colour). Any ABOVE the image
  *                   makes the host measured:"partial" and pass:false.
@@ -72,8 +90,13 @@
 
   const DEFAULT_HOSTS = "[data-plate-host], .plate-host, .route-plate-host, .desk-plate-host";
   const DEFAULT_LAYER = ":scope > [data-plate], :scope > .plate, :scope > .route-plate, :scope > .desk-plate";
-  const DEFAULT_FLOORS = Object.freeze({ ge11: 8, ge13: 1, text: 4.5, large: 3 });
+  const DEFAULT_FLOORS = Object.freeze({ ge11: 8, ge13: 1, struct11: 8, struct13: 1, text: 4.5, large: 3 });
+  // STRUCTURE (gen_atmosphere.py's definition, kept identical so `score` and the browser agree):
+  // the visibility of the plate after a separable box blur at its DISPLAYED size.
+  const STRUCTURE_FRAC = 0.03;
+  const STRUCTURE_MIN_RADIUS = 2;
   const SAMPLE_CAP = 1500000; // raster samples per host; larger slots are measured at a lower density
+  const STRUCTURE_TILE_CAP = 16000000; // displayed-image raster px the STRUCTURE blur will process
   const LARGE_PX = 24;
   const LARGE_BOLD_PX = 18.66;
 
@@ -532,6 +555,65 @@
 
   const listAt = (list, i, dflt) => (list.length ? list[i % list.length] : dflt);
 
+  /** Blur radius for STRUCTURE: max(2, floor(0.03 × displayed image height + 0.5)) px. */
+  const structureRadius = (displayedH) => Math.max(STRUCTURE_MIN_RADIUS, Math.floor(STRUCTURE_FRAC * displayedH + 0.5));
+
+  /**
+   * Separable mean filter, window 2r+1, along x then y, clamp-to-edge, as floats (no rounding).
+   * data: w×h×ch numbers (any array-like); returns a Float32Array of the same layout. O(n) per axis
+   * (running sums).
+   */
+  function boxBlur(data, w, h, ch, r) {
+    const out = new Float32Array(w * h * ch);
+    if (r < 1) { out.set(data); return out; }
+    const win = 2 * r + 1;
+    const tmp = new Float32Array(w * h * ch);
+    const pass = (src, dst, len, count, at) => {
+      // `count` lines of `len` samples; at(line, i) → flat index of sample i (no channel offset)
+      for (let line = 0; line < count; line++) {
+        for (let c = 0; c < ch; c++) {
+          const v = (i) => src[at(line, i < 0 ? 0 : i >= len ? len - 1 : i) + c];
+          let sum = 0;
+          for (let i = -r; i <= r; i++) sum += v(i);
+          for (let i = 0; i < len; i++) {
+            dst[at(line, i) + c] = sum / win;
+            sum += v(i + r + 1) - v(i - r);
+          }
+        }
+      }
+    };
+    pass(data, tmp, w, h, (y, x) => (y * w + x) * ch);
+    pass(tmp, out, h, w, (x, y) => (y * w + x) * ch);
+    return out;
+  }
+
+  /**
+   * Place a w_t×h_t RGBA tile (the image at its displayed size, in raster px) into a w×h slot raster
+   * at `rect` (CSS px, with repeatX/repeatY); k raster px per CSS px. Uncovered pixels get alpha 0.
+   */
+  function placeTile(tile, tw, th, rect, w, h, k) {
+    const out = new Float32Array(w * h * 4);
+    const col = new Int32Array(w).fill(-1);
+    const row = new Int32Array(h).fill(-1);
+    const map = (c, len, rep, n) => {
+      if (rep && len > 0) c = mod(c, len);
+      else if (c < 0 || c >= len) return -1;
+      return clamp(Math.floor(c * k), 0, n - 1);
+    };
+    for (let x = 0; x < w; x++) col[x] = map((x + 0.5) / k - rect.x, rect.w, rect.repeatX, tw);
+    for (let y = 0; y < h; y++) row[y] = map((y + 0.5) / k - rect.y, rect.h, rect.repeatY, th);
+    for (let y = 0; y < h; y++) {
+      if (row[y] < 0) continue;
+      for (let x = 0; x < w; x++) {
+        if (col[x] < 0) continue;
+        const s4 = (row[y] * tw + col[x]) * 4;
+        const d4 = (y * w + x) * 4;
+        out[d4] = tile[s4]; out[d4 + 1] = tile[s4 + 1]; out[d4 + 2] = tile[s4 + 2]; out[d4 + 3] = tile[s4 + 3];
+      }
+    }
+    return out;
+  }
+
   /**
    * The geometry of one plate layer, from its computed background longhands (pure; the browser
    * and the unit tests both go through here).
@@ -609,21 +691,33 @@
    * drawn at the plan's rect. Returns { px: { rgb, lum }, mask }; for a strip the mask keeps only
    * rows above the strip (the rows under the scrim are not the plate's visible area).
    */
-  function rasterSlot(plan, { w, h, k, data, base, resolveLen }) {
+  function rasterSlot(plan, { w, h, k, data, structData, base, resolveLen }) {
     const toLayer = (a) => gradientLayer(a.grad, a.rect, w, h, k, resolveLen);
-    const px = compositeSlot({ w, h, base, below: plan.below.map(toLayer), image: { data }, above: plan.above.map(toLayer) });
+    const below = plan.below.map(toLayer);
+    const above = plan.above.map(toLayer);
+    const px = compositeSlot({ w, h, base, below, image: { data }, above });
+    const structPx = structData ? compositeSlot({ w, h, base, below, image: { data: structData }, above }) : null;
     const mask = coverMask(plan.imgRect, w, h, k);
     if (plan.fit === "strip" && plan.strip != null) {
       for (let y = 0; y < h; y++) if ((y + 0.5) / k >= plan.strip) mask.fill(0, y * w, (y + 1) * w);
     }
-    return { px, mask };
+    return { px, structPx, mask };
+  }
+
+  /**
+   * The STRUCTURE image for a plan: the image drawn at its displayed size (tile: RGBA, tw×th raster
+   * px), blurred there (before the crop and the scrim), then placed into the w×h slot raster.
+   */
+  function structureData(tile, tw, th, plan, w, h, k) {
+    const r = Math.max(1, Math.round(structureRadius(Math.round(plan.imgRect.h)) * k));
+    return { data: placeTile(boxBlur(tile, tw, th, 4, r), tw, th, plan.imgRect, w, h, k), radius: r };
   }
 
   /**
    * Composite a slot: base colour, then layers BELOW the image, the image, then the scrim
    * layers ABOVE it. `below`/`above` are in CSS list order (index 0 = topmost) and are painted
    * last-to-first, as browsers paint backgrounds. image: { data: RGBA Uint8ClampedArray w×h } or null.
-   * Returns { rgb: Float32Array(w*h*3), lum: Float32Array(w*h) }.
+   * Returns { rgb: Float32Array(w*h*3), lum: Float32Array(w*h) }, rounded to 8-bit values.
    */
   function compositeSlot({ w, h, base, below = [], image = null, above = [] }) {
     const N = w * h;
@@ -647,10 +741,12 @@
           if (a > 0) c = { r: image.data[i * 4] * a + c.r * (1 - a), g: image.data[i * 4 + 1] * a + c.g * (1 - a), b: image.data[i * 4 + 2] * a + c.b * (1 - a) };
         }
         for (let l = above.length - 1; l >= 0; l--) c = paint(above[l], x, y, c);
-        rgb[i * 3] = c.r;
-        rgb[i * 3 + 1] = c.g;
-        rgb[i * 3 + 2] = c.b;
-        lum[i] = luminance(c.r, c.g, c.b);
+        // The screen holds 8-bit pixels: round like the browser (and gen_atmosphere's composite) do.
+        const r8 = clamp(Math.round(c.r), 0, 255), g8 = clamp(Math.round(c.g), 0, 255), b8 = clamp(Math.round(c.b), 0, 255);
+        rgb[i * 3] = r8;
+        rgb[i * 3 + 1] = g8;
+        rgb[i * 3 + 2] = b8;
+        lum[i] = luminance(r8, g8, b8);
       }
     }
     return { rgb, lum };
@@ -730,10 +826,21 @@
    * The measurement both modes share. px: { rgb, lum } over a w×h raster (k raster px per CSS px);
    * mask: image-covered pixels; texts: [{ text, color, need, rects }] with rects in slot CSS px.
    */
-  function measurePixels({ px, w, h, k = 1, mask, page, texts = [], floors = DEFAULT_FLOORS }) {
+  function measurePixels({ px, structPx = null, w, h, k = 1, mask, page, texts = [], floors = DEFAULT_FLOORS }) {
+    const f = { ...DEFAULT_FLOORS, ...floors };
     const pageLum = luminance(page.r, page.g, page.b);
     const v = visibility(px.lum, mask, pageLum);
-    const visible = v.n > 0 && v.ge_1_1 >= floors.ge11 && v.ge_1_3 >= floors.ge13;
+    const visible = v.n > 0 && v.ge_1_1 >= f.ge11 && v.ge_1_3 >= f.ge13;
+    const reasons = [];
+    if (!visible) reasons.push(`visibility ${v.ge_1_1}/${v.ge_1_3} below floor ${f.ge11}/${f.ge13}`);
+    let structure = null;
+    let structOk = true;
+    if (structPx) {
+      const sv = visibility(structPx.lum, mask, pageLum);
+      structure = { ge_1_1: sv.ge_1_1, ge_1_3: sv.ge_1_3 };
+      structOk = sv.n > 0 && sv.ge_1_1 >= f.struct11 && sv.ge_1_3 >= f.struct13;
+      if (!structOk) reasons.push(`structure ${sv.ge_1_1}/${sv.ge_1_3} below floor ${f.struct11}/${f.struct13} (grain or noise, not a motif)`);
+    }
     const text = [];
     for (const t of texts) {
       const idx = rectIndices(t.rects, w, h, k);
@@ -744,7 +851,9 @@
     }
     let worstText = null;
     for (const t of text) if (!worstText || t.ratio / t.need < worstText.ratio / worstText.need) worstText = t;
-    return { visibility: { ge_1_1: v.ge_1_1, ge_1_3: v.ge_1_3 }, visible, text, worstText, textPass: text.every((t) => t.pass) };
+    const textPass = text.every((t) => t.pass);
+    if (!textPass) reasons.push(`text ${worstText.ratio}:1 < ${worstText.need}:1 ("${worstText.text}")`);
+    return { visibility: { ge_1_1: v.ge_1_1, ge_1_3: v.ge_1_3 }, structure, visible, structOk, text, worstText, textPass, reasons };
   }
 
   // ── browser side ──────────────────────────────────────────────────────
@@ -1024,19 +1133,35 @@
     const w = Math.max(1, Math.round(W * k));
     const h = Math.max(1, Math.round(H * k));
     let data;
-    try { data = drawImage(img.bitmap, w, h, k, plan.imgRect); } catch (e) {
+    let struct = null;
+    try {
+      data = drawImage(img.bitmap, w, h, k, plan.imgRect);
+      // STRUCTURE: the image at its displayed size, blurred before the crop (gen_atmosphere's order).
+      const tw = Math.max(1, Math.round(plan.imgRect.w * k));
+      const th = Math.max(1, Math.round(plan.imgRect.h * k));
+      if (tw * th <= STRUCTURE_TILE_CAP) {
+        const ctx2 = makeCanvas(tw, th).getContext("2d", { willReadFrequently: true });
+        ctx2.imageSmoothingEnabled = true;
+        ctx2.imageSmoothingQuality = "high";
+        ctx2.drawImage(img.bitmap, 0, 0, tw, th);
+        struct = structureData(ctx2.getImageData(0, 0, tw, th).data, tw, th, plan, w, h, k);
+      }
+    } catch (e) {
       return { selector, box, page: pageHex, url, error: "image_unreadable", detail: errMsg(e), pass: false };
     }
     const own = ctx.resolveColor(cs.backgroundColor);
     const base = own && own.a > 0 ? over(own, page) : page;
-    const { px, mask } = rasterSlot(plan, { w, h, k, data, base, resolveLen: ctx.resolveLen });
+    const { px, structPx, mask } = rasterSlot(plan, { w, h, k, data, structData: struct && struct.data, base, resolveLen: ctx.resolveLen });
     const texts = collectText(host, layer, lr, ctx.resolveColor).map((t) => ({
       text: t.text, color: t.color, rects: t.rects, need: isLargeText(t.px, t.weight) ? opts.floors.large : opts.floors.text,
     }));
-    const m = measurePixels({ px, w, h, k, mask, page, texts, floors: opts.floors });
+    const m = measurePixels({ px, structPx, w, h, k, mask, page, texts, floors: opts.floors });
     const unmodelled = unmodelledProps(cs, getComputedStyle(host));
-    const partial = plan.unsupported.some((u) => u.position === "above") || unmodelled.length > 0;
-    const entry = { selector, box, fit: plan.fit, page: pageHex, url, measured: partial ? "partial" : "full", ...m, pass: m.visible && m.textPass && !partial };
+    const partial = plan.unsupported.some((u) => u.position === "above") || unmodelled.length > 0 || !struct;
+    if (!struct) m.reasons.push("structure not measured: the displayed image is larger than the sampling cap");
+    if (partial && struct) m.reasons.push("measurement partial: see unsupportedLayers / unmodelled");
+    const entry = { selector, box, fit: plan.fit, page: pageHex, url, measured: partial ? "partial" : "full", ...m, pass: m.visible && m.structOk && m.textPass && !partial };
+    if (struct) entry.structureRadius = struct.radius;
     if (plan.strip != null) entry.stripPx = round2(plan.strip);
     if (plan.unsupported.length) entry.unsupportedLayers = plan.unsupported;
     if (unmodelled.length) entry.unmodelled = unmodelled;
@@ -1114,7 +1239,7 @@
     splitTop, parseColor, luminance, contrast, toHex, over, compositeLum, evalLength,
     splitLayers, parseGradient, resolveStops, gradientAt, parseRepeat, resolveAxisPos,
     classifyFit, stripHeight, resolveFit, planSlot, rasterSlot, gradientLayer, coverMask, compositeSlot,
-    rgbaToRgbLum, visibility, percentile, textContrast, isLargeText, rectIndices, measurePixels,
+    rgbaToRgbLum, structureRadius, boxBlur, placeTile, structureData, visibility, percentile, textContrast, isLargeText, rectIndices, measurePixels,
     loadImage, loadImageElement, unmodelledProps, summarize,
   };
   plateCheck._internals = _internals;
