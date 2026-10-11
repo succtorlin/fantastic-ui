@@ -355,9 +355,19 @@ A plate can fail in two directions, and both are failures:
 - **Text gate** — text over the plate is unreadable. Gate on the 10th
   percentile: 4.5:1 for body text, 3:1 for large text.
 - **Visibility gate** — the plate is invisible. After the scrim, at least
-  **8% of the slot's pixels must be ≥1.1:1** against the page ground, and at
-  least **1% must be ≥1.3:1**. A plate that fails visibility is as much a
-  failure as one that fails text contrast; it costs bytes and says nothing.
+  **8% of the pixels the plate covers must be ≥1.1:1** against the page
+  ground, and at least **1% must be ≥1.3:1**. Under `cover` that is the whole
+  slot; under `100% auto` (below) it is the band the image occupies. A plate
+  that fails visibility is as much a failure as one that fails text
+  contrast; it costs bytes and says nothing.
+- **Tall states get a band, not `cover`.** A strip-shaped plate (5:1) under
+  `cover` in a tall empty state is magnified 2–3× and turns to blur. Size it
+  `100% auto`, centred, so it crosses the state as a band at its own
+  aspect, and scrim the middle where centred words sit, leaving the edges
+  clear.
+- **Phones:** text spans the strip, so the full-width scrim stays and the
+  plate is mostly hidden there (measured 0–6%). That is an accepted trade,
+  not a pass: say so in the report rather than claiming the plate shows.
 
 `plate` applies the visibility gate to the bare plate before writing it.
 That is necessary, not sufficient: the scrim only removes visibility, so
