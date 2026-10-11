@@ -179,7 +179,10 @@ At most one plate per route (header strip or a state surface), generated
 from the app tokens, static, and never behind data. A route without one
 records why in the ledger. Every panel and subpanel inherits it in its empty
 and first-run states — built once in the shared empty-state primitive, never
-per panel; populated panels never carry imagery. The canonical rule is
+per panel; populated panels never carry imagery. A plate must be both
+readable under text and visible on the page — the two gates in
+[ai-atmosphere.md §7](ai-atmosphere.md#7-real-pixel-contrast-and-visibility-check).
+The canonical rule is
 [the plate rule in ai-atmosphere.md](ai-atmosphere.md#the-plate-rule), and the
 procedure, tools and markup are there too.
 
@@ -226,7 +229,8 @@ Run after the last screen migrates; these are pass/fail:
       Step 6): axe clean incl. wcag22aa, token contrast matrix recorded,
       manual passes done on the two most complex screens
 - [ ] Imagery: ≤ 1 plate per route, none inside a data panel, text over each
-      plate measured on real pixels, every asset (`plate`, `ai`, `compress`,
+      plate measured on real pixels, each plate visible after its scrim (≥8%
+      of the slot ≥1.1:1 and ≥1% ≥1.3:1 against the page), every asset (`plate`, `ai`, `compress`,
       `svg`) with a line in the imagery ledger (`--ledger`)
 - [ ] Every panel and subpanel empty/first-run state inherits the route's
       plate (or svg texture) from the shared primitive; filtered, failed,

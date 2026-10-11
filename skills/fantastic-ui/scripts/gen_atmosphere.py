@@ -19,11 +19,20 @@ The rules it serves:
     per environment: other libwebp / Pillow / numpy versions may encode or
     round differently. The ledger's sha256 makes any such drift visible.
   * Palette roles: the last one or two colours are the accent (and its
-    highlight); the rest are grounds. The grounds are auto-sorted so the base
-    is the page ground: the darkest ground for a dark palette, the LIGHTEST
-    ground when the grounds' mean relative luminance is > 0.5 (e.g. a cream
-    page). On light palettes accent strength is x0.45 and ground structure x0.6
-    so dark text over the plate keeps high contrast. stdout reports "tone".
+    highlight); the rest are grounds. The FIRST ground is the page surface the
+    plate sits on (`--palette`'s first colour, or the `ground` role from
+    `tokens`), and it is the plate's base. It is never re-sorted. The other
+    grounds are structure: on a dark page (page-ground relative luminance
+    <= 0.5) each must be no darker than the page, on a light (cream) page no
+    lighter. A palette that breaks this is refused, because a plate darker
+    than a dark page is invisible on it. On light palettes accent strength is
+    x0.45 and ground structure x0.6 so dark text over the plate keeps high
+    contrast. stdout reports "tone".
+  * Plates must be perceptible. `plate` measures the encoded pixels against
+    the page ground (`visibility`: the share of pixels at >= 1.1:1 and
+    >= 1.3:1 WCAG contrast, and the share on the wrong side of the page) and
+    refuses to write a plate below --min-visible (default 8,1), exit 4.
+    `ai` and `compress` report the same measure against --page, ungated.
   * The result is decoration only. The caller MUST mark it `aria-hidden="true"`
     or give it `alt=""`, give it explicit width/height (no layout shift), keep
     it static (no animation), and never put information in it.
@@ -35,6 +44,9 @@ Subcommands (each prints exactly ONE JSON object on stdout; logs go to stderr):
   svg       tiny vector motif (grain | grid | rings): inline HTML, jsx or CSS data-URI
   ai        optional: baoyu-image-gen -> cover-crop -> same <=max-kb WebP
   compress  user-supplied image -> cover-crop -> same <=max-kb WebP
+
+Exit codes: 0 ok, 1 error (bad input, inverted palette, budget), 2 usage,
+3 ai unavailable (fall back to `plate`), 4 plate too faint (nothing written).
 
 Requires Python 3.9+, numpy and Pillow (with WebP). `tokens` and `svg` run
 without numpy.
@@ -486,9 +498,12 @@ def rel_luminance(rgb: Sequence[float]) -> float:
 
 def _roles(palette: List[str]):
     """(grounds, accent, accent_hi, light). The last one or two colours are the
-    accent; the rest are grounds, sorted so grounds[0] is the page ground: the
-    darkest on a dark palette, the LIGHTEST when the grounds' mean luminance is
-    above LIGHT_THRESHOLD (a cream page). grounds[-1] is then always the ground
+    accent; the rest are grounds. grounds[0] is the FIRST ground as given: the
+    page surface and the plate's base, never re-sorted. The tone follows it:
+    light when its relative luminance is above LIGHT_THRESHOLD (a cream page).
+    The remaining (structure) grounds must sit on the visible side of the page
+    - no darker on a dark page, no lighter on a light one - or the palette is
+    refused. They are ordered away from the page, so grounds[-1] is the ground
     that contrasts most with the base (used for hairlines)."""
     cols = [_rgb(c) for c in palette]
     if len(cols) >= 4:
@@ -497,10 +512,21 @@ def _roles(palette: List[str]):
         grounds, accent, accent_hi = cols[:2], cols[2], cols[2]
     else:
         grounds, accent, accent_hi = cols[:1], cols[1], cols[1]
-    lums = [float(rel_luminance(g)) for g in grounds]
-    light = bool(sum(lums) / len(lums) > LIGHT_THRESHOLD)
-    order = sorted(range(len(grounds)), key=lambda i: lums[i], reverse=light)
-    return [grounds[i] for i in order], accent, accent_hi, light
+    page = grounds[0]
+    lp = float(rel_luminance(page))
+    light = lp > LIGHT_THRESHOLD
+    for g in grounds[1:]:
+        lg = float(rel_luminance(g))
+        if (lg > lp) if light else (lg < lp):
+            side = "lighter" if light else "darker"
+            msg = (f"ground '{to_hex(g)}' is {side} than the page ground '{to_hex(page)}' "
+                   f"\u2014 the plate would be {side} than the page and invisible; "
+                   f"drop it or put the page surface first")
+            raise CliError(msg, payload={"error": "inverted_palette", "message": msg,
+                                         "page": to_hex(page), "ground": to_hex(g),
+                                         "tone": "light" if light else "dark"})
+    rest = sorted(grounds[1:], key=lambda g: float(rel_luminance(g)), reverse=light)
+    return [page] + rest, accent, accent_hi, light
 
 
 def _focus_dist(width: int, height: int, focus: Tuple[float, float]):
@@ -661,8 +687,68 @@ def render_plate(palette: List[str], style: str, seed: int, width: int, height: 
 
 
 def palette_tone(palette: List[str]) -> str:
-    """'light' when the grounds' mean luminance exceeds LIGHT_THRESHOLD."""
+    """'light' when the page ground's luminance exceeds LIGHT_THRESHOLD."""
     return "light" if _roles(palette)[3] else "dark"
+
+
+# --------------------------------------------------------------------------
+# Visibility: is the plate perceptible on the page it sits on?
+# --------------------------------------------------------------------------
+
+VIS_RATIOS = (1.1, 1.3)   # the two perceptibility thresholds (WCAG contrast)
+VIS_WRONG_SIDE = 1.02     # ignore 8-bit / codec jitter when counting wrong-side pixels
+DEFAULT_MIN_VISIBLE = (8.0, 1.0)
+
+
+def _lum_pixels(pixels):
+    a = np.asarray(pixels)[..., :3].astype(np.float64) / 255.0
+    lin = np.where(a <= 0.04045, a / 12.92, ((a + 0.055) / 1.055) ** 2.4)
+    return lin @ np.array([0.2126, 0.7152, 0.0722])
+
+
+def visibility(pixels, page_rgb, light: Optional[bool] = None) -> dict:
+    """How much of an image a reader can tell apart from the page under it.
+
+    pixels: HxWx3 (or x4) uint8 sRGB. page_rgb: hex string or sRGB 0..1 triple.
+    Returns percentages (0..100, 2 dp) of pixels whose WCAG contrast against
+    the page is >= 1.1:1 (`ge_1_1`) and >= 1.3:1 (`ge_1_3`), plus the share on
+    the wrong side of the page: `darker_than_page` on a dark page, or
+    `lighter_than_page` on a light one (light defaults to page luminance > 0.5).
+    Wrong-side pixels count only beyond VIS_WRONG_SIDE, so codec jitter around
+    the base does not."""
+    need_raster()
+    page = parse_color(page_rgb) if isinstance(page_rgb, str) else tuple(page_rgb)
+    lp = float(rel_luminance(page))
+    if light is None:
+        light = lp > LIGHT_THRESHOLD
+    lum = _lum_pixels(pixels)
+    ratio = (np.maximum(lum, lp) + 0.05) / (np.minimum(lum, lp) + 0.05)
+    n = max(1, lum.size)
+
+    def pct(mask) -> float:
+        return round(100.0 * float(np.count_nonzero(mask)) / n, 2)
+
+    wrong = ((lum > lp) if light else (lum < lp)) & (ratio >= VIS_WRONG_SIDE)
+    return {"ge_1_1": pct(ratio >= VIS_RATIOS[0]), "ge_1_3": pct(ratio >= VIS_RATIOS[1]),
+            ("lighter_than_page" if light else "darker_than_page"): pct(wrong)}
+
+
+def _decode(data: bytes):
+    with Image.open(io.BytesIO(data)) as im:
+        return np.asarray(im.convert("RGB"))
+
+
+def gate_visibility(vis: dict, min_visible: Tuple[float, float]) -> None:
+    """Raise exit 4 when the plate is too faint to be worth shipping."""
+    a, b = min_visible
+    if vis["ge_1_1"] >= a and vis["ge_1_3"] >= b:
+        return
+    msg = (f"plate too faint: {vis['ge_1_1']}% of pixels reach 1.1:1 against the page "
+           f"(need {a:g}%) and {vis['ge_1_3']}% reach 1.3:1 (need {b:g}%); nothing written. "
+           f"Base it on the page ground, raise --intensity, use --style warp, try `ai`, "
+           f"or pass --allow-faint")
+    raise CliError(msg, code=4, payload={"error": "too_faint", "message": msg,
+                                         "visibility": vis, "minVisible": [a, b]})
 
 
 # --------------------------------------------------------------------------
@@ -738,11 +824,21 @@ def _now() -> str:
     return _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds")
 
 
-def _finish(img, out: str, max_kb: float) -> dict:
+def _finish(img, out: str, max_kb: float, page: Optional[str] = None,
+            min_visible: Optional[Tuple[float, float]] = None) -> dict:
+    """Encode under budget; with `page`, measure visibility on the DECODED
+    WebP (the pixels that ship) and, with `min_visible`, refuse before
+    anything is written."""
     data, quality, blur = fit_webp(img, int(max_kb * 1024))
+    vis = visibility(_decode(data), page) if page else None
+    if vis is not None and min_visible is not None:
+        gate_visibility(vis, min_visible)
     write_atomic(Path(out), data)
-    return {"out": out, "bytes": len(data), "width": img.size[0], "height": img.size[1],
-            "quality": quality, "blur": blur, "sha256": hashlib.sha256(data).hexdigest()}
+    res = {"out": out, "bytes": len(data), "width": img.size[0], "height": img.size[1],
+           "quality": quality, "blur": blur, "sha256": hashlib.sha256(data).hexdigest()}
+    if vis is not None:
+        res.update(page=page, visibility=vis)
+    return res
 
 
 # --------------------------------------------------------------------------
@@ -776,6 +872,20 @@ def parse_focus(s: str) -> Tuple[float, float]:
     return x, y
 
 
+def parse_min_visible(s: str) -> Tuple[float, float]:
+    try:
+        a, b = (float(t) for t in s.split(","))
+    except ValueError:
+        raise CliError(f"--min-visible must be A,B percentages (e.g. 8,1), got {s!r}")
+    if not all(math.isfinite(v) and 0 <= v <= 100 for v in (a, b)):
+        raise CliError("--min-visible values must be percentages within 0..100")
+    return a, b
+
+
+def parse_page(s: Optional[str]) -> Optional[str]:
+    return to_hex(parse_color(s)) if s else None
+
+
 def parse_map(s: str) -> Dict[str, str]:
     out: Dict[str, str] = {}
     for item in [t for t in s.split(",") if t.strip()]:
@@ -794,13 +904,19 @@ def load_palette(tokens: Optional[str], palette: Optional[str]) -> List[str]:
     if tokens:
         try:
             data = json.loads(Path(tokens).read_text(encoding="utf-8"))
-            cols = list(data["palette"].values())
+            pal = data["palette"]
+            keys = list(pal)
+            # The `ground` role is the page surface: it leads whatever the map order.
+            if "ground" in pal:
+                keys = ["ground"] + [k for k in keys if k != "ground"]
+            cols = [pal[k] for k in keys]
         except (OSError, ValueError, KeyError, AttributeError) as exc:
             raise CliError(f"cannot read a palette from {tokens}: {exc}")
     else:
         cols = [c.strip() for c in (palette or "").split(",") if c.strip()]
     if not 2 <= len(cols) <= 6:
-        raise CliError(f"palette needs 2-6 colours (dark -> light, accent last), got {len(cols)}")
+        raise CliError(f"palette needs 2-6 colours (page ground first, accent last), "
+                       f"got {len(cols)}")
     return [to_hex(parse_color(c)) for c in cols]
 
 
@@ -823,16 +939,23 @@ def cmd_plate(a, argv) -> dict:
     if not 0.0 <= a.intensity <= 1.0:
         raise CliError("--intensity must be within 0..1")
     check_max_kb(a.max_kb)
+    min_visible = parse_min_visible(a.min_visible)
     pixels = render_plate(palette, a.style, a.seed, w, h, a.intensity, focus)
-    res = _finish(Image.fromarray(pixels), a.out, a.max_kb)
+    # The page is the first ground: the plate's base and the surface it sits on.
+    res = _finish(Image.fromarray(pixels), a.out, a.max_kb, page=palette[0],
+                  min_visible=None if a.allow_faint else min_visible)
     out = {**res, "seed": a.seed, "style": a.style, "palette": palette,
            "tone": palette_tone(palette)}
     append_ledger(a.ledger, {"ts": _now(), "tool": TOOL, "mode": "plate", "style": a.style,
                              "seed": a.seed, "size": f"{w}x{h}", "palette": palette,
                              "intensity": a.intensity, "focus": list(focus), "out": a.out,
                              "bytes": res["bytes"], "quality": res["quality"],
-                             "blur": res["blur"], "sha256": res["sha256"], "argv": argv})
-    log(f"{a.style} seed={a.seed} -> {a.out} {res['bytes']} B q={res['quality']} blur={res['blur']}")
+                             "blur": res["blur"], "sha256": res["sha256"],
+                             "page": res["page"], "visibility": res["visibility"],
+                             "allowFaint": bool(a.allow_faint), "argv": argv})
+    v = res["visibility"]
+    log(f"{a.style} seed={a.seed} -> {a.out} {res['bytes']} B q={res['quality']} "
+        f"blur={res['blur']} visible {v['ge_1_1']}%>=1.1 {v['ge_1_3']}%>=1.3")
     return out
 
 
@@ -986,6 +1109,7 @@ def cmd_ai(a, argv) -> dict:
     need_raster()
     w, h = parse_size(a.size)
     check_max_kb(a.max_kb)
+    page = parse_page(a.page)
     if not BUN.exists():
         raise _ai_unavailable("bun not found at ~/.bun/bin/bun")
     if not IMAGE_GEN.exists():
@@ -1015,7 +1139,7 @@ def cmd_ai(a, argv) -> dict:
                 img = cover_crop(src, w, h)
         except OSError:
             raise _ai_unavailable("image generator wrote an unreadable file")
-        res = _finish(img, a.out, a.max_kb)
+        res = _finish(img, a.out, a.max_kb, page=page)
         kept = None
         if a.keep_raw:
             kept = str(Path(a.out).with_suffix(".raw.png"))
@@ -1028,27 +1152,34 @@ def cmd_ai(a, argv) -> dict:
     append_ledger(a.ledger, {"ts": _now(), "tool": TOOL, "mode": "ai", "provider": a.provider,
                              "prompt": prompt, "size": f"{w}x{h}", "out": a.out,
                              "bytes": res["bytes"], "quality": res["quality"],
-                             "blur": res["blur"], "sha256": res["sha256"], "argv": argv})
+                             "blur": res["blur"], "sha256": res["sha256"],
+                             **_vis_fields(res), "argv": argv})
     return out
+
+
+def _vis_fields(res: dict) -> dict:
+    """Ledger fields for an ungated visibility report (only when --page was given)."""
+    return {"page": res["page"], "visibility": res["visibility"]} if "visibility" in res else {}
 
 
 def cmd_compress(a, argv) -> dict:
     need_raster()
     w, h = parse_size(a.size)
     check_max_kb(a.max_kb)
+    page = parse_page(a.page)
     try:
         source = Path(a.inp).read_bytes()
         with Image.open(io.BytesIO(source)) as src:
             img = cover_crop(src, w, h)
     except OSError as exc:
         raise CliError(f"cannot open image {a.inp}: {exc}")
-    res = _finish(img, a.out, a.max_kb)
+    res = _finish(img, a.out, a.max_kb, page=page)
     append_ledger(a.ledger, {"ts": _now(), "tool": TOOL, "mode": "compress",
                              "source": Path(a.inp).name,
                              "sourceSha256": hashlib.sha256(source).hexdigest(),
                              "size": f"{w}x{h}", "out": a.out, "bytes": res["bytes"],
                              "quality": res["quality"], "blur": res["blur"],
-                             "sha256": res["sha256"], "argv": argv})
+                             "sha256": res["sha256"], **_vis_fields(res), "argv": argv})
     log(f"compress {a.inp} -> {a.out} {res['bytes']} B q={res['quality']} blur={res['blur']}")
     return {**res, "in": a.inp}
 
@@ -1075,7 +1206,9 @@ def build_parser() -> argparse.ArgumentParser:
     t.add_argument("--selector", default=":root",
                    help="block to read first (default :root; e.g. '@theme inline'). @media blocks are ignored")
     t.add_argument("--map", required=True,
-                   help="ordered key=--var list: grounds first, accent (and accentHi) last, e.g. "
+                   help="ordered key=--var list: the page ground first (the surface the plate "
+                        "sits on, keyed `ground`), then lighter grounds (darker on a light page), "
+                        "accent (and accentHi) last, e.g. "
                         "ground=--color-bg,ground2=--color-surface,accent=--color-accent")
     t.add_argument("--out", help="also write the JSON to this file")
     t.set_defaults(fn=cmd_tokens)
@@ -1083,14 +1216,17 @@ def build_parser() -> argparse.ArgumentParser:
     pl = sub.add_parser(
         "plate", help="render a raster atmosphere plate to WebP",
         description="Render a decorative plate. Palette rule: the last one or two colours are the "
-                    "accent; the rest are grounds, auto-sorted so the base is the page ground - the "
-                    "darkest ground on a dark palette, the lightest when the grounds' mean luminance "
-                    "is > 0.5 (cream pages). Light palettes get a weaker accent (x0.45) and softer "
-                    "structure (x0.6) so dark text over them keeps contrast.")
+                    "accent; the rest are grounds. The FIRST ground is the page surface and the "
+                    "plate's base; the other grounds must be no darker than it on a dark page (no "
+                    "lighter on a light page, luminance > 0.5) or the palette is refused. Light "
+                    "palettes get a weaker accent (x0.45) and softer structure (x0.6). The encoded "
+                    "plate is measured against the page ground and refused (exit 4, nothing "
+                    "written) when fewer than A%% of pixels reach 1.1:1 or B%% reach 1.3:1 "
+                    "(--min-visible A,B, default 8,1).")
     src = pl.add_mutually_exclusive_group(required=True)
     src.add_argument("--tokens", help="tokens.json from the tokens subcommand")
-    src.add_argument("--palette", help="'#a,#b,#c[,...]' 2-6 colours: grounds then accent last "
-                                       "(accent, accentHi)")
+    src.add_argument("--palette", help="'#page,#b[,...],#accent[,#accentHi]' 2-6 colours: the "
+                                       "page ground first, then structure grounds, accent last")
     pl.add_argument("--style", required=True, choices=STYLES)
     pl.add_argument("--seed", type=int, required=True)
     pl.add_argument("--size", required=True, help="WxH, e.g. 1600x900")
@@ -1098,6 +1234,11 @@ def build_parser() -> argparse.ArgumentParser:
     pl.add_argument("--max-kb", type=float, default=DEFAULT_MAX_KB, help="size ceiling (default 30)")
     pl.add_argument("--intensity", type=float, default=0.6, help="accent strength 0..1 (default 0.6)")
     pl.add_argument("--focus", default="0.75,0.3", help="x,y in 0..1 (default 0.75,0.3)")
+    pl.add_argument("--min-visible", default="8,1", metavar="A,B",
+                    help="refuse (exit 4) unless >= A%% of pixels reach 1.1:1 and >= B%% reach "
+                         "1.3:1 against the page ground (default 8,1)")
+    pl.add_argument("--allow-faint", action="store_true",
+                    help="skip the visibility gate (the measure is still reported)")
     pl.add_argument("--ledger", help="append a JSON line describing this render")
     pl.set_defaults(fn=cmd_plate)
 
@@ -1124,6 +1265,7 @@ def build_parser() -> argparse.ArgumentParser:
     ai.add_argument("--size", required=True, help="WxH")
     ai.add_argument("--out", required=True)
     ai.add_argument("--max-kb", type=float, default=DEFAULT_MAX_KB)
+    ai.add_argument("--page", help="page colour '#hex' to report visibility against (no gate)")
     ai.add_argument("--ledger")
     ai.add_argument("--keep-raw", action="store_true", help="keep the raw PNG next to --out")
     ai.set_defaults(fn=cmd_ai)
@@ -1133,6 +1275,7 @@ def build_parser() -> argparse.ArgumentParser:
     c.add_argument("--out", required=True)
     c.add_argument("--size", required=True, help="WxH")
     c.add_argument("--max-kb", type=float, default=DEFAULT_MAX_KB)
+    c.add_argument("--page", help="page colour '#hex' to report visibility against (no gate)")
     c.add_argument("--ledger", help="append a JSON line describing this compression")
     c.set_defaults(fn=cmd_compress)
     return p

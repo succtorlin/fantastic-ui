@@ -34,6 +34,9 @@ from PIL import Image  # noqa: E402
 import gen_atmosphere as G  # noqa: E402
 
 RRG_PALETTE = ["#040302", "#0a0907", "#151311", "#f9a216", "#ea8b00"]
+# The real app: the page is #0a0907 and #040302 is a recessed well, darker.
+PAGE_FIRST_WITH_WELL = ["#0a0907", "#040302", "#151311", "#f9a216", "#ea8b00"]
+PAGE_PALETTE = ["#0a0907", "#151311", "#26231d", "#f9a216", "#ea8b00"]
 COOL_PALETTE = ["#05080d", "#0b1220", "#16233a", "#3b82f6", "#93c5fd"]
 LIGHT_PALETTE = ["#f5efe6", "#e9e0d2", "#d8cbb6", "#b5562b", "#8f3d1c"]
 
@@ -179,8 +182,10 @@ def test_every_style_fits_30kb_at_1600x900():
         for style in G.STYLES:
             p = Path(tmp) / f"{style}.webp"
             rc, data, _ = run_cli("plate", "--palette", pal, "--style", style, "--seed", "7",
-                                  "--size", "1600x900", "--out", str(p), check=True)
+                                  "--size", "1600x900", "--out", str(p), "--allow-faint",
+                                  check=True)
             size = p.stat().st_size
+            assert set(data["visibility"]) == {"ge_1_1", "ge_1_3", "darker_than_page"}
             assert size <= 30 * 1024, (style, size)
             assert data["bytes"] == size and data["width"] == 1600 and data["height"] == 900
             with Image.open(p) as im:
@@ -251,7 +256,7 @@ def _check_palette_fidelity(palette, style):
     with tempfile.TemporaryDirectory() as tmp:
         p = Path(tmp) / "p.webp"
         run_cli("plate", "--palette", ",".join(palette), "--style", style, "--seed", "4",
-                "--size", "800x450", "--out", str(p), check=True)
+                "--size", "800x450", "--out", str(p), "--allow-faint", check=True)
         with Image.open(p) as im:
             px = _sample(np.asarray(im.convert("RGB")))
     dist = _hull_distance(px, pal)
@@ -282,15 +287,18 @@ def _luminance(arr):
 def test_light_palette_stays_light_and_small():
     assert G.palette_tone(LIGHT_PALETTE) == "light"
     assert G.palette_tone(RRG_PALETTE) == "dark"
-    # base = page ground (lightest) even when grounds are listed dark -> light
-    grounds, _, _, light = G._roles(["#d8cbb6", "#e9e0d2", "#f5efe6", "#b5562b", "#8f3d1c"])
+    # base = the FIRST ground as listed (the page); structure is ordered away from it
+    grounds, _, _, light = G._roles(["#f5efe6", "#d8cbb6", "#e9e0d2", "#b5562b", "#8f3d1c"])
     assert light and G.to_hex(grounds[0]) == "#f5efe6"
+    assert [G.to_hex(g) for g in grounds[1:]] == ["#e9e0d2", "#d8cbb6"]
     with tempfile.TemporaryDirectory() as tmp:
         for style in G.STYLES:
             p = Path(tmp) / f"{style}.webp"
             rc, data, _ = run_cli("plate", "--palette", ",".join(LIGHT_PALETTE), "--style", style,
-                                  "--seed", "7", "--size", "1600x900", "--out", str(p), check=True)
+                                  "--seed", "7", "--size", "1600x900", "--out", str(p),
+                                  "--allow-faint", check=True)
             assert data["tone"] == "light"
+            assert "lighter_than_page" in data["visibility"]
             assert p.stat().st_size <= 30 * 1024, (style, p.stat().st_size)
             with Image.open(p) as im:
                 lum = _luminance(np.asarray(im.convert("RGB")))
@@ -305,15 +313,19 @@ def test_plate_ledger_line():
         ledger = Path(tmp) / "deep" / "dir" / "ledger.jsonl"
         out = Path(tmp) / "x.webp"
         for _ in range(2):
-            run_cli("plate", "--palette", ",".join(RRG_PALETTE), "--style", "rings", "--seed", "2",
-                    "--size", "320x180", "--out", str(out), "--ledger", str(ledger), check=True)
+            rc, data, _ = run_cli("plate", "--palette", ",".join(PAGE_PALETTE), "--style", "warp",
+                                  "--seed", "2", "--size", "320x180", "--intensity", "1",
+                                  "--out", str(out), "--ledger", str(ledger), check=True)
         lines = ledger.read_text().splitlines()
         assert len(lines) == 2
         rec = json.loads(lines[0])
         for key in ("ts", "tool", "mode", "style", "seed", "size", "palette", "intensity",
-                    "focus", "out", "bytes", "quality", "blur", "sha256", "argv"):
+                    "focus", "out", "bytes", "quality", "blur", "sha256", "page", "visibility",
+                    "allowFaint", "argv"):
             assert key in rec, key
         assert rec["mode"] == "plate" and rec["tool"] == "gen_atmosphere"
+        assert rec["page"] == "#0a0907" and rec["allowFaint"] is False
+        assert rec["visibility"] == data["visibility"] and data["page"] == "#0a0907"
 
 
 def test_plate_rejects_bad_palette_and_size():
@@ -323,6 +335,111 @@ def test_plate_rejects_bad_palette_and_size():
     rc, data, _ = run_cli("plate", "--palette", "#000,#fff", "--style", "warp", "--seed", "1",
                           "--size", "huge", "--out", "/tmp/never.webp")
     assert rc != 0 and "size" in data["message"]
+
+
+# ---------------------------------------------------------------- page ground + visibility
+
+
+def test_page_ground_is_the_first_ground_not_the_darkest():
+    grounds, _, _, light = G._roles(PAGE_PALETTE)
+    assert not light and G.to_hex(grounds[0]) == "#0a0907"
+    px = G.render_plate(PAGE_PALETTE, "warp", 3, 320, 180, 1.0)
+    vis = G.visibility(px, "#0a0907")
+    assert vis["darker_than_page"] == 0.0, vis   # nothing falls below the page
+    # structure grounds are ordered away from the page, whatever the listed order
+    grounds, _, _, _ = G._roles(["#0a0907", "#26231d", "#151311", "#f9a216", "#ea8b00"])
+    assert [G.to_hex(g) for g in grounds] == ["#0a0907", "#151311", "#26231d"]
+
+
+def test_ground_darker_than_page_is_refused():
+    try:
+        G._roles(PAGE_FIRST_WITH_WELL)
+    except G.CliError as exc:
+        assert "'#040302' is darker than the page ground '#0a0907'" in str(exc), exc
+        assert exc.payload["error"] == "inverted_palette"
+    else:
+        raise AssertionError("a ground darker than the page must be refused")
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / "x.webp"
+        rc, data, err = run_cli("plate", "--palette", ",".join(PAGE_FIRST_WITH_WELL),
+                                "--style", "warp", "--seed", "1", "--size", "320x180",
+                                "--out", str(out), "--allow-faint")
+        assert rc == 1 and data["error"] == "inverted_palette", data
+        assert data["page"] == "#0a0907" and data["ground"] == "#040302"
+        assert "invisible" in data["message"] and not out.exists()
+
+
+def test_light_palette_refuses_a_lighter_ground_and_passes_the_gate():
+    try:
+        G._roles(["#e9e0d2", "#f5efe6", "#b5562b", "#8f3d1c"])
+    except G.CliError as exc:
+        assert "lighter than the page ground '#e9e0d2'" in str(exc)
+    else:
+        raise AssertionError("a ground lighter than a light page must be refused")
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / "light.webp"
+        rc, data, _ = run_cli("plate", "--palette", ",".join(LIGHT_PALETTE), "--style", "warp",
+                              "--seed", "7", "--size", "1600x900", "--intensity", "1",
+                              "--out", str(out), check=True)
+        assert data["tone"] == "light" and data["page"] == "#f5efe6"
+        vis = data["visibility"]
+        assert vis["ge_1_1"] >= 8 and vis["ge_1_3"] >= 1, vis
+        assert vis["lighter_than_page"] == 0.0 and "darker_than_page" not in vis
+
+
+def test_tokens_ground_role_leads_the_palette():
+    with tempfile.TemporaryDirectory() as tmp:
+        tok = Path(tmp) / "tokens.json"
+        tok.write_text(json.dumps({"palette": {"ground2": "#151311", "ground": "#0a0907",
+                                               "accent": "#f9a216"}}))
+        assert G.load_palette(str(tok), None) == ["#0a0907", "#151311", "#f9a216"]
+
+
+def test_visibility_numbers_on_a_synthetic_image():
+    page = "#0a0907"
+    img = np.zeros((10, 10, 3), dtype=np.uint8)
+    img[:] = (10, 9, 7)                   # 60 px: the page itself (1.0:1)
+    img[0:2] = (40, 38, 34)               # 20 px: ~1.36:1, clears both thresholds
+    img[2:3] = (30, 28, 25)               # 10 px: ~1.2:1, clears 1.1 only
+    img[3:4] = (0, 0, 0)                  # 10 px: darker than the page (~1.06:1)
+    vis = G.visibility(img, page)
+    assert vis == {"ge_1_1": 30.0, "ge_1_3": 20.0, "darker_than_page": 10.0}, vis
+    # sRGB triples work too, and a light page reports the lighter side
+    assert G.visibility(img, G.parse_color(page)) == vis
+    light = np.full((4, 4, 3), 230, dtype=np.uint8)
+    light[0] = 255
+    lv = G.visibility(light, "#e6e6e6")
+    assert lv["lighter_than_page"] == 25.0 and lv["ge_1_1"] == 25.0 and lv["ge_1_3"] == 0.0
+
+
+def test_min_visible_fails_with_exit_4_and_allow_faint_passes():
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / "faint.webp"
+        args = ["plate", "--palette", ",".join(PAGE_PALETTE), "--style", "contour", "--seed", "3",
+                "--size", "1600x180", "--intensity", "0.3", "--out", str(out)]
+        rc, data, err = run_cli(*args)
+        assert rc == 4 and data["error"] == "too_faint", data
+        assert data["minVisible"] == [8, 1]
+        vis = data["visibility"]
+        assert vis["ge_1_1"] < 8 or vis["ge_1_3"] < 1
+        assert f"{vis['ge_1_1']}%" in data["message"] and "nothing written" in data["message"]
+        assert not out.exists() and not [f for f in os.listdir(tmp) if f.startswith(".gen_")]
+        # a stricter gate fails a plate the default passes
+        ok = Path(tmp) / "ok.webp"
+        strong = ["plate", "--palette", ",".join(PAGE_PALETTE), "--style", "warp", "--seed", "7",
+                  "--size", "960x240", "--intensity", "1", "--out", str(ok)]
+        rc, data, _ = run_cli(*strong, check=True)
+        assert data["visibility"]["ge_1_1"] >= 8 and data["visibility"]["ge_1_3"] >= 1
+        ok.unlink()
+        rc, data, _ = run_cli(*strong, "--min-visible", "90,50")
+        assert rc == 4 and data["minVisible"] == [90, 50] and not ok.exists()
+        # --allow-faint writes it and still reports the measure
+        rc, data, _ = run_cli(*args, "--allow-faint", check=True)
+        assert out.exists() and data["visibility"] == vis
+        rc, data, _ = run_cli(*args, "--min-visible", "0,0", check=True)
+        for bad in ("8", "x,1", "8,101", "nan,1"):
+            rc, data, _ = run_cli(*args, "--min-visible", bad)
+            assert rc == 1 and "--min-visible" in data["message"], bad
 
 
 # ---------------------------------------------------------------- svg
@@ -460,7 +577,7 @@ def test_ai_success_path_crops_compresses_and_cleans_up():
                 mock.patch.object(G.subprocess, "run", side_effect=fake_run) as run:
             rc, data, _ = run_main(["ai", "--prompt", "dusk", "--provider", "google",
                                     "--size", "1200x800", "--out", str(out),
-                                    "--ledger", str(ledger)])
+                                    "--page", "#0a0907", "--ledger", str(ledger)])
         assert rc == 0, data
         cmd = run.call_args[0][0]
         assert cmd[cmd.index("--ar") + 1] == "3:2" and "--model" not in cmd
@@ -471,6 +588,9 @@ def test_ai_success_path_crops_compresses_and_cleans_up():
         assert out.stat().st_size <= 30 * 1024
         rec = json.loads(ledger.read_text().splitlines()[0])
         assert rec["mode"] == "ai" and rec["provider"] == "google" and "prompt" in rec
+        # a gradient over a near-black page: visible, reported, never gated
+        assert data["page"] == "#0a0907" and data["visibility"]["ge_1_3"] > 50
+        assert rec["visibility"] == data["visibility"] and rec["page"] == "#0a0907"
 
 
 def test_nearest_ratio():
@@ -494,6 +614,21 @@ def test_compress_cover_crop():
         with Image.open(out) as im:
             assert im.size == (640, 640)
         assert data["bytes"] == out.stat().st_size <= 30 * 1024
+        assert "visibility" not in data          # no --page, no measure
+
+
+def test_compress_reports_visibility_against_page_without_gating():
+    with tempfile.TemporaryDirectory() as tmp:
+        src = Path(tmp) / "flat.png"
+        Image.fromarray(np.full((200, 300, 3), (10, 9, 7), dtype=np.uint8)).save(src)
+        out = Path(tmp) / "out.webp"
+        ledger = Path(tmp) / "l.jsonl"
+        rc, data, _ = run_cli("compress", "--in", str(src), "--out", str(out), "--size", "300x200",
+                              "--page", "#0a0907", "--ledger", str(ledger), check=True)
+        assert out.exists() and data["page"] == "#0a0907"
+        assert data["visibility"]["ge_1_1"] == 0.0     # invisible, but compress never gates
+        rec = json.loads(ledger.read_text().splitlines()[0])
+        assert rec["visibility"] == data["visibility"] and rec["page"] == "#0a0907"
 
 
 def test_compress_ledger_line():

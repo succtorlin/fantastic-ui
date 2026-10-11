@@ -262,9 +262,11 @@ the text colour, and gate on the **10th-percentile** pixel, not the median
 `contrast-report.mjs`). Repeat per theme and at 320 px and 1440 px —
 `background-size: cover` crops differently at each.
 
-- Fix a failure in the scrim's `color-mix` percentage or by re-rendering the
-  plate at a lower `--intensity` — never with text opacity, text-shadow halos
-  or a lighter-than-token ink.
+- Fix a failure in the scrim's `color-mix` percentage, by masking the scrim
+  to the text column, or by moving `--focus` away from the copy — never with
+  text opacity, text-shadow halos or a lighter-than-token ink. Every such fix
+  makes the plate fainter, so re-run the plate's visibility gate
+  ([ai-atmosphere.md](ai-atmosphere.md) §7) after it.
 - **Decorative media is `aria-hidden`.** Plates, svg texture, watermarks and
   atmospheric photos take `aria-hidden="true"` (and `alt=""` on an `<img>`);
   they carry no information, so they need no text alternative. If removing an

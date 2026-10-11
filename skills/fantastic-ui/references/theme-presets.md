@@ -494,7 +494,7 @@ white on amber is 2.13:1. Amber buttons take `--on-accent` (8.63:1). The
 constant across every preset here is that **white is never the accent's
 partner**, on any ground.
 
-**Imagery.** Cut-out products are the user's own via `compress`, never generated; behind the content column, `plate --style warp` in near-black and amber at `--intensity` ≤ 0.25.
+**Imagery.** Cut-out products are the user's own via `compress`, never generated; behind the content column, `plate --style warp` in near-black and amber at `--intensity` ≤ 0.25 (text spans the plate), and it still passes the visibility gate ([ai-atmosphere.md](ai-atmosphere.md) §7).
 
 ### Component grammar
 

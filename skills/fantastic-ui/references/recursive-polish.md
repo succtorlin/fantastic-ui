@@ -121,7 +121,9 @@ Per batch:
 4. **Imagery slot check** for each route-level surface (rows typed `route`):
    decide its one slot — header strip or a state surface — or record
    `none: <reason>`. Generate per [ai-atmosphere.md](ai-atmosphere.md), view
-   the result, measure text over it on real pixels. Every asset — `plate`,
+   the result, measure text over it on real pixels, and measure the plate
+   itself: after the scrim, ≥8% of the slot ≥1.1:1 and ≥1% ≥1.3:1 against
+   the page (a faint plate fails as surely as unreadable text). Every asset — `plate`,
    `ai`, `compress` or `svg` — gets a line in the imagery ledger (`--ledger`
    on each subcommand). Then the **panel state check**: every panel and
    subpanel in the batch, at every nesting level, has its empty and

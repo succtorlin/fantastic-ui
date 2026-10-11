@@ -51,7 +51,7 @@ Explore the bundled [design foundations](skills/fantastic-ui/references/design-e
 
 ## Imagery, generated from the tokens
 
-Every page gets an imagery decision, announced with the brief: *"Imagery: warp plate behind the page header, inherited by every panel's empty states (gen_atmosphere, seed 7)"*, or `none` with a stated reason. In a product, each route has one plate, and every panel and subpanel inherits it in its empty and first-run states through the shared empty-state primitive; populated panels never carry imagery. The default is a **plate** rendered by `scripts/gen_atmosphere.py` from the page's own palette tokens: local, keyless, deterministic and ≤30 KB WebP. Zero-byte SVG texture comes next. AI imagery is used only for photographic slots a preset needs, and it falls back to a plate when no provider is available. Plates are atmosphere only. They never show UI, text, people, logos or fake data, and they never sit behind data (the one carve-out is big-type marketing stats, under the scrim and after the real-pixel gate). They are static and `aria-hidden`, they sit under a token `color-mix()` scrim, and text over them is contrast-checked on real screenshot pixels. Procedure: [ai-atmosphere.md](skills/fantastic-ui/references/ai-atmosphere.md).
+Every page gets an imagery decision, announced with the brief: *"Imagery: warp plate behind the page header, inherited by every panel's empty states (gen_atmosphere, seed 7)"*, or `none` with a stated reason. In a product, each route has one plate, and every panel and subpanel inherits it in its empty and first-run states through the shared empty-state primitive; populated panels never carry imagery. The default is a **plate** rendered by `scripts/gen_atmosphere.py` from the page's own palette tokens: local, keyless, deterministic and ≤30 KB WebP. Zero-byte SVG texture comes next. AI imagery is used only for photographic slots a preset needs, and it falls back to a plate when no provider is available. Plates are atmosphere only. They never show UI, text, people, logos or fake data, and they never sit behind data (the one carve-out is big-type marketing stats, under the scrim and after the real-pixel gate). They are static and `aria-hidden`, they sit under a token `color-mix()` scrim masked to the text column, and both directions are checked on real screenshot pixels: text over a plate keeps its contrast, and the plate stays visible (≥8% of the slot ≥1.1:1 and ≥1% ≥1.3:1 against the page). The generator bases every plate on the page ground and refuses one too faint to see. Procedure: [ai-atmosphere.md](skills/fantastic-ui/references/ai-atmosphere.md).
 
 ## The mechanics layer
 
@@ -184,7 +184,7 @@ skills/fantastic-ui/
     ├── canvas-hero.md              # annotated live-canvas hero, sparklines, scroll reveals —
     │                               #   with the complete lifecycle contract (DPR / visibility / reduced-motion / cleanup)
     ├── ai-atmosphere.md            # imagery procedure: slots per surface, plate → svg → ai → compress,
-    │                               #   markup contract, token scrim, real-pixel contrast check
+    │                               #   markup contract, masked token scrim, real-pixel text + visibility gates
     ├── product-surfaces.md         # retrofit procedure for app pages/panels/subpanels: audit → tokens →
     │                               #   primitives → migration, panel anatomy, nesting depth, state design
     ├── theme-presets.md            # eleven named directions with contrast-validated token blocks and

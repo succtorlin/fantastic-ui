@@ -335,7 +335,8 @@ make the whole page feel alive without any animation library.
 from the tokens* by `scripts/gen_atmosphere.py`, never chosen from stock, and
 never shows UI, text, people, logos or fake data. Plates follow
 [the plate rule](references/ai-atmosphere.md#the-plate-rule): static,
-`aria-hidden`, ≤30 KB, never behind data. Every page's imagery decision is
+`aria-hidden`, ≤30 KB, never behind data — and visible: a plate the reader
+cannot see is a failure, not a safe default. Every page's imagery decision is
 the brief line's imagery clause.
 
 ### 4. Page rhythm — dense, alternating, specific
@@ -587,6 +588,8 @@ Run through this before calling the page done:
 - [ ] Every raster ≤ 30 KB WebP, `aria-hidden`, explicit dimensions, static;
       every asset (`plate`, `ai`, `compress`, `svg`) has an imagery-ledger line
 - [ ] Text over any plate passes contrast measured on real pixels
+- [ ] Plates are visible: ≥8% of the slot ≥1.1:1 and ≥1% ≥1.3:1 against the
+      page after the scrim, measured on real pixels
 - [ ] Every panel/subpanel empty and first-run state inherits the route's
       plate (or svg texture); populated panels carry none
 - [ ] Hero shows the product *running*, not a picture of it
@@ -634,8 +637,9 @@ Additional gates when the work touched product surfaces:
 - [references/visual-reference-analysis.md](references/visual-reference-analysis.md)
   — image/typography analysis, observed vs. inferred. Read at Step 0b.
 - [references/ai-atmosphere.md](references/ai-atmosphere.md) — the canonical
-  plate rule, slots, tool order (`plate` → `svg` → `ai` → `compress`), scrim,
-  real-pixel contrast. Read when writing the imagery clause and before any asset.
+  plate rule, slots, tool order (`plate` → `svg` → `ai` → `compress`), masked
+  scrim, real-pixel text and visibility gates. Read when writing the imagery
+  clause and before any asset.
 - [references/css-architecture.md](references/css-architecture.md) — token
   system, scoping, primitives, responsive patterns. Read when writing the stylesheet.
 - [references/ui-mechanics.md](references/ui-mechanics.md) — hierarchy, spacing,
@@ -656,7 +660,8 @@ Additional gates when the work touched product surfaces:
   all eleven presets; not density or "reads as the direction". Read "Verifying
   an applied preset" in theme-presets.md before running it.
 - `scripts/gen_atmosphere.py` — `tokens`, `plate`, `svg` (HTML/JSX/CSS), `ai`,
-  `compress`; ≤30 KB, a ledger line per asset. Run it per ai-atmosphere.md §4.
+  `compress`; ≤30 KB, a ledger line per asset; `plate` refuses a ground darker
+  than the page and a too-faint result (exit 4). Run it per ai-atmosphere.md §4.
 
 ### Consolidated interaction references
 
