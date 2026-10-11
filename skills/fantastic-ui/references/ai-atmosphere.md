@@ -12,7 +12,15 @@ content. It carries no information.
 The generator is `scripts/gen_atmosphere.py` in this skill (Python 3.9,
 numpy + Pillow). Below, `$GEN` stands for its installed path, for example
 `~/.claude/skills/fantastic-ui/scripts/gen_atmosphere.py` (or the Codex
-equivalent under `~/.codex/skills/`).
+equivalent under `~/.codex/skills/`). The other imagery tools:
+
+| File | What it is for |
+|---|---|
+| [plate-slots.md](plate-slots.md) | the named scrim + fit slots (`header-band`, `state-band`, `center-band`, `phone-strip`, `full`, `none`), their exact CSS and `score` calls |
+| [ai-motifs.md](ai-motifs.md) | domain → motif table, the five-part `ai` prompt, consent and cost rules |
+| `scripts/plate-check.js` | measures visibility and text over every plate on the live page (§7) |
+| `templates/tests/` | consumer tests to copy into the project: plate visibility vs the page, banded scrims in the CSS |
+| `evals/plate-visibility/` | a fixture app and an offline run that proves the tools catch the failures below |
 
 ## 1. Decision rule — when, where, how many
 
@@ -59,6 +67,11 @@ here.
   the brief line. For example: "Imagery: none — single dense table route, a
   plate would sit behind numbers." "No API key" is not a reason, because
   `plate` needs no key.
+- **Every imagery claim cites a measured number.** "The plates are visible"
+  or "text is readable" is a claim; it ships with each slot's `ge_1_1` /
+  `ge_1_3` and its worst text ratio, measured on the composited page (§7).
+  Never "reads correctly" from viewing the raw file: one app's plates looked
+  fine as files and measured 0.1–0.4% visible in their headers.
 - **Retrofits and existing token systems:** no preset applies, but the
   recovered brief line still ends with an imagery clause: a slot per route, or
   `none: <reason>`. A plate is a new asset, not a new token, and it introduces
@@ -74,74 +87,69 @@ in one panel.
 to the user's own filter and carries its reset action; a *failed* state
 belongs to semantic red; *loading* is a skeleton; *stale* is a warning; an
 *alarm* empty (an accent rule, "the office is off") must not compete with its
-own signal. All of those stay plain.
+own signal. All of those stay plain. Decide this from an explicit `kind`
+prop on the primitive, never from its label, and trace every branch that
+reaches it first: an error that falls through to the empty copy gets the
+plate too, which makes the bug look designed
+([product-surfaces.md](product-surfaces.md#audit-before-you-plate)).
 
-**A — CSS only (any framework; the default).** The route root names its plate
-once as a custom property; the shared empty-state class paints it from a
-pseudo-element, which is outside the accessibility tree by construction.
-Outside a route the variable is unset and nothing is drawn.
+**A — CSS variable (any framework; the default).** The route root names its
+plate once; the shared primitive renders the host class and one empty
+`aria-hidden` layer for `kind` empty or first-run. With no var() fallback,
+a route without a plate paints nothing.
 
 ```css
-.route-today { --route-plate: url("/plates/today.webp"); }   /* one per route */
-
-.state-empty { position: relative; isolation: isolate; overflow: hidden;
-  padding: var(--sp-5) var(--sp-4); border-radius: var(--radius); }
-.state-empty::before {
-  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  /* Heavier than a header scrim: the state's sentence can sit anywhere. */
-  background-image:
-    linear-gradient(90deg,
-      color-mix(in oklab, var(--ground) 95%, transparent) 0%,
-      color-mix(in oklab, var(--ground) 86%, transparent) 50%,
-      color-mix(in oklab, var(--ground) 50%, transparent) 100%),
-    var(--route-plate, none);
-  background-size: cover; background-position: right center;
-}
-@media (max-width: 767px) {   /* the sentence runs the full width */
-  .state-empty::before { background-image:
-    linear-gradient(90deg,
-      color-mix(in oklab, var(--ground) 94%, transparent),
-      color-mix(in oklab, var(--ground) 88%, transparent)),
-    var(--route-plate, none); }
-}
+.route-today { --plate: url("/plates/today.webp"); --plate-aspect: 5; }  /* one per route */
 ```
 
-On a route without a plate, put an `svg --format css` texture token in
-`--route-plate` instead (§8).
+```html
+<div class="state plate-host plate-host--state">
+  <div class="plate plate--center" aria-hidden="true"></div>   <!-- empty / first-run only -->
+  <p>No trades yet — run the screen to propose one.</p>
+</div>
+```
 
-**B — component context (when the empty state is a component that renders
-its own layer).** Each route wraps its content in a provider naming its
-plate; the shared empty-state component reads it and draws
+Use `plate--state` for left-aligned words and `plate--center` for centred
+words in a tall box; the CSS for both, and their phone rules, is in
+[plate-slots.md](plate-slots.md#3-the-css). On a route without a plate, put
+an `svg --format css` texture token in `--plate` instead (§8).
+
+**B — component context (when the plate URL lives in code).** Each route
+wraps its content in a provider naming its plate; the shared empty-state
+component reads it and draws
 `<div aria-hidden="true" class="plate plate--state" style="--plate: url(…)">`
-only for a true empty, non-alarm state. A route that stays mounted while
-hidden (`display: none`) downloads nothing.
+only for `kind` empty or first-run. A route that stays mounted while hidden
+(`display: none`) downloads nothing.
 
-**Gate.** Measure text over every inherited plate on real pixels (§7), at
-desktop and phone widths, per distinct empty state — not once per route — and
-measure the plate's visibility in the same pass. The state scrim above is
-heavier than a header's; if the plate fails visibility under it, lower the
-100% stop before anything else.
-Worked example: RRGPy's `/agents` desk (`DeskPlateProvider` → `StateBlock`'s
-empty branch) — 75+ empty states across seven routes inherit their route's
-plate; the faintest text over one measured ~7.9:1.
+**Gate.** Measure every inherited plate on the page (§7), at desktop and
+phone widths, per distinct empty state — not once per route. Worked example:
+RRGPy's `/agents` desk (`DeskPlateProvider` → `StateBlock`'s empty branch) —
+75+ empty states across seven routes inherit their route's plate; the
+faintest text over one measured ~7.9:1, and a centred band measured 10.3% /
+3.1% visible.
 
 ## 2. Order of tools
 
 1. **`plate`** — the default. It is local, keyless and deterministic, and it
    uses only palette colours. Use it for atmosphere bands, header strips, state
-   surfaces and covers. It measures itself against the page ground and exits
-   **4** (`{"error":"too_faint"}`, nothing written) when fewer than 8% of its
-   pixels reach 1.1:1 or fewer than 1% reach 1.3:1 (`--min-visible 8,1`;
-   `--allow-faint` skips the gate but still reports the measure).
+   surfaces and covers. It gates itself: with `--slot WxH --scrim NAME --fit
+   cover|band|strip` it measures what that slot will show; without them, the
+   whole file. It exits **4** (`{"error":"too_faint"}`, nothing written) when
+   fewer than 8% of the measured pixels reach 1.1:1 against the page or fewer
+   than 1% reach 1.3:1 (`--min-visible 8,1`; `--allow-faint` skips the gate
+   but still reports the measure). `--seeds 1-8 --pick best` renders each
+   seed, scores each on the slot, and writes the best one that passes (exit 4
+   if none does); the ledger lists every candidate. `--page '#hex'` names the
+   page colour and exits **1** with `{"error":"page_mismatch"}` when the
+   palette's first ground is a different colour (§4).
 
    **Product route headers: render two candidates when an image key exists.**
-   Render an `ai` candidate (prompt recipe in §11, `--page` set to the page
-   ground) and a `plate` candidate for the same slot. Place each under the
-   masked scrim, score both on the text gate and the visibility gate (§7), and
-   ship the better one. Record the winner's prompt in the ledger (`ai` does
-   this itself). With no key, `ai` exits 3; ship the `plate`. Measured on one
-   dark app's headers, `ai` reached 24–31% ≥1.1:1 and 9–19% ≥1.3:1, against
-   16–18% and 3–4% for the best `warp` plate, with grey text still ≥4.5:1.
+   An `ai` candidate (motif and prompt from [ai-motifs.md](ai-motifs.md)) and
+   a `plate` candidate for the same slot. Score both with `score` on the same
+   slot and scrim, ship the better one, and keep the winner's ledger row. With
+   no key, `ai` exits 3; ship the `plate`. Measured on one dark app under
+   `header-band`: AI rasters 19–31% ≥1.1:1 and 8–17% ≥1.3:1, token `warp`
+   14–25% and 3–14%, text still ≥4.5:1.
 2. **`svg`** — zero-byte texture (grain, grid, rings) as an inline
    `<svg aria-hidden="true">` (HTML or JSX) with `currentColor` strokes. Use
    it for small slots, as a second texture on a page that already ships a
@@ -150,11 +158,21 @@ plate; the faintest text over one measured ~7.9:1.
    (daylight interiors, timber, stone, fabric close-ups), and as the second
    candidate for a product route header (above). It wraps the installed
    `baoyu-image-gen` skill and appends "no text/logos/people/UI". It reports
-   visibility against `--page '#hex'` but does not gate; you do, in §7.
-   **Exit 3 with `{"error":"ai_unavailable"}` means fall back to `plate`.**
+   visibility against `--page '#hex'` but does not gate; `score` does.
+   **Exit 3 means any failure** (no key, provider error, network, unusable
+   image): fall back to `plate` for a new slot, and never overwrite an
+   approved image (consent and cost rules: [ai-motifs.md §4](ai-motifs.md#4-consent-and-cost)).
 4. **`compress`** — for images the user supplies, such as their photo library
    or product shots. It brings them to ≤30 KB WebP at the slot's size, and
    reports visibility against `--page` like `ai`.
+5. **`score`** — scores any WebP (a plate, an `ai` render, a user photo) on a
+   named slot, offline, with numpy and Pillow: `--plate FILE --page '#hex'
+   --slot WxH --scrim NAME --fit cover|band|strip [--strip PX] [--text '#hex']`.
+   It prints `{"visibility":{"ge_1_1","ge_1_3"},"text":{…},"pass",
+   "reasons"}` and exits 0 on pass, 4 on a failed gate, 1 or 2 on an error.
+   It predicts the browser numbers; the page measurement (§7) confirms them.
+6. **`batch`** — renders, scores and swaps a whole project's plates from one
+   manifest (§4a). It replaces per-project shell scripts.
 
 There is always an image or a stated reason. Never substitute stock photos,
 icon libraries or illustration packs.
@@ -163,18 +181,19 @@ Plate styles, matched to character:
 
 | `--style` | Reads as | Reach for it on |
 |---|---|---|
-| `warp` | light raking across silk folds of the ground scale — lit folds, not an aura or a glow | atmosphere bands, hero backdrops, warm or editorial presets |
+| `warp` | light raking across silk folds of the ground scale — lit folds, not an aura or a glow | atmosphere bands, hero backdrops, header strips, warm or editorial presets |
 | `grain` | fine palette noise, paper or film | empty and auth states, print-leaning presets |
 | `contour` | topographic linework | technical and engineering directions, report covers |
 | `rings` | concentric instrument face | tall header bands of instrument products, covers |
 
-**Strips under ~200 px tall use `warp` or `ai`.** `contour` and `rings` are
-hairlines (0.75–0.85 px). Scaled into a short strip they reach 1.1:1 on about
-15% of the slot but 1.3:1 on under 1%, so they fail the visibility gate; give
+**Strips under ~200 px tall use `warp` or `ai`,** or `contour`/`rings` with
+`--weight`. `contour` and `rings` are hairlines (0.75–0.85 px). Scaled into a
+short strip they reach 1.1:1 on about 15% of the slot but 1.3:1 on under 1%,
+so they fail the visibility gate. `--weight W` (0.5–4, default 1) scales the
+hairline width and mix; render with `--slot` so the gate decides, or give
 them slots of 300 px and more. Every style concentrates its energy within a
 height or two of `--focus`, so a very wide strip (beyond ~6:1) is mostly calm
-ground: render it at ≤4:1 and let `background-size: cover` crop it, or use
-`ai`.
+ground: render it at ≤5:1 and let the slot's fit crop it, or use `ai`.
 
 ## 3. What imagery may show
 
@@ -206,16 +225,22 @@ ground, ground2, ground3, accent and accentHi, and nothing else.
 
 ```bash
 # 1. Extract tokens. This resolves var() chains and converts hex/rgb/hsl/oklch to sRGB.
-#    `ground` is the PAGE background - the surface the plate sits on - never a darker well.
+#    The first ground is the PAGE; --page-role names it and tokens.json records "page".
 python3 $GEN tokens --css app/globals.css --selector ':root' \
   --map ground=--ground,ground2=--ground-2,ground3=--panel,accent=--accent,accentHi=--accent-hi \
-  --out design/imagery/tokens.json
+  --page-role ground --out design/imagery/tokens.json
 
-# 2. Render with a seed. It is deterministic, it never writes a file over --max-kb,
-#    and it never writes one too faint to see (exit 4, see §2).
-python3 $GEN plate --tokens design/imagery/tokens.json --style warp --seed 7 \
-  --size 1200x240 --intensity 0.9 --focus 0.8,0.5 --max-kb 30 \
-  --out public/img/plate-header.webp --ledger design/imagery/ledger.jsonl
+# 2. Render for the slot it will sit in, best of eight seeds. Deterministic, never over
+#    --max-kb, never too faint for that slot (exit 4). Pass --page = the RENDERED page colour
+#    (getComputedStyle(document.body).backgroundColor), not tokens.json's mapped ground.
+python3 $GEN plate --tokens design/imagery/tokens.json --style warp --seeds 1-8 --pick best \
+  --size 1600x320 --intensity 0.9 --focus 0.70,0.45 --max-kb 30 --page '#0a0907' \
+  --slot 1170x90 --scrim header-band --fit cover \
+  --out public/plates/today.webp --ledger design/imagery/plates.jsonl
+
+# 3. Score it (or an ai render, or a user photo) on every slot it will appear in.
+python3 $GEN score --plate public/plates/today.webp --page '#0a0907' \
+  --slot 375x150 --scrim phone-strip --fit strip --strip 64 --text '#84817e'
 ```
 
 1. **Extract tokens** from the file that owns them. `--map` is positional.
@@ -227,16 +252,28 @@ python3 $GEN plate --tokens design/imagery/tokens.json --style warp --seed 7 \
    plate's base, so every pixel the plate does not decorate *is* that colour.
    Base it on a well darker than the page and most of the plate lands below
    the page — invisible on a dark theme (one shipped app measured 80–84% of
-   each plate darker than its page and 0.1–0.4% perceptible). The generator
-   refuses a palette whose other grounds sit on the wrong side of the first.
-   Map the roles to the project's actual names, such as `--sodium` and
-   `--sodium-hi` for the worked example, or `--ground-0`… for an app shell.
-2. **Render** at the slot's displayed CSS size. Low-frequency plates do not
-   need 2× pixels. Place `--focus` (x,y as fractions) **away from** the copy,
-   so the energy sits where the text does not. **Header strips and state
-   slots use `--intensity` 0.8–1.0** with the masked scrim (§6): the scrim,
-   not a timid plate, protects the text column. Low intensity (0.2–0.4) is
-   only for a plate that text runs across from edge to edge.
+   each plate darker than its page and 0.1–0.4% perceptible). Two guards
+   catch it: the generator refuses a palette whose other grounds sit on the
+   wrong side of the first, and `plate --page '#hex'` exits 1 `page_mismatch`
+   when the first ground is not the page. **Take `--page` from the rendered
+   page, never from the token map:** read `getComputedStyle(document.body)
+   .backgroundColor` (or the surface the plate sits on) and pass that hex on
+   every render, and set `page` explicitly in a batch manifest. tokens.json's
+   `page` is only the role you mapped as `ground`; if the map labels the
+   darker well as `ground`, tokens.json vouches for the wrong colour and the
+   guard never fires. The visibility floor is not a substitute — on some
+   seeds a bright accent alone lifts a well-based plate past 8% / 1%. Map the roles to the project's actual
+   names, such as `--sodium` and `--sodium-hi`, or `--ground-0`… for an app
+   shell.
+2. **Render** at the slot's displayed CSS size or its aspect (1600x320 for a
+   5:1 header). Low-frequency plates do not need 2× pixels. Place `--focus`
+   (x,y as fractions) **away from** the copy and inside the slot's clear band
+   (58–78% across under `header-band`). **Header strips and state slots use
+   `--intensity` 0.8–1.0** with a banded scrim (§6): the scrim, not a timid
+   plate, protects the text column. Low intensity (0.2–0.4) is only for a
+   plate that text runs across from edge to edge. Always pass `--slot`,
+   `--scrim` and `--fit`: a plate that passes as a file can still vanish in
+   its slot.
 3. **View the result.** Read the WebP; if your viewer cannot open WebP, look at
    a PNG preview and never ship the preview. Reject the plate and re-roll the
    seed or move `--focus` when it shows:
@@ -250,45 +287,111 @@ python3 $GEN plate --tokens design/imagery/tokens.json --style warp --seed 7 \
    `warp` is light raking across folds, not an aura. Its energy sits at
    `--focus`, away from the copy, and the text areas stay calm. A plate whose
    brightest region is a soft centred bloom has failed, even when its colours
-   pass. Never fix a bad plate in CSS.
-4. **Place it** per the markup contract (§5).
-5. **Measure on real pixels, both ways** (§7), in every theme and at 320 px
-   and 1440 px, because `cover` crops differently at each width: text over
-   the plate keeps its contrast, and the plate stays visible after the scrim.
-6. **Commit** the generator command, the tokens snapshot (`tokens.json`), the
-   ledger and the shipped WebP. **Every asset gets a ledger line**: `plate`,
-   `ai`, `compress` and `svg` all take `--ledger` (only `tokens` does not).
-   `compress` records the source filename and both hashes. `svg` records its
-   style, seed, colour, format and the sha256 of the emitted markup.
-   **Never commit a source PNG.** It is a build intermediate, and the ledger
-   line is the provenance record. When the tokens change, re-run the ledger's
-   commands and the plates re-derive. The same seed gives byte-identical
-   output **per environment**. Other libwebp, Pillow or numpy versions can
-   encode differently. Then the ledger's sha256 no longer matches, which makes
-   the drift visible instead of silent.
+   pass. Never fix a bad plate in CSS. Viewing is for taste only; it is not a
+   visibility measurement.
+4. **Place it** per the markup contract (§5) and a named slot from
+   [plate-slots.md](plate-slots.md).
+5. **Measure on the page** (§7) with `scripts/plate-check.js`, in every
+   theme, at 1440 px and at 375 and 320 px, because each fit crops
+   differently at each width.
+6. **Commit** the manifest or generator command, the tokens snapshot
+   (`tokens.json`), the ledger and the shipped WebP. **Every asset gets a
+   ledger line**: `plate`, `ai`, `compress` and `svg` all take `--ledger`
+   (only `tokens` does not). `plate` records the slot, scrim, slot visibility
+   and, with `--seeds`, every candidate and the chosen seed. `compress`
+   records the source filename and both hashes. `svg` records its style,
+   seed, colour, format and the sha256 of the emitted markup. **Never commit
+   a source PNG.** It is a build intermediate, and the ledger line is the
+   provenance record. When the tokens change, re-run and the plates
+   re-derive. The same seed gives byte-identical output **per environment**.
+   Other libwebp, Pillow or numpy versions can encode differently. Then the
+   ledger's sha256 no longer matches, which makes the drift visible instead
+   of silent.
+
+### 4a. Many plates: `batch --manifest`
+
+A project with a plate per route keeps one manifest instead of a shell
+script per area. Run it **from the project root**; every path in it is
+relative to the current working directory.
+
+```json
+{
+  "tokens": {"css": "web/app/globals.css", "selector": ":root",
+             "map": "ground=--color-bg,ground2=--color-surface-raised,ground3=--color-sodium-soft,accent=--color-sodium,accentHi=--color-sodium-strong",
+             "out": "docs/imagery/tokens.json"},
+  "page": "#0a0907",
+  "text": "#84817e",
+  "out_dir": "web/public/plates",
+  "ledger": "docs/imagery/plates.jsonl",
+  "defaults": {"size": "1600x320", "intensity": 1.0, "focus": "0.70,0.45", "max_kb": 30,
+               "slot": "1170x90", "scrim": "header-band", "fit": "cover"},
+  "plates": [
+    {"name": "today", "style": "warp", "seed": 11},
+    {"name": "trades", "style": "warp", "seeds": "1-8", "pick": "best"},
+    {"name": "crowding", "ai": {"provider": "openai", "prompt": "..."},
+     "fallback": {"style": "warp", "seed": 131}}
+  ]
+}
+```
+
+```bash
+python3 $GEN batch --manifest docs/imagery/plates.json --dry-run   # score and print a table, write nothing
+python3 $GEN batch --manifest docs/imagery/plates.json             # render, score, then swap
+```
+
+- Every entry renders in memory first; nothing is written until all pass.
+  `plate` entries render deterministically on every run.
+- `ai` entries are **not** re-rendered unless `--reroll-ai`. The shipped
+  file must match its ledger row's sha256, or the run exits 1
+  `ledger_mismatch`.
+- Under `--reroll-ai`, an `ai` failure aborts with nothing changed (exit 3)
+  unless `--fallback`, which renders that entry's `fallback` plate instead
+  and says so. `--fallback` has no effect without `--reroll-ai`.
+- Tests and CI can stand in for the image provider with `$FUI_AI_CMD`: a
+  command (no shell; split like a shell would) that receives the same `ai`
+  arguments. Never point it at anything you have not read.
+- Every entry is scored on its slot, scrim and fit (and against `text`, when
+  given). If any fails, the run exits 4 and nothing changes.
+- Only then are the files swapped into `out_dir` and the ledger written
+  atomically: one row per plate, sorted by `out`, paths relative, sha256
+  verified, no timestamps or argv, so a re-run with nothing changed leaves
+  the ledger byte-identical.
+- The ledger keeps every row that is not one of this manifest's plates
+  (`ai`, `compress`, `svg`, hand-run rows) byte for byte; `--prune` drops
+  them and lists what went.
+- `--only NAME[,NAME]` runs the named entries; the rest must still verify
+  against their ledger rows and are left untouched.
+- A plate on a raised panel carries its own `page` (and its own `palette`
+  or token `map`) in its entry; the manifest `page` is the default and is
+  always required.
+- Under `--reroll-ai`, an existing file the ledger cannot verify is refused
+  (`ledger_mismatch`) before any credit is spent. If the run aborts after
+  generating images, they are kept in `<out_dir>/.rejected/<timestamp>/`
+  with a note per image — paid work is never discarded silently.
+- Paths (`out_dir`, `ledger`, `tokens.css`, `tokens.out`) must sit inside the
+  project (exit 1 `path_outside_project`) unless `--allow-outside`. Treat a
+  manifest from another repo like a script: read it before running it.
+- Files are staged and their sha256 checked, then swapped; a failed rename
+  restores the originals (`swap_failed`) and leaves the ledger untouched.
+- `--intensity` defaults to 1.0 for an entry with a slot (0.6 without).
+- Exit codes: **0** ok, **1** error, **2** usage, **3** AI failed (no
+  `--fallback`), **4** a gate failed.
 
 ## 5. Markup contract
 
 A plate is a **decorative layer**. Removing it must lose no information.
 
-```tsx
-<header className={s.routeHead}>
-  <div className={s.plate} aria-hidden="true" />
-  <div className={s.headInner}>…eyebrow, title, actions…</div>
+```html
+<header class="plate-host plate-host--header">
+  <div class="plate plate--header" aria-hidden="true"></div>
+  <div class="head-inner">…eyebrow, title, actions…</div>
 </header>
 ```
 
-```css
-.routeHead { position: relative; isolation: isolate; min-height: 168px; }
-.plate {
-  position: absolute; inset: 0; z-index: -1;
-  background:
-    var(--scrim-head),                        /* §6: masked to the text column */
-    url(/img/plate-header.webp) center / cover no-repeat;
-}
-```
-
-Or, as an element:
+The host carries the padding and the text; the layer is its first child and
+paints the scrim over `var(--plate)`. The CSS for each slot is in
+[plate-slots.md §3](plate-slots.md#3-the-css). `scripts/plate-check.js` finds
+this pair by default. Or, as an element in a slot with no text over it:
 
 ```html
 <img class="plate" src="/img/plate-empty.webp" alt="" aria-hidden="true"
@@ -311,147 +414,124 @@ Or, as an element:
 
 A scrim is a token-mixed gradient between the plate and the text. **It
 covers the text column only.** Text sits on the left of a header; a scrim
-that runs the full width erases the plate everywhere else. On one shipped
-app, a page-based `warp` plate measured 0.4% perceptible under a full-width
-scrim and 16–19% under the same scrim masked to the text column.
+that runs the full width erases the plate everywhere else. One shipped app's
+header plates measured 0.1–0.4% visible under a full-width 94% → 35% scrim;
+under the banded `header-band` profile, its token plates measured 14–25%
+≥1.1:1.
 
-The banded header profile:
-
-```css
-:root {
-  --scrim-head: linear-gradient(90deg,
-    color-mix(in oklab, var(--ground) 94%, transparent) 0%,    /* under the title */
-    color-mix(in oklab, var(--ground) 86%, transparent) 40%,   /* end of the copy */
-    transparent 58%,                                           /* the plate shows */
-    transparent 82%,
-    color-mix(in oklab, var(--ground) 75%, transparent) 100%); /* under the actions */
-  --scrim-full: linear-gradient(90deg,
-    color-mix(in oklab, var(--ground) 94%, transparent),
-    color-mix(in oklab, var(--ground) 80%, transparent),
-    color-mix(in oklab, var(--ground) 35%, transparent));
-}
-@media (max-width: 767px) { :root { --scrim-head: var(--scrim-full); } }
-```
+Use a named profile from [plate-slots.md](plate-slots.md), not a hand-tuned
+gradient: `header-band` for header strips, `state-band` or `center-band` for
+empty states, `phone-strip` for headers under 768 px, `full` where text spans
+the slot, `none` where no text sits over the plate. The generator, `score`,
+`batch` and `plate-check.js` all know these names, so the CSS and the
+measurement describe the same thing.
 
 - **Fit the bands to the layout.** The stops follow where the copy and the
   actions end at desktop width; move them with the layout, then re-measure.
-  The right-hand band exists only when actions sit there.
-- **Keep the full-width profile** (`--scrim-full`) for phones, where the
-  title runs the full width, and for any slot whose text spans it.
+  A moved stop is a custom profile: score it with `--scrim-json`.
+- **Phones get a strip above the words,** not a full-width scrim over a side
+  band (measured 0–6% visible on one app's headers). `phone-strip` keeps the
+  top 64 px clear and scrims the text below it.
 - **No `rgba(`, no CSS `opacity`.** The scrim is `color-mix()` over the
   ground token, so it needs no hex literal outside the token file, and the
   hex/rgb greps, the opacity rule in [wcag-audit.md](wcag-audit.md) and
   project guards that ban `rgba(` or `opacity: 0.x` all pass.
-- **Tune brightness at generation time** with `--intensity` and `--focus`.
-  Never tune it with CSS opacity on the plate or the text.
+- **Tune brightness at generation time** with `--intensity`, `--focus` and
+  `--weight`. Never tune it with CSS opacity on the plate or the text.
 - **Move a stop only as far as both gates in §7 allow.** Raising a mix to
   rescue text makes the plate fainter; the visibility gate catches it.
-- **Light grounds** use the same formula with their own `--ground`.
+- **Light grounds** use the same profiles with their own `--ground`.
 
 ## 7. Real-pixel contrast and visibility check
 
 A plate can fail in two directions, and both are failures:
 
-- **Text gate** — text over the plate is unreadable. Gate on the 10th
-  percentile: 4.5:1 for body text, 3:1 for large text.
-- **Visibility gate** — the plate is invisible. After the scrim, at least
-  **8% of the pixels the plate covers must be ≥1.1:1** against the page
-  ground, and at least **1% must be ≥1.3:1**. Under `cover` that is the whole
-  slot; under `100% auto` (below) it is the band the image occupies. A plate
-  that fails visibility is as much a failure as one that fails text
-  contrast; it costs bytes and says nothing.
-- **Tall states get a band, not `cover`.** A strip-shaped plate (5:1) under
-  `cover` in a tall empty state is magnified 2–3× and turns to blur. Size it
-  `100% auto`, centred, so it crosses the state as a band at its own
-  aspect, and scrim the middle where centred words sit, leaving the edges
-  clear.
-- **Phones get a strip above the words.** Below ~768 px header text spans
-  the full width, so a side band has nowhere to go and a full-width scrim
-  hides the plate (measured 0–6%). Reserve a strip instead: pad the header
-  host by `--plate-strip` (64 px) plus the usual gap, size the plate
-  `max(100%, strip × aspect) auto` anchored `right top`, and scrim it with a
-  vertical gradient — transparent through the strip, fading over ~16 px
-  into the full scrim under the text:
-  `linear-gradient(180deg, transparent 0, transparent calc(var(--plate-strip) - 16px), color-mix(in oklab, var(--ground) 92%, transparent) var(--plate-strip), …)`.
-  Scope it to header hosts with a child selector so state plates keep their
-  own sizing. Measured on a dark app at 375/320: 13–41% of strip pixels
-  ≥1.1:1, text from 75 px, worst text unchanged.
+- **Text gate** — text over the plate is unreadable. Take the composited
+  background under each text region and gate on its 90th-percentile
+  luminance for light text on a dark page (10th percentile for dark text on
+  a light page): 4.5:1 for body text, 3:1 for large text (≥24 px, or
+  ≥18.66 px bold).
+- **Visibility gate** — the plate is invisible. Over the pixels the plate
+  image covers inside the slot, after the scrim is composited over the page
+  colour, at least **8% must be ≥1.1:1** against the page (`ge_1_1`) and at
+  least **1% must be ≥1.3:1** (`ge_1_3`). Under `band` that is the rows the
+  image covers; under `strip`, the strip. A plate that fails visibility is as
+  much a failure as one that fails text contrast; it costs bytes and says
+  nothing.
 
-`plate` applies the visibility gate to the bare plate before writing it.
-That is necessary, not sufficient: the scrim only removes visibility, so
-measure again in the page. A text-over-ground contrast checker composites the
-gradient and ignores the `url()` layer, so it cannot see the plate. To
-measure what the reader actually gets:
+axe and token-pair checkers composite the gradient and ignore the `url()`
+layer, so they cannot see the plate. Measure in two places:
 
-1. Hide the text paint.
-2. Take a screenshot.
-3. Sample the pixels inside each glyph box.
-4. Compute WCAG contrast against the text colour.
-
-The technique is borrowed from HyperFrames' `contrast-report.mjs` in
-`hyperframes-creative/scripts/` (if installed; the snippet below stands
-alone), which samples the composited background inside each element's own
-box once its glyphs are hidden. Playwright:
+1. **Offline, before it ships:** `plate --slot` and `score` model the slot
+   (fit, crop, named scrim) with numpy. They predict the browser numbers
+   closely and run in CI.
+2. **On the page, after it ships:** `scripts/plate-check.js` reads each
+   host's computed geometry (background-size, position, the scrim's stops),
+   decodes the plate, composites the scrim over the page colour, and measures
+   both gates on every text node in the host. Load it in DevTools (paste the
+   file), with Playwright `page.addScriptTag({ path })`, or by `eval` of the
+   file text, then:
 
 ```js
-const SLOT = ".routeHead";                              // the plate's slot
-const SEL = `${SLOT} :is(h1,h2,p,span,a,button)`;      // text that sits over the plate
-await page.locator(SLOT).scrollIntoViewIfNeeded();
-// 1. Record each element's ink BEFORE hiding it; afterwards it reads as transparent.
-const inks = await page.$$eval(SEL, els => els.map(el => getComputedStyle(el).color));
-// 2. Hide the glyph paint (layout-neutral) and capture the real composited pixels.
-await page.addStyleTag({ content: `${SEL}{color:transparent!important;
-  -webkit-text-fill-color:transparent!important;text-shadow:none!important}` });
-const shot = (await page.screenshot()).toString("base64");
-// 3. Sample each element's own box and score every sampled pixel against its ink.
-const report = await page.evaluate(async ({ shot, sel, slot, inks }) => {
-  const img = new Image(); img.src = "data:image/png;base64," + shot; await img.decode();
-  const x = new OffscreenCanvas(img.width, img.height).getContext("2d"); x.drawImage(img, 0, 0);
-  const k = img.width / innerWidth;                                   // device pixel ratio
-  const p = new OffscreenCanvas(1, 1).getContext("2d", { willReadFrequently: true });
-  const rgb = (c) => { p.clearRect(0, 0, 1, 1); p.fillStyle = c; p.fillRect(0, 0, 1, 1);
-    return [...p.getImageData(0, 0, 1, 1).data].slice(0, 3); };     // any colour syntax
-  const lum = (c) => { const s = c.map(v => (v /= 255) <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4);
-    return .2126 * s[0] + .7152 * s[1] + .0722 * s[2]; };
-  const ratio = (a, b) => { const [h, l] = [lum(a), lum(b)].sort((m, n) => n - m); return (h + .05) / (l + .05); };
-  const text = [...document.querySelectorAll(sel)].map((el, i) => {
-    const r = el.getBoundingClientRect();
-    if (r.width < 1 || r.height < 1 || r.bottom < 0 || r.top > innerHeight) return null;
-    const d = x.getImageData(r.x * k, r.y * k, r.width * k, r.height * k).data;
-    const ink = rgb(inks[i]), rs = [];
-    for (let j = 0; j < d.length; j += 4 * 7) rs.push(ratio(ink, [d[j], d[j + 1], d[j + 2]]));
-    rs.sort((m, n) => m - n);
-    return { el: el.tagName, text: el.textContent.trim().slice(0, 24), p10: +rs[Math.floor(rs.length * .1)].toFixed(2) };
-  }).filter(Boolean);
-  // 4. Visibility: the whole slot, after the scrim, against the page ground.
-  const root = getComputedStyle(document.documentElement);
-  const ground = rgb(root.getPropertyValue("--ground").trim() || getComputedStyle(document.body).backgroundColor);
-  const s = document.querySelector(slot).getBoundingClientRect();
-  const v = x.getImageData(s.x * k, s.y * k, s.width * k, s.height * k).data;
-  let n = 0, a = 0, b = 0;
-  for (let j = 0; j < v.length; j += 4 * 3) {
-    const q = ratio(ground, [v[j], v[j + 1], v[j + 2]]); n++; a += q >= 1.1; b += q >= 1.3; }
-  const visible = { ge_1_1: +(100 * a / n).toFixed(1), ge_1_3: +(100 * b / n).toFixed(1) };
-  return { text, visible, pass: visible.ge_1_1 >= 8 && visible.ge_1_3 >= 1 };
-}, { shot, sel: SEL, slot: SLOT, inks });
+// The sentinel names a value the CURRENT width's rule produces: the desktop
+// header band has a 58% stop; the phone strip has a 48px stop (strip − 16).
+const wide = innerWidth >= 768;
+const report = await plateCheck({
+  expect: [{ selector: ".plate-host--header > .plate", property: "background-image",
+             includes: wide ? "58%" : "48px" }],
+});
+if (report.stale) throw new Error("stale CSS: the edit is not loaded");
+console.log(JSON.stringify(report.hosts.map(h => [h.box, h.visibility, h.worstText, h.visible && h.textPass])));
 ```
 
-- **Record the ink before hiding it** (step 1). Once the text is hidden, its
-  computed colour reads as transparent. Only elements in the viewport are
-  measured, so scroll each plate slot into view and repeat.
-- **Gate on the 10th-percentile ratio, not the median.** A plate is not
-  uniform, and the median hides the one bright patch under one word. Use
-  4.5:1 for body text and 3:1 for large text.
-- **Visibility is measured on the slot with the text hidden.** Controls with
-  their own fill (a filled button, a badge) count as visible pixels; when
-  they are large, sample the slot minus their boxes.
+   Run it at 1440 px and at 375 px, in every theme, with each plated empty
+   state on screen. `report.pass` is false when any host fails either gate.
+   Read the report honestly:
+   - `hosts[].measured: "partial"` (with `unsupportedLayers` or
+     `unmodelled`) means a radial/angled gradient, layer opacity, mask,
+     filter or blend sits on the plate and the numbers cannot be vouched
+     for; the host fails until you remove it or measure with the shot mode.
+   - A layer set to `display: none` is `{ skipped: "layer_hidden" }` and
+     listed in `skippedHosts`; a page where every host is skipped fails with
+     `all_skipped` unless you pass `allowAllSkipped: true` on purpose.
+   - `image_unreadable` (cross-origin, timeout after `imageTimeoutMs`,
+     default 10 s) is a failure, never a pass.
+   `scripts/plate-check-shot.mjs` (needs Playwright; exits 2 with a message
+   without it) does the same from screenshots with the text made
+   transparent, for a pixel-true second opinion.
+
+- **Use the stale-CSS sentinel.** `expect` names a computed value your last
+  edit must have produced (a new stop such as `58%`). When any value lacks
+  it, plate-check returns `{stale: true}` and measures nothing. **Numbers
+  unchanged after a CSS edit are stale until proven otherwise**: in one
+  session a dev server served the old stylesheet twice, and the
+  measurements came back unchanged both times, which looked like "the edit
+  did nothing" instead of "the edit is not loaded". Restart the server or
+  clear its cache, reload, and re-run with the sentinel. Two traps, both
+  hit while proving the checker: Chrome **drops a default `180deg`**
+  (`linear-gradient(rgba(…) 0px, …)`), so match a stop such as `48px`,
+  never the angle; and every element the selector matches must contain the
+  string, so **scope the selector to one layer kind**
+  (`.plate-host--header > .plate`, not `.plate`) or state layers with other
+  stops read as stale.
+- **Cite the numbers.** Every claim about imagery in a report or PR carries
+  each slot's `ge_1_1` / `ge_1_3` and its worst text ratio, measured here.
+  Never "reads correctly" from viewing the raw file.
+- **Controls with their own fill** (a filled button, a badge) are skipped as
+  text over the plate; they still sit in the slot.
 - **When the text gate fails,** move `--focus` away from the copy, or widen
-  or deepen the scrim's text band. Never lighten the text past its token.
+  or deepen the scrim's text band (then re-score it as a custom profile).
+  Never lighten the text past its token.
 - **When the visibility gate fails,** in this order: base the plate on the
-  page ground (§4 step 1); raise `--intensity` toward 1.0; mask the scrim to
-  the text column (§6); switch from `contour`/`rings` to `warp`, or render
-  the `ai` candidate (§2).
+  page (§4 step 1, `--page`); raise `--intensity` toward 1.0; use a banded
+  profile instead of `full` (§6); `--seeds 1-8 --pick best`; raise
+  `--weight` or switch from `contour`/`rings` to `warp`; render the `ai`
+  candidate (§2).
 - Record both results with the slot in the ledger or the polish table.
+- Copy the consumer tests from `templates/tests/` into the project:
+  `plateVisibility.test.ts` decodes each shipped plate and fails below the
+  floors against the page; `plateScrim.test.ts` fails when a header or state
+  rule loses its banded scrim or the phone strip rule disappears.
 
 ## 8. SVG texture
 
@@ -507,8 +587,8 @@ good at rendering images and wrong about pages. Do not import:
 
 These are for when a slot wants a look the generator lacks, and each one
 applies **only if it is already installed**. Render once at build time, run
-the output through `compress --ledger`, and ship only the WebP. The tool
-itself never ships to the page.
+the output through `compress --ledger`, score it on its slot, and ship only
+the WebP. The tool itself never ships to the page.
 
 `npx` downloads and runs remote code. Prefer the local generator, and use
 `npx` only for a package the user already trusts and has pinned.
@@ -528,22 +608,13 @@ its command and the source palette to the ledger by hand.
 The finance-terminal landing page (see SKILL.md) carries its
 accountability content in band 6, over a full-bleed atmospheric image. Its
 big-type stats sit there under the plate rule's carve-out. It shipped as an
-11 KB WebP under the token scrim. The image came from an AI prompt that
-followed this structure, which is still the recipe for `ai`:
-
-1. **Register:** "ultra-minimal, very dark abstract background for a premium
-   [domain] [product-type]".
-2. **Motif:** sparse points, lines or arcs in the accent hue ("a faint
-   constellation").
-3. **Negative space, stated explicitly:** "mostly deep [ground colour]
-   near-black negative space, so overlaid text stays readable".
-4. **Finish:** "gentle depth-of-field, subtle film grain, restrained,
-   editorial".
-5. **Hard negatives:** "no text, no words, no logos, no chart axes". `ai`
-   appends its own as well.
+11 KB WebP under the token scrim. The image came from an AI prompt with five
+parts — register, motif, negative space in the page ground, finish, hard
+negatives — which is still the recipe for `ai`
+([ai-motifs.md §2](ai-motifs.md#2-the-prompt-recipe)).
 
 Rebuilt today, the band is `plate --style warp` from the page's tokens:
-keyless, reproducible and within budget. With an image key, this prompt
-(register, motif, negative space in the page ground, finish, hard
-negatives) also makes the `ai` candidate for a product route header (§2):
-render both, run both gates, ship the better one.
+keyless, reproducible and within budget, scored with `--scrim full` because
+its stats span the band. With an image key, the same recipe makes the `ai`
+candidate for a product route header (§2): render both, score both on the
+slot, ship the better one.

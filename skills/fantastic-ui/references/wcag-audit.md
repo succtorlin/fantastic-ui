@@ -255,18 +255,45 @@ approximately never.
 
 axe and any token-pair checker see the gradient layers, **not the `url()`
 layer**: text over a plate or photo passes on paper and fails on the bright
-patch under one word. Measure it on real pixels instead — hide the text paint,
-screenshot, sample the pixels inside each text box, compute the ratio against
-the text colour, and gate on the **10th-percentile** pixel, not the median
-(snippet in [ai-atmosphere.md](ai-atmosphere.md) §7, after HyperFrames'
-`contrast-report.mjs`). Repeat per theme and at 320 px and 1440 px —
-`background-size: cover` crops differently at each.
+patch under one word. Measure it with `scripts/plate-check.js` from this
+skill. It reads each plate host's computed fit and scrim, composites the
+scrim over the page colour, and gates every text node in the host on the
+90th-percentile background luminance under it (10th on a light page), not
+the median: 4.5:1 body, 3:1 large. In the same pass it measures the plate's
+own visibility (≥8% of covered pixels ≥1.1:1 and ≥1% ≥1.3:1 against the
+page).
 
+```js
+// Paste the file into DevTools, or page.addScriptTag({ path }) in Playwright, then:
+const r = await plateCheck({ expect: [{ selector: ".plate-host--header > .plate",
+  property: "background-image",
+  includes: innerWidth >= 768 ? "58%" : "48px" }] });   // a stop this width's rule produced
+if (r.stale) throw new Error("stale CSS");            // nothing was measured
+console.log(r.pass, r.hosts.map(h => [h.box, h.visibility, h.worstText]));
+```
+
+Repeat per theme and at 1440 px, 375 px and 320 px: each fit crops
+differently at each width. For a pixel-true second opinion,
+`scripts/plate-check-shot.mjs` (needs Playwright) screenshots each host with
+its text made transparent and reports the same shape.
+
+- **Set the `expect` sentinel after every CSS edit.** Match on something
+  that survives serialisation, such as a stop position: computed values
+  rewrite colours (`transparent` reads back as `rgba(0, 0, 0, 0)`) and drop
+  a default `180deg`; scope the selector to one layer kind, since every
+  match must contain the string. If the
+  computed value lacks the string, the stylesheet you edited is not the one
+  rendering, and plate-check returns `{stale: true}` without measuring. Numbers that do not
+  move after an edit are stale until proven otherwise: a dev server serving
+  old CSS produced unchanged measurements twice in one session.
+- Report the numbers per slot (visibility and worst text ratio), not
+  "passes" or "reads correctly".
 - Fix a failure in the scrim's `color-mix` percentage, by masking the scrim
   to the text column, or by moving `--focus` away from the copy — never with
   text opacity, text-shadow halos or a lighter-than-token ink. Every such fix
-  makes the plate fainter, so re-run the plate's visibility gate
-  ([ai-atmosphere.md](ai-atmosphere.md) §7) after it.
+  makes the plate fainter, so re-run plate-check after it; both gates come
+  back in one report ([ai-atmosphere.md](ai-atmosphere.md) §7). A moved stop
+  is a custom scrim profile ([plate-slots.md](plate-slots.md)).
 - **Decorative media is `aria-hidden`.** Plates, svg texture, watermarks and
   atmospheric photos take `aria-hidden="true"` (and `alt=""` on an `<img>`);
   they carry no information, so they need no text alternative. If removing an
@@ -449,8 +476,9 @@ had failures. Exit criteria:
       excluded
 - [ ] All four manual passes clean, including per-state scans on product
       panels (loading / empty / error)
-- [ ] Text over every plate or photo measured on real pixels (Step 2d);
-      decorative media `aria-hidden`
+- [ ] Text over every plate or photo, and each plate's visibility, measured
+      with `plate-check.js` behind a passing stale-CSS sentinel (Step 2d);
+      numbers recorded; decorative media `aria-hidden`
 - [ ] WCAG 2.2 additions verified (focus-not-obscured, target size,
       dragging alternative, consistent help, redundant entry, auth)
 - [ ] Moderate findings fixed or documented with reason + owner

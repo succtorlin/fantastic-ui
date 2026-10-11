@@ -1,0 +1,47 @@
+{
+  "tokens": {
+    "css": "skills/fantastic-ui/evals/plate-visibility/fixture/tokens.css",
+    "selector": ":root",
+    "map": "ground=--ground,ground2=--panel,ground3=--hair,accent=--accent,accentHi=--accent-hi",
+    "out": "skills/fantastic-ui/evals/plate-visibility/.out/tokens.json"
+  },
+  "page": "#0a0907",
+  "text": "#84817e",
+  "out_dir": "skills/fantastic-ui/evals/plate-visibility/.out/plates",
+  "ledger": "skills/fantastic-ui/evals/plate-visibility/.out/plates.jsonl",
+  "defaults": {
+    "size": "1600x320",
+    "intensity": 1.0,
+    "focus": "0.70,0.45",
+    "max_kb": 30,
+    "slot": "1424x96",
+    "scrim": "header-band",
+    "fit": "cover"
+  },
+  "plates": [
+    {
+      "name": "positions-head",
+      "style": "warp",
+      "seeds": "1-6",
+      "pick": "best"
+    },
+    {
+      "name": "positions-phone",
+      "style": "warp",
+      "seed": 5,
+      "slot": "375x116",
+      "scrim": "phone-strip",
+      "fit": "strip"
+    },
+    {
+      "name": "watchlist-empty",
+      "style": "warp",
+      "seeds": "1-8",
+      "pick": "best",
+      "focus": "0.12,0.50",
+      "slot": "892x340",
+      "scrim": "center-band",
+      "fit": "band"
+    }
+  ]
+}

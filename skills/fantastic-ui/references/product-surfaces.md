@@ -154,8 +154,9 @@ the user never loses the map:
   No illustration clip-art. Every empty and first-run state — every panel,
   every subpanel — inherits the route's plate, or svg texture on a route
   without one, from the shared empty-state primitive
-  ([recipe](ai-atmosphere.md#recipe-hand-the-plate-down)); it leaves when the
-  first row renders. Mono microcopy is fine; jokes are not.
+  ([recipe](ai-atmosphere.md#recipe-hand-the-plate-down)), chosen by an
+  explicit `kind` prop ([audit before you plate](#audit-before-you-plate));
+  it leaves when the first row renders. Mono microcopy is fine; jokes are not.
 - **Error** — semantic red appears *here and only here* (plus real
   destructive actions): one line of what failed, one retry action, error
   detail behind a disclosure. The panel border may take a red hairline;
@@ -163,6 +164,38 @@ the user never loses the map:
 - **Stale/degraded** (data apps) — timestamp in the panel head goes warn-
   colored with a mono "as of 14:02:11Z" label. Never silently show old data
   as fresh; candor is a premium signal inside the product too.
+
+### Audit before you plate
+
+The plate makes an empty state look designed, so a wrong branch that lands
+there looks designed too. Before the shared primitive paints a plate, trace
+every branch that renders it and write down its precondition:
+
+| Branch | Must be true before it renders | Plate |
+|---|---|---|
+| loading | the fetch is in flight | no — skeleton |
+| error | the fetch failed, or the payload is unusable | no — semantic red, retry |
+| filtered | data exists; the user's filter excluded all of it | no — reset action |
+| empty | the fetch succeeded and returned nothing | yes |
+| first-run | the user has never created the thing | yes |
+
+- **Failures falling through to empty copy is a bug, and the plate makes it
+  worse.** A typical shape: `if (error) return null` inside a child, or
+  `rows ?? []` on a failed response, and the parent shows "No trades yet"
+  over the route's plate. The user reads a confident, decorated "nothing
+  here" when the truth is "we could not load it". A review of one app's
+  plated states found error paths doing exactly this. Fix the branch first,
+  then plate.
+- **Give the shared primitive an explicit `kind` prop**:
+  `kind: "empty" | "first-run" | "filtered" | "loading" | "error"`. The
+  plate renders only for `empty` and `first-run`. Never decide by matching
+  the label or the copy ("No …", "Nothing …"): a label changes with a copy
+  edit, and an error message that starts with "No" gets a plate.
+- Make `kind` required, so every call site states which branch it is, and
+  grep the call sites once: every `kind="empty"` must sit behind a
+  successful fetch.
+- Test the failure path: kill the API or block the request, and confirm the
+  panel shows its error state with no plate.
 
 ## Live proof, in-app version
 
@@ -181,7 +214,9 @@ records why in the ledger. Every panel and subpanel inherits it in its empty
 and first-run states — built once in the shared empty-state primitive, never
 per panel; populated panels never carry imagery. A plate must be both
 readable under text and visible on the page — the two gates in
-[ai-atmosphere.md §7](ai-atmosphere.md#7-real-pixel-contrast-and-visibility-check).
+[ai-atmosphere.md §7](ai-atmosphere.md#7-real-pixel-contrast-and-visibility-check),
+measured with `scripts/plate-check.js` in the slots named in
+[plate-slots.md](plate-slots.md).
 The canonical rule is
 [the plate rule in ai-atmosphere.md](ai-atmosphere.md#the-plate-rule), and the
 procedure, tools and markup are there too.
@@ -229,10 +264,13 @@ Run after the last screen migrates; these are pass/fail:
       Step 6): axe clean incl. wcag22aa, token contrast matrix recorded,
       manual passes done on the two most complex screens
 - [ ] Imagery: ≤ 1 plate per route, none inside a data panel, text over each
-      plate measured on real pixels, each plate visible after its scrim (≥8%
-      of the slot ≥1.1:1 and ≥1% ≥1.3:1 against the page), every asset (`plate`, `ai`, `compress`,
+      plate measured on the page with `plate-check.js`, each plate visible
+      after its scrim (≥8% ≥1.1:1 and ≥1% ≥1.3:1 against the page), the
+      numbers cited, every asset (`plate`, `ai`, `compress`,
       `svg`) with a line in the imagery ledger (`--ledger`)
 - [ ] Every panel and subpanel empty/first-run state inherits the route's
       plate (or svg texture) from the shared primitive; filtered, failed,
       loading, stale and alarm states stay plain
+- [ ] Every plated branch audited: the primitive takes an explicit `kind`,
+      and no error or fetch-failed path falls through to empty copy
 - [ ] Before/after screenshot pairs archived for every screen

@@ -337,7 +337,10 @@ never shows UI, text, people, logos or fake data. Plates follow
 [the plate rule](references/ai-atmosphere.md#the-plate-rule): static,
 `aria-hidden`, ≤30 KB, never behind data — and visible: a plate the reader
 cannot see is a failure, not a safe default. Every page's imagery decision is
-the brief line's imagery clause.
+the brief line's imagery clause. **Every imagery claim cites a measured
+number** — each slot's visibility and worst text ratio from
+`scripts/plate-check.js` on the composited page — never "reads correctly"
+from the raw file.
 
 ### 4. Page rhythm — dense, alternating, specific
 
@@ -500,8 +503,8 @@ before starting any whole-app job. It adds, on top of everything above:
 - **Shared-primitives-first ordering**, then routes by traffic (with a stated
   fallback ranking when no analytics exist)
 - **Batches of 3–5 surfaces** with a presentation-only diff gate, per-batch
-  a11y pass, an imagery slot check per route and per panel state, and a
-  persistent ledger file
+  a11y pass, an imagery slot check per route and per panel state (plate-check
+  numbers, empty-state audit), and a persistent ledger file
   that survives session boundaries
 - **Loop-until-dry completion**: re-run the inventory from scratch at the end;
   the job is done only when a fresh sweep finds zero non-done surfaces and the
@@ -587,11 +590,13 @@ Run through this before calling the page done:
 - [ ] Imagery plan executed, or its absence justified in the brief line
 - [ ] Every raster ≤ 30 KB WebP, `aria-hidden`, explicit dimensions, static;
       every asset (`plate`, `ai`, `compress`, `svg`) has an imagery-ledger line
-- [ ] Text over any plate passes contrast measured on real pixels
-- [ ] Plates are visible: ≥8% of the slot ≥1.1:1 and ≥1% ≥1.3:1 against the
-      page after the scrim, measured on real pixels
+- [ ] Every plate slot measured with `scripts/plate-check.js` at 1440 and
+      375 px behind a stale-CSS sentinel (`expect`): ≥8% ≥1.1:1 and ≥1%
+      ≥1.3:1 against the page, text ≥4.5:1 (3:1 large); numbers cited
 - [ ] Every panel/subpanel empty and first-run state inherits the route's
-      plate (or svg texture); populated panels carry none
+      plate (or svg texture); populated panels carry none; plated branches
+      audited — explicit `kind`, no error path falls through to empty copy
+- [ ] Consumer tests copied from `templates/tests/` and passing
 - [ ] Hero shows the product *running*, not a picture of it
 - [ ] `prefers-reduced-motion`: every animation has a static path (verify by
       toggling the OS setting or DevTools emulation)
@@ -637,9 +642,12 @@ Additional gates when the work touched product surfaces:
 - [references/visual-reference-analysis.md](references/visual-reference-analysis.md)
   — image/typography analysis, observed vs. inferred. Read at Step 0b.
 - [references/ai-atmosphere.md](references/ai-atmosphere.md) — the canonical
-  plate rule, slots, tool order (`plate` → `svg` → `ai` → `compress`), masked
-  scrim, real-pixel text and visibility gates. Read when writing the imagery
-  clause and before any asset.
+  plate rule, tool order, procedure, `batch` manifests, text and visibility
+  gates. Read when writing the imagery clause and before any asset.
+- [references/plate-slots.md](references/plate-slots.md) — named scrim + fit
+  slots with exact CSS and `score` calls. Read before placing a plate.
+- [references/ai-motifs.md](references/ai-motifs.md) — domain → motif, the
+  `ai` prompt recipe, consent and cost. Read before any `ai` call.
 - [references/css-architecture.md](references/css-architecture.md) — token
   system, scoping, primitives, responsive patterns. Read when writing the stylesheet.
 - [references/ui-mechanics.md](references/ui-mechanics.md) — hierarchy, spacing,
@@ -659,9 +667,12 @@ Additional gates when the work touched product surfaces:
 - `scripts/verify-preset.mjs` + `scripts/preset-gates.json` — runnable gates for
   all eleven presets; not density or "reads as the direction". Read "Verifying
   an applied preset" in theme-presets.md before running it.
-- `scripts/gen_atmosphere.py` — `tokens`, `plate`, `svg` (HTML/JSX/CSS), `ai`,
-  `compress`; ≤30 KB, a ledger line per asset; `plate` refuses a ground darker
-  than the page and a too-faint result (exit 4). Run it per ai-atmosphere.md §4.
+- `scripts/gen_atmosphere.py` — `tokens`, `plate`, `svg`, `ai`, `compress`,
+  `score`, `batch`; ≤30 KB, a ledger line per asset; `plate --page` exits 1
+  `page_mismatch`, a too-faint slot exits 4. Run it per ai-atmosphere.md §4.
+- `scripts/plate-check.js` — browser check of every plate host: visibility,
+  text, stale-CSS sentinel. `templates/tests/` — consumer tests to copy.
+  `evals/plate-visibility/` — fixture app and offline run for the tools.
 
 ### Consolidated interaction references
 

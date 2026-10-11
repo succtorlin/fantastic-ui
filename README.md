@@ -51,7 +51,14 @@ Explore the bundled [design foundations](skills/fantastic-ui/references/design-e
 
 ## Imagery, generated from the tokens
 
-Every page gets an imagery decision, announced with the brief: *"Imagery: warp plate behind the page header, inherited by every panel's empty states (gen_atmosphere, seed 7)"*, or `none` with a stated reason. In a product, each route has one plate, and every panel and subpanel inherits it in its empty and first-run states through the shared empty-state primitive; populated panels never carry imagery. The default is a **plate** rendered by `scripts/gen_atmosphere.py` from the page's own palette tokens: local, keyless, deterministic and ≤30 KB WebP. Zero-byte SVG texture comes next. AI imagery is used only for photographic slots a preset needs, and it falls back to a plate when no provider is available. Plates are atmosphere only. They never show UI, text, people, logos or fake data, and they never sit behind data (the one carve-out is big-type marketing stats, under the scrim and after the real-pixel gate). They are static and `aria-hidden`, they sit under a token `color-mix()` scrim masked to the text column, and both directions are checked on real screenshot pixels: text over a plate keeps its contrast, and the plate stays visible (≥8% of the slot ≥1.1:1 and ≥1% ≥1.3:1 against the page). The generator bases every plate on the page ground and refuses one too faint to see. Procedure: [ai-atmosphere.md](skills/fantastic-ui/references/ai-atmosphere.md).
+Every page gets an imagery decision, announced with the brief: *"Imagery: warp plate behind the page header, inherited by every panel's empty states (gen_atmosphere, seed 7)"*, or `none` with a stated reason. In a product, each route has one plate, and every panel and subpanel inherits it in its empty and first-run states through the shared empty-state primitive; populated panels never carry imagery. The default is a **plate** rendered by `scripts/gen_atmosphere.py` from the page's own palette tokens: local, keyless, deterministic and ≤30 KB WebP. Zero-byte SVG texture comes next. AI imagery is used only for photographic slots a preset needs, and it falls back to a plate when no provider is available. Plates are atmosphere only. They never show UI, text, people, logos or fake data, and they never sit behind data (the one carve-out is big-type marketing stats, under the scrim and after the real-pixel gate). They are static and `aria-hidden`, they sit in a named slot (a banded token `color-mix()` scrim plus a fit: `header-band`, `state-band`, `center-band`, `phone-strip`), and both directions are measured on the composited page: text over a plate keeps its contrast, and the plate stays visible (≥8% of the covered pixels ≥1.1:1 and ≥1% ≥1.3:1 against the page). Every imagery claim cites those numbers. The tools exist because plates once shipped at 0.1–0.4% visible while passing every text check:
+
+- `gen_atmosphere.py plate --page --slot --scrim --seeds 1-8 --pick best` renders for the slot the plate will sit in, refuses a base that is not the page (`page_mismatch`) and a result too faint for that slot (exit 4).
+- `gen_atmosphere.py score` scores any WebP on a named slot offline; `batch --manifest` renders, scores and swaps a project's plates atomically, and re-rolls AI images only with `--reroll-ai`.
+- `scripts/plate-check.js` measures every plate host on the live page, with a stale-CSS sentinel so an unloaded edit is never reported as a measurement.
+- `templates/tests/` holds consumer tests to copy into the project; `evals/plate-visibility/` is a fixture app that proves the tools catch the failures.
+
+Procedure: [ai-atmosphere.md](skills/fantastic-ui/references/ai-atmosphere.md); slots: [plate-slots.md](skills/fantastic-ui/references/plate-slots.md); AI prompts: [ai-motifs.md](skills/fantastic-ui/references/ai-motifs.md).
 
 ## The mechanics layer
 
@@ -113,7 +120,7 @@ The phase is hardened with lessons from real audits, where the tooling itself wa
 
 ## Install
 
-The commands below are for a fresh installation. If you already have a `fantastic-ui` skill, preserve local edits before replacing it. Install the complete skill directory, including `references/` and `scripts/`, not just `SKILL.md`.
+The commands below are for a fresh installation. If you already have a `fantastic-ui` skill, preserve local edits before replacing it. Install the complete skill directory, including `references/`, `scripts/` and `templates/`, not just `SKILL.md`.
 
 Clone the repository:
 
@@ -172,7 +179,13 @@ skills/fantastic-ui/
 ├── scripts/
 │   ├── verify-preset.mjs            # runnable checks against a live page (+ advisory imagery count)
 │   ├── preset-gates.json           # universal and per-preset gate declarations
-│   └── gen_atmosphere.py           # token plates, SVG texture, AI wrapper, compressor — ≤30 KB, with a ledger
+│   ├── gen_atmosphere.py           # token plates, SVG texture, AI wrapper, compressor, slot scoring
+│   │                               #   (`score`), manifest builds (`batch`) — ≤30 KB, with a ledger
+│   ├── plate-check.js              # browser check: plate visibility + text over it, stale-CSS sentinel
+│   ├── plate-check.test.mjs        # `node --test` unit tests for its pure helpers
+│   └── plate-check-shot.mjs        # optional Playwright screenshot variant
+├── templates/tests/                # consumer tests to copy: plate visibility, banded scrims in the CSS
+├── evals/plate-visibility/         # fixture app, manifest and offline run for the imagery tools
 └── references/
     ├── visual-reference-analysis.md # composition, typography geometry, observation vs. inference,
     │                               #   reusable briefs and responsive native UI translation
@@ -184,7 +197,9 @@ skills/fantastic-ui/
     ├── canvas-hero.md              # annotated live-canvas hero, sparklines, scroll reveals —
     │                               #   with the complete lifecycle contract (DPR / visibility / reduced-motion / cleanup)
     ├── ai-atmosphere.md            # imagery procedure: slots per surface, plate → svg → ai → compress,
-    │                               #   markup contract, masked token scrim, real-pixel text + visibility gates
+    │                               #   score + batch, markup contract, text + visibility gates
+    ├── plate-slots.md              # named scrim + fit slots with exact CSS, score calls, measured ranges
+    ├── ai-motifs.md                # domain → motif table, five-part AI prompt, consent and cost
     ├── product-surfaces.md         # retrofit procedure for app pages/panels/subpanels: audit → tokens →
     │                               #   primitives → migration, panel anatomy, nesting depth, state design
     ├── theme-presets.md            # eleven named directions with contrast-validated token blocks and

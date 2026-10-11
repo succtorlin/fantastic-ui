@@ -120,13 +120,20 @@ Per batch:
    was validated once, globally, in the token phase).
 4. **Imagery slot check** for each route-level surface (rows typed `route`):
    decide its one slot — header strip or a state surface — or record
-   `none: <reason>`. Generate per [ai-atmosphere.md](ai-atmosphere.md), view
-   the result, measure text over it on real pixels, and measure the plate
-   itself: after the scrim, ≥8% of the slot ≥1.1:1 and ≥1% ≥1.3:1 against
-   the page (a faint plate fails as surely as unreadable text). Every asset — `plate`,
-   `ai`, `compress` or `svg` — gets a line in the imagery ledger (`--ledger`
-   on each subcommand). Then the **panel state check**: every panel and
-   subpanel in the batch, at every nesting level, has its empty and
+   `none: <reason>`. Pick a named slot from [plate-slots.md](plate-slots.md),
+   add the route to the project's `batch` manifest and run it
+   ([ai-atmosphere.md](ai-atmosphere.md) §4a), view the result, then run
+   `scripts/plate-check.js` on the page at 1440 and 375 px with a stale-CSS
+   sentinel: text over the plate passes, and the plate itself is visible
+   after the scrim, ≥8% ≥1.1:1 and ≥1% ≥1.3:1 against the page (a faint
+   plate fails as surely as unreadable text). Write the numbers into the
+   ledger's Imagery cell. Every asset — `plate`, `ai`, `compress` or `svg` —
+   gets a line in the imagery ledger (`--ledger` on each subcommand, or the
+   manifest's ledger). Then the **panel state check**: first the
+   **empty-state audit** ([product-surfaces.md](product-surfaces.md#audit-before-you-plate)):
+   the shared primitive takes an explicit `kind`, and no error or
+   fetch-failed branch in the batch falls through to empty copy. Then every
+   panel and subpanel in the batch, at every nesting level, has its empty and
    first-run states inherit the route's plate (or svg texture) through the
    shared empty-state primitive — never a hand-placed plate — and no
    populated panel carries imagery
@@ -157,7 +164,7 @@ Track every inventory row in a file that survives the session (e.g.
 |---|---|---|---|---|---|
 | StatCard | shared(×7) | dashboard, health… | done | 1 | — |
 | /admin/users | route | — | anatomy-pending | 3 | none: dense table |
-| /onboarding | route | — | done | 2 | plate warp seed 7, first-run |
+| /onboarding | route | — | done | 2 | plate warp seed 7, first-run; ge_1_1 N% / ge_1_3 N%, worst text N:1 |
 ```
 
 Statuses: `not-audited → tokens-mapped → primitives-applied → a11y-passed →
@@ -202,3 +209,5 @@ inherits scope, not amnesia.
 - Holding progress in memory instead of the ledger
 - Declaring done without the re-sweep
 - A route marked `done` with an empty Imagery cell, or a plate inside a data panel
+- An Imagery cell without measured numbers, or numbers taken without a
+  stale-CSS sentinel (plate-check `expect`) after the last CSS edit

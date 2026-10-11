@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ledgerline · Book</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { color-scheme: dark; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font: 14px/1.5 var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+  }
+  .num, td.n, .meta time, .meta .count { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+  /* ---- header strip: title left, meta right ---- */
+  .route-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 90px;
+    padding: 18px var(--gutter);
+    border-bottom: 1px solid var(--hair);
+  }
+  .route-head .kicker {
+    margin: 0 0 2px;
+    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .route-head h1 { margin: 0; font-size: 26px; font-weight: 600; letter-spacing: -.01em; }
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--text-muted);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .live { display: inline-flex; align-items: center; gap: 6px; color: var(--text); }
+  .live::before {
+    content: "";
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent);
+  }
+
+  /* ---- layout ---- */
+  main {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 20px;
+    padding: 24px var(--gutter) 48px;
+  }
+  /* panels are hairline frames */
+  .panel {
+    background: transparent;
+    border: 1px solid var(--hair);
+    border-radius: var(--radius);
+    min-width: 0;
+  }
+  .panel > h2 {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin: 0;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--hair);
+    font-size: 13px; font-weight: 600; letter-spacing: .02em;
+  }
+  .panel > h2 small { color: var(--text-muted); font-weight: 400; }
+  .span-2 { grid-column: 1 / -1; }
+
+  /* ---- populated table ---- */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    background: var(--well);
+    color: var(--text-muted);
+    font-weight: 500; font-size: 12px;
+    text-align: left;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--hair);
+    white-space: nowrap;
+  }
+  tbody td { padding: 9px 16px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--panel-hi); }
+  th.n, td.n { text-align: right; }
+  .tkr { font-family: var(--font-mono); font-weight: 600; letter-spacing: .02em; }
+  .side { color: var(--text-muted); font-size: 12px; }
+  .up { color: var(--up); }
+  .down { color: var(--down); }
+
+  /* ---- shared state primitive ---- */
+  .state {
+    display: grid;
+    justify-items: start;
+    gap: 8px;
+    padding: 20px 16px;
+  }
+  .state h3 { margin: 0; font-size: 15px; font-weight: 600; }
+  .state p { margin: 0; color: var(--text-muted); max-width: 46ch; }
+  .state[data-kind="empty"] {
+    min-height: 340px;
+    align-content: center;
+    justify-items: center;
+    text-align: center;
+  }
+  .state[data-kind="empty"] h3 { font-size: 20px; }
+  .state[data-kind="error"] { border-left: 2px solid var(--down); }
+
+  .btn {
+    font: inherit; font-size: 13px; font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--hair-lit);
+    background: var(--panel-hi);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #140e02; }
+  .btn.primary:hover { background: var(--accent-hi); border-color: var(--accent-hi); }
+
+  .filter { display: flex; gap: 8px; padding: 12px 16px 0; }
+  .filter input {
+    flex: 1; min-width: 0;
+    font: 13px var(--font-mono);
+    padding: 7px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--hair-lit);
+    background: var(--well);
+    color: var(--text);
+  }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .side-stack { display: grid; gap: 20px; align-content: start; min-width: 0; }
+
+  @media (max-width: 720px) {
+    .route-head { flex-direction: column; align-items: flex-start; gap: 6px; min-height: 0; }
+    .route-head h1 { font-size: 22px; }
+    .meta { flex-wrap: wrap; white-space: normal; gap: 8px 14px; }
+    main { grid-template-columns: minmax(0, 1fr); padding-top: 16px; }
+    .state[data-kind="empty"] { min-height: 280px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="route-head">
+  <div>
+    <p class="kicker">Ledgerline / Book</p>
+    <h1>Positions</h1>
+  </div>
+  <div class="meta">
+    <span>As of <time datetime="2026-10-11T14:32:05Z">14:32:05 UTC</time></span>
+    <span><span class="count">12</span> open</span>
+    <span class="live">Live feed</span>
+  </div>
+</header>
+
+<main>
+  <!-- positions -->
+  <section class="panel span-2" aria-labelledby="pos-h">
+    <h2 id="pos-h">Open positions <small class="num">NAV $4,812,330</small></h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Ticker</th><th scope="col">Side</th>
+            <th scope="col" class="n">Qty</th><th scope="col" class="n">Avg cost</th>
+            <th scope="col" class="n">Last</th><th scope="col" class="n">P&amp;L</th>
+            <th scope="col" class="n">Weight</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="tkr">NVDA</td><td class="side">Long</td><td class="n">1,800</td><td class="n">118.42</td><td class="n">131.07</td><td class="n up">+22,770</td><td class="n">4.9%</td></tr>
+          <tr><td class="tkr">MSFT</td><td class="side">Long</td><td class="n">640</td><td class="n">402.10</td><td class="n">417.55</td><td class="n up">+9,888</td><td class="n">5.6%</td></tr>
+          <tr><td class="tkr">XOM</td><td class="side">Short</td><td class="n">-900</td><td class="n">117.80</td><td class="n">114.25</td><td class="n up">+3,195</td><td class="n">2.1%</td></tr>
+          <tr><td class="tkr">JPM</td><td class="side">Long</td><td class="n">1,100</td><td class="n">212.65</td><td class="n">208.90</td><td class="n down">-4,125</td><td class="n">4.8%</td></tr>
+          <tr><td class="tkr">COST</td><td class="side">Long</td><td class="n">210</td><td class="n">871.30</td><td class="n">902.14</td><td class="n up">+6,476</td><td class="n">3.9%</td></tr>
+          <tr><td class="tkr">TSLA</td><td class="side">Short</td><td class="n">-450</td><td class="n">238.00</td><td class="n">251.62</td><td class="n down">-6,129</td><td class="n">2.4%</td></tr>
+          <tr><td class="tkr">LLY</td><td class="side">Long</td><td class="n">160</td><td class="n">884.20</td><td class="n">861.75</td><td class="n down">-3,592</td><td class="n">2.9%</td></tr>
+          <tr><td class="tkr">AVGO</td><td class="side">Long</td><td class="n">520</td><td class="n">161.30</td><td class="n">172.48</td><td class="n up">+5,814</td><td class="n">1.9%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- watchlist -->
+  <section class="panel" aria-labelledby="watch-h">
+    <h2 id="watch-h">Watchlist <small>0 names</small></h2>
+    <div class="state" data-kind="empty">
+      <h3>Nothing on your watchlist yet</h3>
+      <p>Add a ticker and Ledgerline tracks its relative strength against your book every close.</p>
+      <button class="btn primary" type="button">Add a ticker</button>
+    </div>
+  </section>
+
+  <div class="side-stack">
+    <!-- search results -->
+    <section class="panel" aria-labelledby="scr-h">
+      <h2 id="scr-h">Screener <small class="num">503 names</small></h2>
+      <form class="filter" role="search" onsubmit="return false">
+        <label class="sr-only" for="q">Filter tickers</label>
+        <input id="q" value="XQZ" autocomplete="off">
+      </form>
+      <div class="state" data-kind="filtered">
+        <h3>No matches for <span class="num">“XQZ”</span></h3>
+        <p>None of the 503 names match this filter.</p>
+        <button class="btn" type="button">Clear filter</button>
+      </div>
+    </section>
+
+    <!-- alerts feed -->
+    <section class="panel" aria-labelledby="alr-h">
+      <h2 id="alr-h">Alerts</h2>
+      <div class="state" data-kind="error" role="alert">
+        <h3>Couldn’t load alerts</h3>
+        <p>The alerts feed returned <span class="num">503</span> at <time class="num" datetime="2026-10-11T14:31:40Z">14:31:40</time>. Your positions above are unaffected.</p>
+        <button class="btn" type="button">Retry</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+</body>
+</html>
