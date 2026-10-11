@@ -48,8 +48,10 @@ Consequences:
 
 ## Phase 2 — One brief, app-level tokens
 
-Write the one-sentence brief for the **whole application** (Step 0 in
-SKILL.md), tested against the two or three most important screens. Then
+Write the brief line for the **whole application** (Step 0 in SKILL.md),
+imagery clause included, tested against the two or three most important
+screens. When the app already has a token system, recover its brief instead,
+and it still gets an imagery clause. Then
 install the token block from `css-architecture.md` at the app shell —
 `:root` or the app's root class — instead of a page class. Two additions
 for app work:
@@ -149,7 +151,9 @@ the user never loses the map:
   spinner for a panel-level fetch.
 - **Empty** — one muted sentence stating what will appear here and the one
   action that fills it ("No alerts configured — Add your first rule").
-  No illustration clip-art. Mono microcopy is fine; jokes are not.
+  No illustration clip-art; a token plate or svg texture from the imagery
+  procedure is allowed on empty/first-run states (`aria-hidden`, static,
+  ≤30 KB). Mono microcopy is fine; jokes are not.
 - **Error** — semantic red appears *here and only here* (plus real
   destructive actions): one line of what failed, one retry action, error
   detail behind a disclosure. The panel border may take a red hairline;
@@ -166,6 +170,14 @@ event pulses in feeds — all drawn from palette tokens, DPR-aware, RAF paused
 on `visibilitychange`, one static frame under `prefers-reduced-motion` (the
 lifecycle rules in `canvas-hero.md` apply verbatim). Decorative animation has
 no place in-product; every moving pixel must encode a data change.
+
+## Imagery in-product
+
+At most one plate per route (header strip or a state surface), generated
+from the app tokens, static, and never behind data. A route without one
+records why in the ledger. The canonical rule is
+[the plate rule in ai-atmosphere.md](ai-atmosphere.md#the-plate-rule), and the
+procedure, tools and markup are there too.
 
 ## Migration order and PR discipline
 
@@ -186,8 +198,14 @@ no place in-product; every moving pixel must encode a data change.
 
 Run after the last screen migrates; these are pass/fail:
 
-- [ ] `grep -rn "#[0-9a-fA-F]\{3,8\}" src/ --include='*.css' --include='*.tsx'`
-      finds colors only in the token file
+- [ ] `grep -rnE "#[0-9a-fA-F]{3,8}\b|rgba?\(" src/ --include='*.css' --include='*.tsx'`
+      finds colors only in the token file. Translucency outside it is
+      `color-mix(in oklab, var(--token) N%, transparent)` — plate scrims and
+      tints included — which this grep correctly lets through. Canvas
+      drawing code is the one exception: a canvas cannot read `var()`, so it
+      reads the tokens at runtime with `getComputedStyle` (as
+      [canvas-hero.md](canvas-hero.md) does). Its colour constants come from
+      those tokens and are never invented
 - [ ] The accent means the same thing on every screen (primary action /
       current selection / focus), and appears in ≤ ~5% of any screen's pixels
 - [ ] Semantic colors audit: every red is an error or a loss; every green is
@@ -203,4 +221,7 @@ Run after the last screen migrates; these are pass/fail:
 - [ ] Accessibility phase exit criteria met app-wide (`wcag-audit.md`
       Step 6): axe clean incl. wcag22aa, token contrast matrix recorded,
       manual passes done on the two most complex screens
+- [ ] Imagery: ≤ 1 plate per route, none inside a data panel, text over each
+      plate measured on real pixels, every asset (`plate`, `ai`, `compress`,
+      `svg`) with a line in the imagery ledger (`--ledger`)
 - [ ] Before/after screenshot pairs archived for every screen

@@ -8,9 +8,10 @@ description: >-
   WCAG work. Also use for confusing or unintuitive interactions, affordance,
   discoverability, mental-model, error-prevention, cognitive-walkthrough,
   usability, navigation, form, heuristic, or dark-pattern analysis. Covers
-  editorial visual systems, live proof, performance, keyboard/screen-reader
-  access, Norman's interaction foundations, Krug's usability rules, and
-  Nielsen heuristic audits.
+  editorial visual systems, live proof, generated token-driven decorative
+  imagery (palette plates, SVG texture, AI atmosphere, ≤30 KB), performance,
+  keyboard/screen-reader access, Norman's interaction foundations, Krug's
+  usability rules, and Nielsen heuristic audits.
 ---
 
 # Fantastic UI — instrument-grade marketing pages and product surfaces
@@ -174,12 +175,14 @@ primary actions (discoverability vs minimalism).
 
 ## Step 0 — Write the one-sentence brief first
 
-Before any code, commit to a named direction in one sentence. Example from the
-worked case:
+Before any code, commit to a named direction in one sentence that ends with
+an **imagery clause**. This sentence is **the brief line**; every later
+reference to it means this sentence. Example from the worked case:
 
 > "Dark, instrument-grade market terminal elevated to editorial: warm-charcoal
 > ground, single sodium-amber accent, teal/red only as semantic signal colors,
-> humanist serif display over monospace data."
+> humanist serif display over monospace data; imagery: warp plate behind the
+> atmosphere band and the hero copy column."
 
 ### Step 0a — Run the preset check FIRST (do not skip, do not skip silently)
 
@@ -193,8 +196,9 @@ Work the gates in order and stop at the first that answers:
 2. **Does the codebase already have a token system?** Grep the global
    stylesheet for token names, accent variables, shared primitive classes. If
    one exists → **no preset.** Recover its brief and extend it (Phase B of
-   `recursive-polish.md`). A preset here would run a second design system in
-   parallel, which is the exact failure Shift 1 forbids.
+   `recursive-polish.md`); the recovered brief line still gets an imagery
+   clause. A preset here would run a second design system in parallel, which
+   is the exact failure Shift 1 forbids.
 3. **Otherwise, score the request** against the signal table in
    `theme-presets.md` — medium, domain, imagery, density — and apply each
    preset's disqualifier.
@@ -208,15 +212,24 @@ Then act on the confidence you actually have:
 | A preset half-fits, or a disqualifier fires | **Say so and write a fresh brief.** A stretched preset produces exactly the template output the Anti-Template Policy exists to prevent. |
 | Nothing fits | Fresh brief via Step 0. Note which preset was closest and why it failed. |
 
-**Always announce the outcome in one line before building**, so the user can
-redirect before code exists:
+**Always announce the outcome in one line before building**, with the
+imagery clause attached, so the user can redirect before code exists. When a
+preset is adopted, this announcement is the brief line:
 
 > Using **Terracotta Commerce** — retail storefront, product photography,
-> soft-shadow cards. Say the word if you'd rather I write a fresh direction.
+> soft-shadow cards. Imagery: your product shots via `compress`, timber band
+> via `ai`, else `plate --style warp`. Say the word if you'd rather I write a
+> fresh direction.
 
 > No preset fits: this is a data-dense operator console, and every preset
 > either fails at density or has no accent to encode state. Writing a fresh
-> brief.
+> brief. Imagery: warp plate behind the page header + svg grain on empty
+> states (gen_atmosphere, seed 7).
+
+Every path needs the clause: preset, fresh brief, and recovered brief alike.
+"Imagery: none" is allowed only with its reason ("dense table route — a plate
+would sit behind numbers"). Slots, tools and limits:
+[references/ai-atmosphere.md](references/ai-atmosphere.md).
 
 **Known gap, state it rather than forcing a fit:** all eleven presets are
 content- or product-led. **Data-heavy analytics, developer tools, dashboards
@@ -318,6 +331,13 @@ Non-negotiables for any canvas animation (full annotated pattern in
 Smaller instances of the same idea (sparklines painted into feature cards)
 make the whole page feel alive without any animation library.
 
+**Imagery is part of the system.** Proof is live; atmosphere is *generated
+from the tokens* by `scripts/gen_atmosphere.py`, never chosen from stock, and
+never shows UI, text, people, logos or fake data. Plates follow
+[the plate rule](references/ai-atmosphere.md#the-plate-rule): static,
+`aria-hidden`, ≤30 KB, never behind data. Every page's imagery decision is
+the brief line's imagery clause.
+
 ### 4. Page rhythm — dense, alternating, specific
 
 Structure the page as alternating **texture bands** rather than uniform
@@ -332,9 +352,12 @@ sections. The worked skeleton, generalizable:
 5. **Feature bento** — asymmetric grid (3+3 / 2+2+2 columns, 6→2→1
    responsive), each card carrying a *proof artifact* (sparkline, pill row,
    mini-table), never an icon
-6. **Atmosphere band** — full-bleed section over a subtle AI-generated
-   background (see [references/ai-atmosphere.md](references/ai-atmosphere.md))
-   carrying the accountability/credibility content
+6. **Atmosphere band** — full-bleed section over a token plate under a
+   token scrim carrying the accountability/credibility content. Its big-type
+   stats are the plate rule's one carve-out: scrim plus a passing real-pixel
+   gate ([ai-atmosphere.md](references/ai-atmosphere.md#the-plate-rule)).
+   The hero backdrop and section dividers may take plates too — three
+   rasters per page at most
 7. **Interactive toggle section** — one real state switch (markets, plans,
    platforms) with proper ARIA tabs, proving the page is an application
 8. **Principles trio** — the "why trust us" values, stated plainly
@@ -353,7 +376,8 @@ These are pass/fail, checked before shipping:
 **Performance**
 - Zero webfonts, zero animation/UI libraries — the page needs only the
   framework it lives in
-- Any raster asset ≤ ~30 KB (generate large, compress hard to webp)
+- Any raster asset ≤ 30 KB WebP (the generator enforces it); decorative
+  imagery static and `aria-hidden`
 - Motion on compositor properties only (`transform`, `opacity`); scroll work
   via IntersectionObserver, never scroll handlers doing layout reads
 - Explicit dimensions on media; hero canvas gets width/height attributes
@@ -436,6 +460,9 @@ visibly primary (span, position, density — not louder color), and nesting
 depth encoded by the ground scale (each subpanel level exactly one ground
 step lighter, hairline-separated — never stacked shadows, max ~3 levels).
 
+**Imagery in-product:** one plate per route at most, never behind data —
+[the plate rule](references/ai-atmosphere.md#the-plate-rule).
+
 **Retrofit procedure for existing screens** (details in the reference):
 
 1. **Audit** — inventory every page/panel/subpanel; screenshot before;
@@ -470,7 +497,8 @@ before starting any whole-app job. It adds, on top of everything above:
 - **Shared-primitives-first ordering**, then routes by traffic (with a stated
   fallback ranking when no analytics exist)
 - **Batches of 3–5 surfaces** with a presentation-only diff gate, per-batch
-  a11y pass, and a persistent ledger file that survives session boundaries
+  a11y pass, an imagery slot check per route, and a persistent ledger file
+  that survives session boundaries
 - **Loop-until-dry completion**: re-run the inventory from scratch at the end;
   the job is done only when a fresh sweep finds zero non-done surfaces and the
   mechanical proofs (hex-grep zero, axe-core zero critical/serious) pass
@@ -552,6 +580,10 @@ Run through this before calling the page done:
 - [ ] The one-sentence brief still describes the shipped page
 - [ ] One accent color; semantic colors appear only with their meaning
 - [ ] No webfonts, no new dependencies, assets ≤ 30 KB each
+- [ ] Imagery plan executed, or its absence justified in the brief line
+- [ ] Every raster ≤ 30 KB WebP, `aria-hidden`, explicit dimensions, static;
+      every asset (`plate`, `ai`, `compress`, `svg`) has an imagery-ledger line
+- [ ] Text over any plate passes contrast measured on real pixels
 - [ ] Hero shows the product *running*, not a picture of it
 - [ ] `prefers-reduced-motion`: every animation has a static path (verify by
       toggling the OS setting or DevTools emulation)
@@ -570,7 +602,8 @@ Run through this before calling the page done:
 
 Additional gates when the work touched product surfaces:
 
-- [ ] No hex/rgb literals outside the token file (grep proves it)
+- [ ] No hex/rgb literals outside the token file (grep proves it; token
+      `color-mix(` scrims and tints pass)
 - [ ] Every panel uses the shared anatomy (eyebrow header, hairline
       separation, actions right) — no one-off panel styles
 - [ ] Subpanel nesting encoded by ground-scale steps, ≤ 3 levels, no
@@ -588,61 +621,41 @@ Additional gates when the work touched product surfaces:
 
 ## References
 
-- [references/visual-reference-analysis.md](references/visual-reference-analysis.md) — observable image and typography analysis, inference boundaries, reusable briefs, exclusions, and translation into responsive native UI. Read at Step 0b for reference-driven design.
-
-- `scripts/verify-preset.mjs` + `scripts/preset-gates.json` — runnable gates for
-  all eleven presets: seven universal (contrast, webfonts, asset weight, reflow,
-  focus ring, reduced motion, token roles) plus per-preset accent, separation
-  strategy, and stated traps. Handles a stated accent deviation by resolving the
-  live token. Does NOT check density or whether the result reads as the
-  direction. See "Verifying an applied preset" in theme-presets.md.
 - [references/theme-presets.md](references/theme-presets.md) — eleven named
-  directions with contrast-validated token blocks and component grammar, the
-  selection signal table, a disambiguation note for the four warm-yellow
-  directions, the shared device set, and the procedure for adding a preset:
-  Coastal Editorial, Blueprint Mono, Marigold Report, Atelier Warm, Terracotta
-  Commerce, Midnight Showroom, Broadcast Light, Studio Kinetic, Campus Bright,
-  Charter Navy, Dispatch Yellow. Read at Step 0, before writing a brief.
-- [references/css-architecture.md](references/css-architecture.md) — the full
-  token system, scoping rules, shared primitives, and responsive patterns.
-  Read when writing the stylesheet.
-- [references/ui-mechanics.md](references/ui-mechanics.md) — the mechanics layer:
-  hierarchy dials, the spacing scale and ambiguous-spacing bug, type scale and
-  line-length/line-height coupling, HSL scale construction (saturation at the extremes,
-  hue-rotation brightness, tinted-grey ranges, two contrast escape hatches), depth on a
-  dark ground vs. the light-source/two-part-shadow mechanics, empty states, form
-  mechanics, and the AI-default checklist. Derived from *Refactoring UI* (Wathan &
-  Schoger) and adapted — rules that invert on this skill's dark ground are marked ↯.
-  Read when a surface looks off but the palette and structure are right.
-- [references/canvas-hero.md](references/canvas-hero.md) — annotated live
-  canvas hero + sparkline + scroll-reveal code with all lifecycle handling.
-  Read when building any canvas or reveal behavior.
-- [references/ai-atmosphere.md](references/ai-atmosphere.md) — generating and
-  compressing AI atmosphere backgrounds (prompt recipe + pipeline script).
-  Read when a section needs an atmospheric background image.
-- [references/product-surfaces.md](references/product-surfaces.md) — the full
-  retrofit procedure for existing app pages, panel and subpanel anatomy,
-  nesting/depth rules, state design (empty/loading/error), and density
-  guidance. Read whenever modifying or restyling in-product UI.
-- [references/recursive-polish.md](references/recursive-polish.md) — the
-  whole-app sweep mode: recursive surface inventory, prior-art reconciliation,
-  shared-first ordering, batch loop with ledger, loop-until-dry completion.
-  Read whenever the scope is every surface of the app rather than one screen.
-- [references/wcag-audit.md](references/wcag-audit.md) — the accessibility
-  check-and-fix phase: token contrast matrix script, semantic tints as
-  grounds, the opacity rule and why it compounds, automated sweep
-  (axe-core / Lighthouse) with `violations` vs `incomplete` triage, how to
-  validate your own contrast checker (and the four bugs that make one lie),
-  auditing the surface that actually renders, the four manual passes, WCAG 2.2
-  new criteria, fix patterns keyed to the design system — including never
-  faking a grid role, and replacing a dimming that encodes state — guard tests
-  with mutation checks, and the report/re-audit loop.
-  Read when entering the accessibility phase or on any a11y/WCAG request.
+  directions (Coastal Editorial, Blueprint Mono, Marigold Report, Atelier Warm,
+  Terracotta Commerce, Midnight Showroom, Broadcast Light, Studio Kinetic,
+  Campus Bright, Charter Navy, Dispatch Yellow): contrast-validated tokens,
+  grammar, imagery, signal table. Read at Step 0a, before writing a brief.
+- [references/visual-reference-analysis.md](references/visual-reference-analysis.md)
+  — image/typography analysis, observed vs. inferred. Read at Step 0b.
+- [references/ai-atmosphere.md](references/ai-atmosphere.md) — the canonical
+  plate rule, slots, tool order (`plate` → `svg` → `ai` → `compress`), scrim,
+  real-pixel contrast. Read when writing the imagery clause and before any asset.
+- [references/css-architecture.md](references/css-architecture.md) — token
+  system, scoping, primitives, responsive patterns. Read when writing the stylesheet.
+- [references/ui-mechanics.md](references/ui-mechanics.md) — hierarchy, spacing,
+  type/line-height, HSL construction, depth, empty states, forms, AI-default
+  checklist (*Refactoring UI*, dark-ground inversions marked ↯). Read when a
+  surface looks off but the palette and structure are right.
+- [references/canvas-hero.md](references/canvas-hero.md) — live canvas hero,
+  sparklines, scroll reveal, lifecycle. Read when building any canvas or reveal.
+- [references/product-surfaces.md](references/product-surfaces.md) — retrofit
+  procedure, panel anatomy, nesting, states. Read whenever modifying in-product UI.
+- [references/recursive-polish.md](references/recursive-polish.md) — whole-app
+  sweep with ledger and loop-until-dry. Read when the scope is every surface.
+- [references/wcag-audit.md](references/wcag-audit.md) — contrast matrix,
+  opacity rule, axe `violations` vs `incomplete`, checker validation, manual
+  passes, text over imagery, fix patterns, guards. Read when entering the
+  accessibility phase or on any a11y/WCAG request.
+- `scripts/verify-preset.mjs` + `scripts/preset-gates.json` — runnable gates for
+  all eleven presets; not density or "reads as the direction". Read "Verifying
+  an applied preset" in theme-presets.md before running it.
+- `scripts/gen_atmosphere.py` — `tokens`, `plate`, `svg` (HTML/JSX/CSS), `ai`,
+  `compress`; ≤30 KB, a ledger line per asset. Run it per ai-atmosphere.md §4.
 
 ### Consolidated interaction references
 
-The following references are bundled with this skill so the former standalone
-frameworks remain available without invoking a second skill:
+Bundled so the former standalone frameworks need no second skill:
 
 - [Design foundations](references/design-everyday-things/) — affordances,
   signifiers, mappings, constraints, feedback, conceptual models, human error,

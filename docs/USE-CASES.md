@@ -107,7 +107,7 @@ This module is valuable even if you never touch the visual design — it's a sta
 Two reference modules you can invoke by name when the job calls for them:
 
 - **Canvas hero** (`references/canvas-hero.md`) — a fully annotated live-canvas hero with the complete lifecycle contract, plus card sparklines and scroll reveals. Ask: *"give the hero a live canvas like the RRG example."*
-- **AI atmosphere** (`references/ai-atmosphere.md`) — AI-generated atmosphere backgrounds done reproducibly: a prompt recipe and a committed pipeline script that compresses to a ≤ 30 KB webp. The asset is regenerable, not a mystery PNG. Ask: *"add an atmosphere band behind the stats section."*
+- **Imagery** (`references/ai-atmosphere.md`) — every page gets an imagery decision. The default is a plate rendered from your own palette tokens by `scripts/gen_atmosphere.py`: keyless, seeded and ≤ 30 KB WebP, with a ledger line recording how it was made. AI imagery is used only for photographic slots, and it falls back to a plate. The asset is regenerable, not a mystery PNG. Ask: *"add an atmosphere band behind the stats section"* or *"give the empty states some texture."*
 
 ---
 

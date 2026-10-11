@@ -8,7 +8,8 @@
  * Gates come from preset-gates.json, which is transcribed from
  * references/theme-presets.md. Seven gates are universal; three more are
  * per-preset (accent, separation strategy, radii) plus each direction's own
- * stated traps.
+ * stated traps. One ADVISORY check counts decorative imagery (see
+ * imageryAdvisory below): it can warn, it never fails the run.
  *
  * WHAT THIS CANNOT CHECK, stated so nobody mistakes a pass for a verdict:
  *   - density (airy / medium / dense) — a composition judgement
@@ -48,6 +49,8 @@ const P = GATES.presets[PRESET];
 const U = GATES.universal;
 const results = [];
 const record = (id, pass, evidence, note) => results.push({ id, pass, evidence, note });
+// Advisory rows print INFO/WARN and never count toward the exit code.
+const advise = (id, warn, evidence, note) => results.push({ id, pass: true, advisory: true, warn, evidence, note });
 
 // ---------- colour helpers, injected into the page ----------
 // Canvas resolution handles oklab/color-mix/gradients and composites alpha.
@@ -90,6 +93,39 @@ function visibleTextNodes(scope){
   return out;
 }
 `;
+
+// ---------- advisory: decorative imagery count ----------
+// Every page owes an imagery decision (references/ai-atmosphere.md). Zero
+// images is allowed — with a reason stated in the brief — so this WARNS and
+// never fails. The hard limit stays in gate 3 (maxAssetKB).
+async function imageryAdvisory(page, scope, cfg) {
+  const r = await page.evaluate((scope) => {
+    const root = document.querySelector(scope) || document.body;
+    const all = [root, ...root.querySelectorAll("*")];
+    const decorative = (el) => el.getAttribute("aria-hidden") === "true" || el.getAttribute("alt") === "";
+    const imgs = [...root.querySelectorAll("img")];
+    const decoImgs = imgs.filter(decorative);
+    const cssUrls = new Set();
+    for (const el of all) {
+      for (const pseudo of [null, "::before", "::after"]) {
+        const bg = getComputedStyle(el, pseudo).backgroundImage;
+        if (bg && bg !== "none") for (const m of bg.matchAll(/url\(["']?([^"')]+)["']?\)/g)) cssUrls.add(m[1]);
+      }
+    }
+    const svgs = [...root.querySelectorAll("svg[aria-hidden='true']")]
+      .filter(el => !el.closest("button, a, [role=button]"));      // icons in controls are not imagery
+    const unsized = decoImgs.filter(el => !el.getAttribute("width") || !el.getAttribute("height"))
+      .map(el => (el.getAttribute("src") || "").split("/").pop()).slice(0, 4);
+    return { decoImgs: decoImgs.length, otherImgs: imgs.length - decoImgs.length, cssUrls: cssUrls.size, svgs: svgs.length, unsized };
+  }, scope);
+  const total = r.decoImgs + r.cssUrls + r.svgs;
+  const notes = [];
+  if (total === 0 && cfg.warnWhenZero) notes.push("0 images — state the reason in the brief");
+  if (r.unsized.length) notes.push(`decorative <img> without width/height: ${r.unsized.join(", ")}`);
+  advise("imagery", notes.length > 0,
+    `${total} decorative (${r.decoImgs} <img>, ${r.cssUrls} css url(), ${r.svgs} aria-hidden <svg>); ${r.otherImgs} content <img>`,
+    notes.join(" | "));
+}
 
 // ---------- runner ----------
 const { chromium } = await import(join(process.cwd(), "node_modules", "playwright", "index.mjs"))
@@ -270,6 +306,9 @@ for (const theme of themeList) {
       ? "preset separates with shadows but none are present"
       : "preset separates with hairlines — shadows found (theme-presets.md: do not mix the two strategies)");
 
+  // advisory: decorative imagery (never fails)
+  await imageryAdvisory(page, SCOPE, U.imageryAdvisory || { warnWhenZero: true });
+
   // 10. per-preset geometry traps
   for (const trap of (P.traps || [])) {
     if (trap.kind !== "geometry") continue;
@@ -336,10 +375,12 @@ console.log(`  ${URL_}${THEMES.length ? `  themes: ${THEMES.join(", ")}` : ""}\n
 let failed = 0;
 for (const r of results) {
   if (!r.pass) failed++;
-  console.log(`  ${r.pass ? "PASS" : "FAIL"}  ${pad(r.id, 34)} ${r.evidence}`);
+  const label = r.advisory ? (r.warn ? "WARN" : "INFO") : r.pass ? "PASS" : "FAIL";
+  console.log(`  ${label}  ${pad(r.id, 34)} ${r.evidence}`);
   if (r.note) console.log(`        ${" ".repeat(34)} ${r.note}`);
 }
-console.log(`\n  ${failed === 0 ? "All gates passed" : failed + " gate(s) failed"} — ${results.length} checked`);
+const gates = results.filter(r => !r.advisory).length;
+console.log(`\n  ${failed === 0 ? "All gates passed" : failed + " gate(s) failed"} — ${gates} checked, ${results.length - gates} advisory`);
 console.log(`  NOT CHECKED: density (${P.density}), and whether the result reads as the direction.`);
 console.log(`  A green run means no gate was violated. It is not a verdict on the design.\n`);
 process.exit(failed === 0 ? 0 : 1);

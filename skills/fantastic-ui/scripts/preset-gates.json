@@ -23,6 +23,10 @@
     "requireFocusRing": true,
     "requireReducedMotionPath": true,
     "forbidHexOutsideTokens": true,
+    "imageryAdvisory": {
+      "$comment": "ADVISORY, never a failure. Counts decorative imagery (aria-hidden or alt=\"\" <img>, css url() backgrounds, aria-hidden <svg> outside controls). Zero is allowed with a reason stated in the brief — see references/ai-atmosphere.md. The hard limit is maxAssetKB.",
+      "warnWhenZero": true
+    },
     "requiredTokenRoles": [
       "ground", "ink", "ink-2", "muted", "hair"
     ],

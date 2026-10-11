@@ -103,6 +103,8 @@ look:
 
 Never ship the pale-card + white-text pairing.
 
+**Imagery.** Soft daylight interiors and destinations via `ai` (no identifiable people), the user's library via `compress`; else warm `plate --style warp` from the sea-grey ground and periwinkle.
+
 ### Component grammar
 
 - **Sheet-on-backdrop.** The page is a `--panel` sheet at `--r-sheet`, inset
@@ -113,10 +115,11 @@ Never ship the pale-card + white-text pairing.
   masked *over* the lower third of the letterforms. The interruption is the
   idea — flat type on a photo is the template version of this.
 - **Photo card.** `--r-card`, image fills, label block bottom-left over a
-  `linear-gradient(to top, rgba(0,0,0,.65), transparent 55%)` scrim, and an
-  optional frosted price chip top-right (`background: rgba(255,255,255,.85);
-  backdrop-filter: blur(8px)`). Title 14px/600, then a rating and a location
-  line at 11px.
+  `linear-gradient(to top, color-mix(in oklab, var(--ink) 65%, transparent),
+  transparent 55%)` scrim, and an optional frosted price chip top-right
+  (`background: color-mix(in oklab, var(--panel) 85%, transparent);
+  backdrop-filter: blur(8px)`). Both keep the original 65% and 85% alpha.
+  Title 14px/600, then a rating and a location line at 11px.
 - **Feature card.** `--accent` fill, `--r-panel`, with a white `--r-tile` icon
   square at the left. Body copy at 11–12px in `--ink` (see the trap above).
 - **Stat cluster.** Dark filled circle (36px) with a white glyph, big number at
@@ -180,6 +183,8 @@ layout, and excellent when the layout is strong.
 Every pair above clears AA by a wide margin — this direction's risk is not
 contrast, it is monotony. Guard against it with scale contrast and the
 light/dark alternation below, never by sneaking in a color.
+
+**Imagery.** Specimen plates: the user's project photos via `compress`, desaturated; else `ai` greyscale material close-ups (concrete, steel, drafting paper) or `plate --style contour`. No accent, so map the plate's `accent` role to `--hair-lit`.
 
 ### Component grammar
 
@@ -257,6 +262,8 @@ direction. Marigold is a *fill*: put `--ink` on it (8.42:1). If a block truly
 needs white type, drop to `--accent-ink` and accept the darker, less sunny
 result.
 
+**Imagery.** Greyscale workplace and material photography via `compress` or `ai`; covers and dividers as `plate --style grain`. Marigold lives in the bleed blocks, never in a plate — map `accent` to `--hair-lit`.
+
 ### Component grammar
 
 - **Bleed block.** Solid `--accent` panel running off the page edge, carrying a
@@ -286,8 +293,8 @@ result.
 
 Gallery-like and tactile. Suits interiors, architecture, fashion, craft, food —
 work where material and texture *are* the argument. It has no bright accent at
-all; warmth comes from the ground itself. The direction depends on good
-photography and dies without it.
+all; warmth comes from the ground itself. The direction needs its photo slots
+filled; `ai` material close-ups qualify.
 
 ```css
 .page {
@@ -326,6 +333,8 @@ photography and dies without it.
 cream ground. The reference uses it for tiny annotation labels, which fails.
 Body and label copy take `--ink-2`; reserve `--muted` for rules, dividers and
 swatch borders.
+
+**Imagery.** Material close-ups (linen, oak, plaster, stone) in soft oat light via `ai`, the user's work via `compress`; moodboard gaps take `plate --style grain` swatches. Every photo slot is filled — empty frames are the failure mode.
 
 ### Component grammar
 
@@ -403,6 +412,8 @@ analytical, where the softness reads as imprecision.
 and "Shop Now" buttons all fail. Either put `--ink` on the terracotta fill
 (6.47:1), or use `--accent-ink` for a white-label button (5.70:1). The second
 is usually right for a primary CTA, where white type carries more authority.
+
+**Imagery.** Product shots are the user's own via `compress` (a generated product is fake data); lifestyle rooms and the timber band via `ai`; else `plate --style warp` in warm white and terracotta.
 
 ### Component grammar
 
@@ -483,6 +494,8 @@ white on amber is 2.13:1. Amber buttons take `--on-accent` (8.63:1). The
 constant across every preset here is that **white is never the accent's
 partner**, on any ground.
 
+**Imagery.** Cut-out products are the user's own via `compress`, never generated; behind the content column, `plate --style warp` in near-black and amber at `--intensity` ≤ 0.25.
+
 ### Component grammar
 
 - **Ghost wordmark.** Section-scale lettering (~150px, weight 800) in
@@ -553,6 +566,8 @@ an index of episodes rather than an argument.
 audit. Episode metadata, durations and dates all take `--ink-2`. Reserve
 `--muted` for separators and inactive icons.
 
+**Imagery.** Thumbnails are the user's own via `compress`; the hero photo via `ai` mood photography (studio, equipment, no people), else `plate --style warp` in cool greys under the uniform wash.
+
 ### Component grammar
 
 - **Straddling platform bar.** A white `--r-pill` bar carrying "listen on"
@@ -560,8 +575,9 @@ audit. Episode metadata, durations and dates all take `--ink-2`. Reserve
   height. It is the page's most recognisable object and the reason the hero
   doesn't read as a stock banner.
 - **Hero scrim.** Full-bleed photograph under a
-  `linear-gradient(rgba(10,12,16,.55), rgba(10,12,16,.72))` wash with centred
-  white display type. The wash is uniform rather than bottom-weighted, because
+  `linear-gradient(color-mix(in oklab, var(--invert) 55%, transparent),
+  color-mix(in oklab, var(--invert) 72%, transparent))` wash with centred
+  white display type. It keeps the original 55% and 72% alpha. The wash is uniform rather than bottom-weighted, because
   the type is centred rather than baseline-aligned.
 - **Four-up episode card.** `--panel`, `--r-card`, 16:9 thumbnail, two-line
   title at 13px/600 `--ink`, then a play link with a leading triangle in
@@ -623,6 +639,8 @@ work sold on personality as much as capability.
 **The trap.** `--muted` at 3.45:1 and `--grid` at 1.18:1 are both below AA and
 both look usable in a comp. Grid lines are texture; muted is for inactive
 states. All copy takes `--ink` or `--ink-2`.
+
+**Imagery.** Cut-out people must be the user's own team photos via `compress` — never generated people; with none, drop the device and let `svg --style grid` (the graph-paper ground) and the tilted path carry the page.
 
 ### Component grammar
 
@@ -703,6 +721,8 @@ word in it. That highlight only works over the dark hero scrim (11.09:1). On a
 white section, highlight by weight or by an `--accent-dim` marker-pen
 background behind `--ink`, never by colouring the type.
 
+**Imagery.** Course thumbnails are the user's own via `compress`; a missing one gets `plate --style grain` seeded by the course id — same palette, distinct texture, never a stock classroom.
+
 ### Component grammar
 
 - **Highlight word.** One word per headline in `--accent`, and only on a dark
@@ -774,6 +794,8 @@ reaches for — measures 4.28:1 against white and fails; `--accent` above is
 tuned to clear it. Second, red on the navy ground is **3.47:1**: never set red
 type or red icons on a navy section. Inside navy, action is a white or
 red-filled button, never coloured text.
+
+**Imagery.** Aircraft and cabin photography from the operator's library via `compress`; sky, cloud and material mood plates via `ai` (no livery, no people); else `plate --style warp` in navy for the band.
 
 ### Component grammar
 
@@ -850,6 +872,8 @@ the worst measured pairing in the file. Yellow blocks take `--on-accent`
 without exception. If a design calls for white type over yellow, the design is
 wrong, not the token.
 
+**Imagery.** Flat blocks replace photography; vehicle shots are the user's own via `compress`; texture, if any, is `svg --style grain` on the black band. "None — flat-colour direction" is a valid stated reason here.
+
 ### Component grammar
 
 - **Checker stripe.** A 16px-tall band of alternating `--accent` and `--invert`
@@ -903,7 +927,7 @@ even when every other signal matches.**
 |---|---|
 | **Medium** | marketing page · in-app screen · document/PDF · slide deck · storefront |
 | **Domain** | travel & hospitality · trades & engineering · professional services · interiors, fashion, craft, food · retail & catalogue · data & analytics |
-| **Imagery** | rich lifestyle · product shots · material/texture · greyscale or stock · none available |
+| **Imagery** | rich lifestyle · product shots · material/texture · greyscale or stock · none supplied → generate (`plate`, or `ai` for photo slots) |
 | **Density** | airy · medium · dense |
 
 ### Scoring
@@ -911,19 +935,22 @@ even when every other signal matches.**
 | Preset | Medium | Domain | Imagery | Density | **Disqualified when** |
 |---|---|---|---|---|---|
 | **A · Coastal Editorial** | marketing | travel, hospitality, listings | rich lifestyle | airy | the surface is data-dense or operator-facing |
-| **B · Blueprint Mono** | marketing, in-app | trades, engineering, pro services | specimen, greyscale, none | dense | the brand needs warmth or playfulness |
+| **B · Blueprint Mono** | marketing, in-app | trades, engineering, pro services | specimen, greyscale, none supplied | dense | the brand needs warmth or playfulness |
 | **C · Marigold Report** | document/PDF | any business subject | greyscale | dense | the output is an interactive screen |
-| **D · Atelier Warm** | deck, marketing | interiors, fashion, craft, food | material/texture | medium | there is no good photography to carry it |
+| **D · Atelier Warm** | deck, marketing | interiors, fashion, craft, food | material/texture | medium | its photo slots can't be filled (`ai` material close-ups qualify) |
 | **E · Terracotta Commerce** | storefront, marketing | retail, catalogue | product shots | medium | the work is analytical or precision-critical |
 | **F · Midnight Showroom** | marketing, storefront | vehicles, luxury goods, hire | cut-out product on black | medium | the page reports numbers rather than sells objects |
 | **G · Broadcast Light** | marketing, in-app index | podcasts, publishing, courses | episode thumbnails | medium | the page must argue a position, not list content |
 | **H · Studio Kinetic** | marketing | studios, agencies, consultancies | cut-out people | medium | the subject is formal, regulated or safety-critical |
 | **I · Campus Bright** | marketing, catalogue | courses, bootcamps, membership | course thumbnails | dense | the brand is luxury, restrained or B2B-formal |
 | **J · Charter Navy** | marketing, booking | aviation, marine, logistics, finance | corporate, aircraft, people | medium | the brand wants warmth or a consumer-casual voice |
-| **K · Dispatch Yellow** | marketing, booking | taxi, courier, trades, plant hire | minimal or none | medium | the work is premium, understated or editorial |
+| **K · Dispatch Yellow** | marketing, booking | taxi, courier, trades, plant hire | minimal or none supplied | medium | the work is premium, understated or editorial |
 
 Two signals is the adoption threshold. One signal is a coincidence — ask
-rather than assume.
+rather than assume. "No imagery supplied" is never a disqualifier by itself:
+the slots get generated per [ai-atmosphere.md](ai-atmosphere.md). Two things
+generation cannot supply are the user's own products and people — E, F and H
+need those from the user or lose that device.
 
 ### Worked calls
 
@@ -974,7 +1001,7 @@ skill exists to prevent.
 | **A · Coastal Editorial** | Cool pale | Periwinkle | Hairline | Airy | Lifestyle | Travel, hospitality, listings | Dense operator screens |
 | **B · Blueprint Mono** | Neutral paper | None | Hairline | Dense | Specimen | Trades, engineering, pro services | Warmth, playfulness |
 | **C · Marigold Report** | White page | Marigold | Rule | Dense | Greyscale | Proposals, plans, reports, PDF | Interactive screens |
-| **D · Atelier Warm** | Oat cream | None | Hairline | Medium | Moodboard | Interiors, fashion, craft, food | Weak photography |
+| **D · Atelier Warm** | Oat cream | None | Hairline | Medium | Moodboard | Interiors, fashion, craft, food | Unfilled photo slots |
 | **E · Terracotta Commerce** | Warm white | Terracotta | **Shadow** | Medium | Product | E-commerce, catalogues | Analytical work |
 | **F · Midnight Showroom** | Near-black | Amber | Hairline | Medium | Cut-out product | Vehicles, watches, spirits, hire | Data reporting |
 | **G · Broadcast Light** | Cool white | None | Hairline | Medium | Thumbnails | Podcasts, publishers, catalogues | Argument-led pages |
@@ -1016,6 +1043,11 @@ installed; the script resolves them from the working directory.
 contrast in every declared theme · zero webfonts · assets ≤30 KB · reflow
 320→1920 · a `:focus-visible` outline rule for every interactive element · a
 `prefers-reduced-motion` block · every required token role defined.
+
+**One advisory, never a failure:** a count of decorative imagery (`aria-hidden`
+or `alt=""` images, CSS `url()` layers, `aria-hidden` SVG outside controls). At
+zero it warns "state the reason in the brief" — zero is allowed with a reason;
+the ≤30 KB asset gate stays hard.
 
 **Per-preset gates:** the accent (or, for B/D/G/H, its declared absence) ·
 the separation strategy — E and H separate with shadows, everything else does

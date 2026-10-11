@@ -13,7 +13,25 @@ contract, established once and applied to every effect:
   resume when visible. A marketing tab left open must not spin a core.
 - **Full cleanup**: every effect returns a cleanup that cancels RAF and
   removes every listener it added.
-- **Palette-locked**: canvas colors are the same hex values as the CSS tokens.
+- **Palette-locked**: canvas colors are the CSS tokens, read at runtime.
+  A canvas cannot read `var()`, so each effect resolves the tokens once with
+  `getComputedStyle` (the `tokenHex` helper below) and derives every alpha
+  variant from them. No colour constant is ever invented in drawing code.
+
+```ts
+// Resolve a colour token to "#rrggbb", whatever syntax the token file uses
+// (hex, rgb, hsl, oklch): paint it into one pixel and read the pixel back.
+export const tokenHex = (el: Element, name: string) => {
+  const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
+  ctx.fillStyle = getComputedStyle(el).getPropertyValue(name).trim();
+  ctx.fillRect(0, 0, 1, 1);
+  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+  return "#" + [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("");
+};
+// Alpha variant of a resolved token: "#rrggbb" + "aa".
+export const fade = (hex: string, a: number) =>
+  a >= 1 ? hex : hex + Math.round(a * 255).toString(16).padStart(2, "0");
+```
 
 ## The hero canvas (worked example: orbiting-dots RRG)
 
@@ -49,24 +67,32 @@ useEffect(() => {
   // Each dot orbits at a base radius with a slow sinusoidal wobble, so paths
   // look organic, not mechanical. Most dots wear the accent color; a couple
   // wear the semantic up/down colors so the legend reads truthfully.
-  const SOD = "#f2a83c", UP = "#35c4ac", DOWN = "#e3563f";
+  // Colours are the tokens, read once per effect (palette-locked, above).
+  const SOD = tokenHex(cv, "--sodium"), UP = tokenHex(cv, "--up");
+  const DOWN = tokenHex(cv, "--down"), HAIR_LIT = tokenHex(cv, "--hair-lit");
+  // Seeded PRNG (mulberry32), never Math.random(): the same seed draws the same
+  // frame, so screenshot diffs and the reduced-motion still are reproducible.
+  const mulberry32 = (a: number) => () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const rnd = mulberry32(7);
   const N = 14;
   const dots = Array.from({ length: N }, (_, i) => ({
-    base: 0.28 + Math.random() * 0.5,        // orbit radius (fraction of R)
-    amp: 0.04 + Math.random() * 0.05,        // wobble amplitude
-    ang: Math.random() * Math.PI * 2,        // start angle
-    spd: (0.06 + Math.random() * 0.14) * -1, // clockwise, varied speed
-    wob: Math.random() * Math.PI * 2,
-    wobs: 0.2 + Math.random() * 0.5,
+    base: 0.28 + rnd() * 0.5,                // orbit radius (fraction of R)
+    amp: 0.04 + rnd() * 0.05,                // wobble amplitude
+    ang: rnd() * Math.PI * 2,                // start angle
+    spd: (0.06 + rnd() * 0.14) * -1,         // clockwise, varied speed
+    wob: rnd() * Math.PI * 2,
+    wobs: 0.2 + rnd() * 0.5,
     role: i < 2 ? "up" : i >= N - 2 ? "down" : "sod",
     trail: [] as Array<[number, number]>,
   }));
-  // hex + alpha-suffix trick: "#f2a83c" + "80" — cheap per-segment fading
-  const col = (role: string, a: number) => {
-    const c = role === "up" ? UP : role === "down" ? DOWN : SOD;
-    if (a >= 1) return c;
-    return c + Math.round(a * 255).toString(16).padStart(2, "0");
-  };
+  // hex + alpha-suffix trick on the resolved token — cheap per-segment fading
+  const col = (role: string, a: number) =>
+    fade(role === "up" ? UP : role === "down" ? DOWN : SOD, a);
 
   let raf = 0;
   const frame = () => {
@@ -77,11 +103,11 @@ useEffect(() => {
     for (let k = 1; k <= 4; k++) {
       ctx.beginPath();
       ctx.arc(cx, cy, (R * k) / 4.2, 0, 7);
-      ctx.strokeStyle = "rgba(65,59,40,.5)"; // = --hair-lit at half alpha
+      ctx.strokeStyle = fade(HAIR_LIT, 0.5);
       ctx.lineWidth = 1;
       ctx.stroke();
     }
-    ctx.strokeStyle = "rgba(242,168,60,.22)";
+    ctx.strokeStyle = fade(SOD, 0.22);
     ctx.beginPath();
     ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy + R);
     ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy);
@@ -162,6 +188,7 @@ useEffect(() => {
     root.querySelectorAll<HTMLCanvasElement>("[data-spark]"),
   );
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const SOD = tokenHex(root, "--sodium"), SOD_HI = tokenHex(root, "--sodium-hi");
   const draw = (cv: HTMLCanvasElement) => {
     const ctx = cv.getContext("2d");
     if (!ctx) return;
@@ -178,22 +205,22 @@ useEffect(() => {
       i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
     });
     const stroke = ctx.createLinearGradient(0, 0, w, 0);
-    stroke.addColorStop(0, "rgba(242,168,60,.5)");
-    stroke.addColorStop(1, "#f2a83c");
+    stroke.addColorStop(0, fade(SOD, 0.5));
+    stroke.addColorStop(1, SOD);
     ctx.strokeStyle = stroke;
     ctx.lineWidth = 1.6;
     ctx.lineJoin = "round";
     ctx.stroke();
     ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
     const fill = ctx.createLinearGradient(0, 0, 0, h);
-    fill.addColorStop(0, "rgba(242,168,60,.16)");
-    fill.addColorStop(1, "rgba(242,168,60,0)");
+    fill.addColorStop(0, fade(SOD, 0.16));
+    fill.addColorStop(1, fade(SOD, 0));
     ctx.fillStyle = fill;
     ctx.fill();
     const last = pts[pts.length - 1];
     ctx.beginPath();
     ctx.arc(w - 2, h - last * (h - 6) - 3, 2.4, 0, 7);
-    ctx.fillStyle = "#ffc164";
+    ctx.fillStyle = SOD_HI;
     ctx.fill();
   };
   const drawAll = () => canvases.forEach(draw);

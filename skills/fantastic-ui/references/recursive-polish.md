@@ -66,9 +66,10 @@ Before writing any brief or token, detect whether a pass already exists: grep
 for token names, accent variables, and shared primitive classes in the global
 stylesheet and across components.
 
-- **Prior system found** → recover its one-sentence brief from the existing
-  tokens and treat that as canonical. Extend it; never run a parallel system.
-  Two briefs = the costume party Shift 1 forbids.
+- **Prior system found** → recover its brief line from the existing tokens
+  and treat that as canonical. Extend it; never run a parallel system. Two
+  briefs = the costume party Shift 1 forbids. The recovered brief line still
+  ends with an imagery clause ([ai-atmosphere.md](ai-atmosphere.md) §1).
 - **No prior system** → proceed with Step 0 and the token phase as normal.
 - Partial rollouts split the inventory: already-compliant rows skip token work
   and go straight to anatomy + accessibility checks.
@@ -117,8 +118,14 @@ Per batch:
    existing test suite; run the build.
 3. Batch accessibility pass (semantics + axe-core; the token contrast matrix
    was validated once, globally, in the token phase).
-4. Before/after screenshots at 320/768/1024/1440.
-5. Commit/PR the batch, update the ledger, then take the next batch.
+4. **Imagery slot check** for each route-level surface (rows typed `route`):
+   decide its one slot — header strip or a state surface — or record
+   `none: <reason>`. Generate per [ai-atmosphere.md](ai-atmosphere.md), view
+   the result, measure text over it on real pixels. Every asset — `plate`,
+   `ai`, `compress` or `svg` — gets a line in the imagery ledger (`--ledger`
+   on each subcommand); panels and subpanels get no slot check of their own.
+5. Before/after screenshots at 320/768/1024/1440.
+6. Commit/PR the batch, update the ledger, then take the next batch.
 
 **PR granularity in sweep mode**: the batch is the PR unit. This supersedes
 the per-screen "one PR per screen" rule from
@@ -139,14 +146,16 @@ Track every inventory row in a file that survives the session (e.g.
 `docs/plans/<date>-ui-polish-ledger.md`), one row per surface:
 
 ```markdown
-| Surface | Type | Routes | Status | Batch |
-|---|---|---|---|---|
-| StatCard | shared(×7) | dashboard, health… | done | 1 |
-| /admin/users | route | — | anatomy-pending | 3 |
+| Surface | Type | Routes | Status | Batch | Imagery |
+|---|---|---|---|---|---|
+| StatCard | shared(×7) | dashboard, health… | done | 1 | — |
+| /admin/users | route | — | anatomy-pending | 3 | none: dense table |
+| /onboarding | route | — | done | 2 | plate warp seed 7, first-run |
 ```
 
 Statuses: `not-audited → tokens-mapped → primitives-applied → a11y-passed →
-done`. TodoWrite mirrors the *current batch* only; the ledger is the source of
+done`. The Imagery column is filled for every `route` row before it reaches
+`done`; the per-asset provenance lives in the imagery ledger, not here. TodoWrite mirrors the *current batch* only; the ledger is the source of
 truth across sessions. A new session resumes by reading the ledger, not by
 re-deciding scope.
 
@@ -185,3 +194,4 @@ inherits scope, not amnesia.
 - A "styling" diff that touches a handler or a fetch
 - Holding progress in memory instead of the ledger
 - Declaring done without the re-sweep
+- A route marked `done` with an empty Imagery cell, or a plate inside a data panel

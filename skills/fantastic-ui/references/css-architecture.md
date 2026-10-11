@@ -168,7 +168,7 @@ flipped by a passive scroll listener at ~12px):
   transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
 }
 .navBar.scrolled {
-  background: rgba(11, 11, 10, 0.72);
+  background: color-mix(in oklab, var(--ground) 72%, transparent); /* token scrim, never a literal */
   backdrop-filter: blur(14px) saturate(1.3);
   border-bottom: 1px solid var(--hair);
 }

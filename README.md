@@ -46,8 +46,12 @@ Explore the bundled [design foundations](skills/fantastic-ui/references/design-e
 1. **Single-accent color system** — one accent, ground/hairline/ink scales tinted toward it, and semantic colors (up-teal, down-red) that *only ever* appear with their meaning. Color is information, not decoration.
 2. **Three-face typography, zero webfonts** — humanist serif display + monospace data face + system sans body, all system stacks. The serif/mono contrast does the work webfonts get hired for, at zero performance cost.
 3. **Live proof over screenshots** — the hero is the product running on a `<canvas>`: DPR-aware, pauses when the tab hides, renders one static frame under `prefers-reduced-motion`, cleans up completely.
-4. **Page rhythm** — alternating texture bands: stat tape, thesis explainer, asymmetric bento with painted sparklines, an AI-generated atmosphere band (≤30 KB webp), an interactive ARIA-correct toggle, honest fine print.
+4. **Page rhythm** — alternating texture bands: stat tape, thesis explainer, asymmetric bento with painted sparklines, an atmosphere band over a token-generated plate (≤30 KB WebP), an interactive ARIA-correct toggle, honest fine print.
 5. **Performance and accessibility as gates, not polish** — a pass/fail ship checklist: reduced-motion paths for every animation, skip link, designed focus rings, no horizontal overflow at 320px, RAF verified stopped when the tab hides.
+
+## Imagery, generated from the tokens
+
+Every page gets an imagery decision, announced with the brief: *"Imagery: warp plate behind the page header + grain on empty states (gen_atmosphere, seed 7)"*, or `none` with a stated reason. The default is a **plate** rendered by `scripts/gen_atmosphere.py` from the page's own palette tokens: local, keyless, deterministic and ≤30 KB WebP. Zero-byte SVG texture comes next. AI imagery is used only for photographic slots a preset needs, and it falls back to a plate when no provider is available. Plates are atmosphere only. They never show UI, text, people, logos or fake data, and they never sit behind data (the one carve-out is big-type marketing stats, under the scrim and after the real-pixel gate). They are static and `aria-hidden`, they sit under a token `color-mix()` scrim, and text over them is contrast-checked on real screenshot pixels. Procedure: [ai-atmosphere.md](skills/fantastic-ui/references/ai-atmosphere.md).
 
 ## The mechanics layer
 
@@ -166,8 +170,9 @@ Invoke it explicitly with `$fantastic-ui` in Codex or `/fantastic-ui` in Claude 
 skills/fantastic-ui/
 ├── SKILL.md                        # the methodology + ship checklist
 ├── scripts/
-│   ├── verify-preset.mjs            # runnable checks against a live page
-│   └── preset-gates.json           # universal and per-preset gate declarations
+│   ├── verify-preset.mjs            # runnable checks against a live page (+ advisory imagery count)
+│   ├── preset-gates.json           # universal and per-preset gate declarations
+│   └── gen_atmosphere.py           # token plates, SVG texture, AI wrapper, compressor — ≤30 KB, with a ledger
 └── references/
     ├── visual-reference-analysis.md # composition, typography geometry, observation vs. inference,
     │                               #   reusable briefs and responsive native UI translation
@@ -178,7 +183,8 @@ skills/fantastic-ui/
     ├── css-architecture.md         # full token system, scoped CSS-module rules, shared primitives
     ├── canvas-hero.md              # annotated live-canvas hero, sparklines, scroll reveals —
     │                               #   with the complete lifecycle contract (DPR / visibility / reduced-motion / cleanup)
-    ├── ai-atmosphere.md            # prompt recipe + pipeline for ≤30 KB AI atmosphere backgrounds
+    ├── ai-atmosphere.md            # imagery procedure: slots per surface, plate → svg → ai → compress,
+    │                               #   markup contract, token scrim, real-pixel contrast check
     ├── product-surfaces.md         # retrofit procedure for app pages/panels/subpanels: audit → tokens →
     │                               #   primitives → migration, panel anatomy, nesting depth, state design
     ├── theme-presets.md            # eleven named directions with contrast-validated token blocks and

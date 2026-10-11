@@ -237,6 +237,9 @@ a bare "No data" — reads as broken. Treat it as a real state with real copy:
 - **Give the one action** that fills it, as the primary CTA.
 - **Don't reach for an illustration** to soften it. On an instrument surface, a diagram of
   the empty structure (ghosted column headers, a flat axis) is more honest and more useful.
+  A token plate or svg texture behind the message is not an illustration — it is the ground
+  scale with texture, allowed on empty and first-run states per
+  [ai-atmosphere.md](ai-atmosphere.md) (static, `aria-hidden`, never behind the ghosted data).
 - Distinguish **empty** (nothing yet) from **filtered to nothing** (your query excluded
   everything) from **failed** (we couldn't load it). Three different states, three different
   messages. Collapsing them is a common and expensive bug.

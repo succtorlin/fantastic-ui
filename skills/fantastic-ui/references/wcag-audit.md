@@ -251,6 +251,26 @@ loading, empty, error, and any state-dependent styling (approved/locked/
 disabled variants). Those ship as often as the happy path and are scanned
 approximately never.
 
+## Step 2d — Text over imagery
+
+axe and any token-pair checker see the gradient layers, **not the `url()`
+layer**: text over a plate or photo passes on paper and fails on the bright
+patch under one word. Measure it on real pixels instead — hide the text paint,
+screenshot, sample the pixels inside each text box, compute the ratio against
+the text colour, and gate on the **10th-percentile** pixel, not the median
+(snippet in [ai-atmosphere.md](ai-atmosphere.md) §7, after HyperFrames'
+`contrast-report.mjs`). Repeat per theme and at 320 px and 1440 px —
+`background-size: cover` crops differently at each.
+
+- Fix a failure in the scrim's `color-mix` percentage or by re-rendering the
+  plate at a lower `--intensity` — never with text opacity, text-shadow halos
+  or a lighter-than-token ink.
+- **Decorative media is `aria-hidden`.** Plates, svg texture, watermarks and
+  atmospheric photos take `aria-hidden="true"` (and `alt=""` on an `<img>`);
+  they carry no information, so they need no text alternative. If removing an
+  image would lose information, it is content, not decoration — give it real
+  alt text and take it out of the imagery procedure.
+
 ## Step 3 — The four manual passes
 
 ### 3a. Keyboard pass
@@ -427,6 +447,8 @@ had failures. Exit criteria:
       excluded
 - [ ] All four manual passes clean, including per-state scans on product
       panels (loading / empty / error)
+- [ ] Text over every plate or photo measured on real pixels (Step 2d);
+      decorative media `aria-hidden`
 - [ ] WCAG 2.2 additions verified (focus-not-obscured, target size,
       dragging alternative, consistent help, redundant entry, auth)
 - [ ] Moderate findings fixed or documented with reason + owner
