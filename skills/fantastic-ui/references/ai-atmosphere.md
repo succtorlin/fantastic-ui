@@ -365,9 +365,17 @@ A plate can fail in two directions, and both are failures:
   `100% auto`, centred, so it crosses the state as a band at its own
   aspect, and scrim the middle where centred words sit, leaving the edges
   clear.
-- **Phones:** text spans the strip, so the full-width scrim stays and the
-  plate is mostly hidden there (measured 0–6%). That is an accepted trade,
-  not a pass: say so in the report rather than claiming the plate shows.
+- **Phones get a strip above the words.** Below ~768 px header text spans
+  the full width, so a side band has nowhere to go and a full-width scrim
+  hides the plate (measured 0–6%). Reserve a strip instead: pad the header
+  host by `--plate-strip` (64 px) plus the usual gap, size the plate
+  `max(100%, strip × aspect) auto` anchored `right top`, and scrim it with a
+  vertical gradient — transparent through the strip, fading over ~16 px
+  into the full scrim under the text:
+  `linear-gradient(180deg, transparent 0, transparent calc(var(--plate-strip) - 16px), color-mix(in oklab, var(--ground) 92%, transparent) var(--plate-strip), …)`.
+  Scope it to header hosts with a child selector so state plates keep their
+  own sizing. Measured on a dark app at 375/320: 13–41% of strip pixels
+  ≥1.1:1, text from 75 px, worst text unchanged.
 
 `plate` applies the visibility gate to the bare plate before writing it.
 That is necessary, not sufficient: the scrim only removes visibility, so
