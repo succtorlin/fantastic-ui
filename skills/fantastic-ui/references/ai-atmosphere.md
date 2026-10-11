@@ -40,12 +40,18 @@ here.
    scrim (§6), and the real-pixel gate (§7) must pass for every element over
    the plate: 3:1 for the numerals and 4.5:1 for their captions. A stat that
    updates, sorts or compares is data, so rule 2 applies to it.
-4. **In the product,** each route gets at most one plate, in the route header
-   strip or on a state surface (empty, first-run, onboarding, auth, paywall,
-   404, report cover). A panel's empty or first-run state holds no data, so
-   texture may sit there. Prefer `svg`, and remove it when the first row
-   renders. A dense data route can keep its one plate in the header strip, or
-   it can skip imagery with a stated reason.
+4. **In the product,** each route gets at most one plate *file*, in the route
+   header strip or on a state surface (empty, first-run, onboarding, auth,
+   paywall, 404, report cover). A dense data route can keep its one plate in
+   the header strip, or it can skip imagery with a stated reason.
+5. **Panels and subpanels inherit it in their empty and first-run states.**
+   Such a state holds no data, so every one of them — at every nesting
+   level — carries the route's plate (the same file: no second download, still
+   one plate per route), or `svg` texture on a route without a plate. It
+   leaves with the state when the first row renders. Only true empty and
+   first-run states: a filtered-to-nothing, failed, loading, stale or alarm
+   state stays plain. A populated panel or subpanel never carries imagery.
+   The mechanism is [the recipe below](#recipe-hand-the-plate-down).
 
 - **"None" is a decision, not a default.** It is valid only with its reason in
   the brief line. For example: "Imagery: none — single dense table route, a
@@ -55,6 +61,64 @@ here.
   recovered brief line still ends with an imagery clause: a slot per route, or
   `none: <reason>`. A plate is a new asset, not a new token, and it introduces
   no colour that the token file lacks.
+
+### Recipe: hand the plate down
+
+Build it once, in the shared empty-state primitive, so every panel and
+subpanel inherits it — including ones written later. Never hand-place a plate
+in one panel.
+
+**Which states.** Empty and first-run only. A *filtered* state is an answer
+to the user's own filter and carries its reset action; a *failed* state
+belongs to semantic red; *loading* is a skeleton; *stale* is a warning; an
+*alarm* empty (an accent rule, "the office is off") must not compete with its
+own signal. All of those stay plain.
+
+**A — CSS only (any framework; the default).** The route root names its plate
+once as a custom property; the shared empty-state class paints it from a
+pseudo-element, which is outside the accessibility tree by construction.
+Outside a route the variable is unset and nothing is drawn.
+
+```css
+.route-today { --route-plate: url("/plates/today.webp"); }   /* one per route */
+
+.state-empty { position: relative; isolation: isolate; overflow: hidden;
+  padding: var(--sp-5) var(--sp-4); border-radius: var(--radius); }
+.state-empty::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  /* Heavier than a header scrim: the state's sentence can sit anywhere. */
+  background-image:
+    linear-gradient(90deg,
+      color-mix(in oklab, var(--ground) 95%, transparent) 0%,
+      color-mix(in oklab, var(--ground) 86%, transparent) 50%,
+      color-mix(in oklab, var(--ground) 50%, transparent) 100%),
+    var(--route-plate, none);
+  background-size: cover; background-position: right center;
+}
+@media (max-width: 767px) {   /* the sentence runs the full width */
+  .state-empty::before { background-image:
+    linear-gradient(90deg,
+      color-mix(in oklab, var(--ground) 94%, transparent),
+      color-mix(in oklab, var(--ground) 88%, transparent)),
+    var(--route-plate, none); }
+}
+```
+
+On a route without a plate, put an `svg --format css` texture token in
+`--route-plate` instead (§8).
+
+**B — component context (when the empty state is a component that renders
+its own layer).** Each route wraps its content in a provider naming its
+plate; the shared empty-state component reads it and draws
+`<div aria-hidden="true" class="plate plate--state" style="--plate: url(…)">`
+only for a true empty, non-alarm state. A route that stays mounted while
+hidden (`display: none`) downloads nothing.
+
+**Gate.** Measure text over every inherited plate on real pixels (§7), at
+desktop and phone widths, per distinct empty state — not once per route.
+Worked example: RRGPy's `/agents` desk (`DeskPlateProvider` → `StateBlock`'s
+empty branch) — 75+ empty states across seven routes inherit their route's
+plate; the faintest text over one measured ~7.9:1.
 
 ## 2. Order of tools
 

@@ -151,9 +151,11 @@ the user never loses the map:
   spinner for a panel-level fetch.
 - **Empty** — one muted sentence stating what will appear here and the one
   action that fills it ("No alerts configured — Add your first rule").
-  No illustration clip-art; a token plate or svg texture from the imagery
-  procedure is allowed on empty/first-run states (`aria-hidden`, static,
-  ≤30 KB). Mono microcopy is fine; jokes are not.
+  No illustration clip-art. Every empty and first-run state — every panel,
+  every subpanel — inherits the route's plate, or svg texture on a route
+  without one, from the shared empty-state primitive
+  ([recipe](ai-atmosphere.md#recipe-hand-the-plate-down)); it leaves when the
+  first row renders. Mono microcopy is fine; jokes are not.
 - **Error** — semantic red appears *here and only here* (plus real
   destructive actions): one line of what failed, one retry action, error
   detail behind a disclosure. The panel border may take a red hairline;
@@ -175,7 +177,9 @@ no place in-product; every moving pixel must encode a data change.
 
 At most one plate per route (header strip or a state surface), generated
 from the app tokens, static, and never behind data. A route without one
-records why in the ledger. The canonical rule is
+records why in the ledger. Every panel and subpanel inherits it in its empty
+and first-run states — built once in the shared empty-state primitive, never
+per panel; populated panels never carry imagery. The canonical rule is
 [the plate rule in ai-atmosphere.md](ai-atmosphere.md#the-plate-rule), and the
 procedure, tools and markup are there too.
 
@@ -224,4 +228,7 @@ Run after the last screen migrates; these are pass/fail:
 - [ ] Imagery: ≤ 1 plate per route, none inside a data panel, text over each
       plate measured on real pixels, every asset (`plate`, `ai`, `compress`,
       `svg`) with a line in the imagery ledger (`--ledger`)
+- [ ] Every panel and subpanel empty/first-run state inherits the route's
+      plate (or svg texture) from the shared primitive; filtered, failed,
+      loading, stale and alarm states stay plain
 - [ ] Before/after screenshot pairs archived for every screen

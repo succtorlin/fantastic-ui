@@ -223,8 +223,8 @@ preset is adopted, this announcement is the brief line:
 
 > No preset fits: this is a data-dense operator console, and every preset
 > either fails at density or has no accent to encode state. Writing a fresh
-> brief. Imagery: warp plate behind the page header + svg grain on empty
-> states (gen_atmosphere, seed 7).
+> brief. Imagery: warp plate behind the page header, inherited by every
+> panel's empty states (gen_atmosphere, seed 7).
 
 Every path needs the clause: preset, fresh brief, and recovered brief alike.
 "Imagery: none" is allowed only with its reason ("dense table route — a plate
@@ -460,7 +460,9 @@ visibly primary (span, position, density — not louder color), and nesting
 depth encoded by the ground scale (each subpanel level exactly one ground
 step lighter, hairline-separated — never stacked shadows, max ~3 levels).
 
-**Imagery in-product:** one plate per route at most, never behind data —
+**Imagery in-product:** one plate per route at most, never behind data; every
+panel and subpanel inherits it in its empty and first-run states, through the
+shared empty-state primitive —
 [the plate rule](references/ai-atmosphere.md#the-plate-rule).
 
 **Retrofit procedure for existing screens** (details in the reference):
@@ -497,7 +499,8 @@ before starting any whole-app job. It adds, on top of everything above:
 - **Shared-primitives-first ordering**, then routes by traffic (with a stated
   fallback ranking when no analytics exist)
 - **Batches of 3–5 surfaces** with a presentation-only diff gate, per-batch
-  a11y pass, an imagery slot check per route, and a persistent ledger file
+  a11y pass, an imagery slot check per route and per panel state, and a
+  persistent ledger file
   that survives session boundaries
 - **Loop-until-dry completion**: re-run the inventory from scratch at the end;
   the job is done only when a fresh sweep finds zero non-done surfaces and the
@@ -584,6 +587,8 @@ Run through this before calling the page done:
 - [ ] Every raster ≤ 30 KB WebP, `aria-hidden`, explicit dimensions, static;
       every asset (`plate`, `ai`, `compress`, `svg`) has an imagery-ledger line
 - [ ] Text over any plate passes contrast measured on real pixels
+- [ ] Every panel/subpanel empty and first-run state inherits the route's
+      plate (or svg texture); populated panels carry none
 - [ ] Hero shows the product *running*, not a picture of it
 - [ ] `prefers-reduced-motion`: every animation has a static path (verify by
       toggling the OS setting or DevTools emulation)

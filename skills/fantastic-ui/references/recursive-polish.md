@@ -123,7 +123,12 @@ Per batch:
    `none: <reason>`. Generate per [ai-atmosphere.md](ai-atmosphere.md), view
    the result, measure text over it on real pixels. Every asset — `plate`,
    `ai`, `compress` or `svg` — gets a line in the imagery ledger (`--ledger`
-   on each subcommand); panels and subpanels get no slot check of their own.
+   on each subcommand). Then the **panel state check**: every panel and
+   subpanel in the batch, at every nesting level, has its empty and
+   first-run states inherit the route's plate (or svg texture) through the
+   shared empty-state primitive — never a hand-placed plate — and no
+   populated panel carries imagery
+   ([recipe](ai-atmosphere.md#recipe-hand-the-plate-down)).
 5. Before/after screenshots at 320/768/1024/1440.
 6. Commit/PR the batch, update the ledger, then take the next batch.
 
