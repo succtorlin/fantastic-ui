@@ -148,8 +148,13 @@ faintest text over one measured ~7.9:1, and a centred band measured 10.3% /
    a `plate` candidate for the same slot. Score both with `score` on the same
    slot and scrim, ship the better one, and keep the winner's ledger row. With
    no key, `ai` exits 3; ship the `plate`. Measured on one dark app under
-   `header-band`: AI rasters 19–31% ≥1.1:1 and 8–17% ≥1.3:1, token `warp`
-   14–25% and 3–14%, text still ≥4.5:1.
+   `header-band`: AI rasters 13–37% ≥1.1:1 and 6–23% ≥1.3:1, token `warp`
+   14–25% and 3–14%, text still ≥4.5:1. "Better" means: a candidate that fails
+   a gate loses; when both pass with margin, the numbers alone do not decide.
+   On one route the token plate measured ~3 points higher on desktop and
+   lower on phones, while the AI image showed the motif and the plate read as
+   smoke. Show the owner both on the composited page with their numbers and
+   let them choose; adopt the choice with `batch --adopt`.
 2. **`svg`** — zero-byte texture (grain, grid, rings) as an inline
    `<svg aria-hidden="true">` (HTML or JSX) with `currentColor` strokes. Use
    it for small slots, as a second texture on a page that already ships a

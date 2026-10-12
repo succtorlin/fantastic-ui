@@ -32,6 +32,7 @@ diagram: no axes, no labels, no legible structure.
 | Network, dependencies | a sparse web of nodes, most edges faint |
 | Onboarding, first run | a path of points leading off the frame |
 | Setups, breakouts, pre-signal | a compressed coil of fine lines, one bright streak lifting off it |
+| Factors, long-short spreads | five thin strata of lines fanning apart, the top one lit |
 
 Use one motif per route. Sibling routes share the register and finish (§2)
 so the set reads as one system; only the motif changes.

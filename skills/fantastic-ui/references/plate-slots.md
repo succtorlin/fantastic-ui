@@ -269,7 +269,10 @@ started at 75 px and its worst ratio did not change.
   whose first ground is that colour. Reusing the page-based route plate
   inside a raised panel is a measured failure: `plate-check.js` scored such
   a state 5.0% / 2.4% against its panel, below the 8% floor, while the same
-  plate's header passed at 14.3% / 3.0%.
+  plate's header passed at 14.3% / 3.0%. The inverse holds for a recessed
+  panel darker than the page: scrim and measure it in the recessed colour
+  (a `--recessed` host modifier setting `--plate-ground`); a page-based plate
+  measured 15.0–15.1% there.
 - **One layer, first child.** `plate-check.js` measures the first `url()`
   layer of the host's `:scope > .plate` child, and treats gradients listed
   above it as the scrim. A pseudo-element plate, or a scrim listed below the
