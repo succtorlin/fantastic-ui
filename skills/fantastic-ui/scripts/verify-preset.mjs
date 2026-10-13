@@ -267,7 +267,11 @@ for (const theme of themeList) {
       return (cs.getPropertyValue("--accent-fill") || cs.getPropertyValue("--accent") || "").trim() || null;
     });
     const accentUsed = liveAccent || P.accent;
-    const bad = await page.evaluate(({ helpers, scope, accent }) => {
+    // A preset may DECLARE white on its accent (theme-presets.md: the rule is a
+    // contrast rule). Declared presets are measured — white on the accent must
+    // clear the body-text minimum — instead of banned outright.
+    const declared = P.whiteOnAccent === "declared";
+    const bad = await page.evaluate(({ helpers, scope, accent, declared, min }) => {
       eval(helpers);
       const acc = paint(accent, "rgb(0,0,0)");
       const near = (a, b) => Math.abs(a[0]-b[0]) + Math.abs(a[1]-b[1]) + Math.abs(a[2]-b[2]) < 24;
@@ -275,13 +279,18 @@ for (const theme of themeList) {
       for (const el of visibleTextNodes(scope)) {
         const cs = getComputedStyle(el);
         const fg = paint(cs.color, "rgb(0,0,0)");
-        if (fg[0] > 244 && fg[1] > 244 && fg[2] > 244 && near(groundOf(el), acc))
-          hits.push((el.className || el.tagName).toString().slice(0, 26));
+        const bg = groundOf(el);
+        if (!(fg[0] > 244 && fg[1] > 244 && fg[2] > 244 && near(bg, acc))) continue;
+        if (declared) {
+          const r = ratio(fg, bg);   // HELPERS' WCAG ratio
+          if (r < min) hits.push(`${(el.className || el.tagName).toString().slice(0, 20)} ${r.toFixed(2)}:1`);
+        } else hits.push((el.className || el.tagName).toString().slice(0, 26));
       }
       return hits;
-    }, { helpers: HELPERS, scope: SCOPE, accent: accentUsed });
-    record("trap:white-never-partners-accent", bad.length === 0,
-      (bad.length ? `${bad.length} element(s) render white on the accent` : "none") +
+    }, { helpers: HELPERS, scope: SCOPE, accent: accentUsed, declared, min: U.contrastMin });
+    record(declared ? "trap:white-on-accent-measured" : "trap:white-never-partners-accent", bad.length === 0,
+      (bad.length ? (declared ? `${bad.length} white-on-accent element(s) under ${U.contrastMin}:1` : `${bad.length} element(s) render white on the accent`)
+                  : (declared ? `declared pairing clears ${U.contrastMin}:1` : "none")) +
       `  [accent tested: ${accentUsed}${liveAccent && liveAccent.toLowerCase() !== P.accent.toLowerCase() ? " — page deviates from the preset's " + P.accent : ""}]`,
       bad.slice(0, 4).join(", "));
   }
@@ -299,29 +308,57 @@ for (const theme of themeList) {
     return { shadowed, hairlined };
   }, SCOPE);
   const wantsShadow = P.separation === "shadow";
-  const sepOK = wantsShadow ? sep.shadowed > 0 : sep.shadowed === 0;
+  const wantsTone = P.separation === "tone";
+  const sepOK = wantsShadow ? sep.shadowed > 0
+    : wantsTone ? sep.shadowed === 0 && sep.hairlined === 0
+    : sep.shadowed === 0;
   record("separation-strategy", sepOK,
     `declared ${P.separation}; found ${sep.shadowed} shadowed / ${sep.hairlined} bordered surfaces`,
     sepOK ? "" : wantsShadow
       ? "preset separates with shadows but none are present"
+      : wantsTone
+      ? "preset separates by tone alone — surfaces carry shadows or borders (theme-presets.md, Preset L)"
       : "preset separates with hairlines — shadows found (theme-presets.md: do not mix the two strategies)");
 
   // advisory: decorative imagery (never fails)
   await imageryAdvisory(page, SCOPE, U.imageryAdvisory || { warnWhenZero: true });
 
-  // 10. per-preset geometry traps
+  // 10. per-preset traps: geometry (every match) and min-bg-alpha
   for (const trap of (P.traps || [])) {
+    if (trap.kind === "min-bg-alpha") {
+      const got = await page.evaluate(({ helpers, sel }) => {
+        eval(helpers);
+        const els = [...document.querySelectorAll(sel)].filter((e) => e.getClientRects().length);
+        if (!els.length) return { skipped: true };
+        // Read the alpha the browser resolved (color-mix(... transparent) included).
+        const c = document.createElement("canvas").getContext("2d");
+        return { alphas: els.map((e) => {
+          c.clearRect(0, 0, 1, 1); c.fillStyle = "#000"; c.fillStyle = getComputedStyle(e).backgroundColor;
+          c.fillRect(0, 0, 1, 1); return +(c.getImageData(0, 0, 1, 1).data[3] / 255).toFixed(3);
+        }) };
+      }, { helpers: HELPERS, sel: trap.selector });
+      if (got.skipped) record(`trap:${trap.id}`, true, "element not present on this page (device unused)");
+      else {
+        const low = got.alphas.filter((a) => a < trap.minAlpha);
+        record(`trap:${trap.id}`, low.length === 0,
+          `background alpha ${got.alphas.join(", ")} (min ${trap.minAlpha})`, low.length ? trap.rule : "");
+      }
+      continue;
+    }
     if (trap.kind !== "geometry") continue;
     const hit = await page.evaluate(({ sel, against }) => {
-      const g = document.querySelector(sel);
-      if (!g) return { skipped: true };
-      if (getComputedStyle(g).display === "none") return { hidden: true };
-      const gr = g.getBoundingClientRect();
+      const gs = [...document.querySelectorAll(sel)];
+      if (!gs.length) return { skipped: true };
+      const shown = gs.filter((g) => getComputedStyle(g).display !== "none" && g.getClientRects().length);
+      if (!shown.length) return { hidden: true };
       const ov = (a, b) => !(a.bottom <= b.top || a.top >= b.bottom || a.right <= b.left || a.left >= b.right);
       const hits = [];
-      for (const el of document.querySelectorAll(against)) {
-        if (!el.getClientRects().length || el.contains(g) || g.contains(el)) continue;
-        if (ov(gr, el.getBoundingClientRect())) hits.push(el.tagName);
+      for (const g of shown) {
+        const gr = g.getBoundingClientRect();
+        for (const el of document.querySelectorAll(against)) {
+          if (!el.getClientRects().length || el.contains(g) || g.contains(el)) continue;
+          if (ov(gr, el.getBoundingClientRect())) hits.push(el.tagName);
+        }
       }
       return { hits };
     }, { sel: trap.selector, against: trap.mustNotOverlap });

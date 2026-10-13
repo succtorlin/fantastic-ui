@@ -1,6 +1,6 @@
 {
   "$comment": [
-    "Machine-checkable gates for the eleven presets in references/theme-presets.md.",
+    "Machine-checkable gates for the twelve presets in references/theme-presets.md.",
     "Read by scripts/verify-preset.mjs. Every value here is transcribed from that",
     "file — accent hexes and radii from each preset's token block, separation and",
     "density from the 'Choosing between them' table, traps from each preset's own",
@@ -163,6 +163,30 @@
       "radii": { "sheet": 0, "panel": 0, "card": 6 },
       "density": "medium",
       "traps": []
+    },
+    "L": {
+      "name": "Gallery White",
+      "accent": "#0062c4",
+      "separation": "tone",
+      "radii": { "sheet": 0, "panel": 18, "card": 28, "pill": 980 },
+      "density": "airy",
+      "whiteOnAccent": "declared",
+      "traps": [
+        {
+          "id": "glass-nav-opacity",
+          "rule": "The translucent nav must stay at or above 80% opacity: at 72% over a stage band --muted falls to 2.71:1. Only --ink on the glass; dark glass over stage bands.",
+          "kind": "min-bg-alpha",
+          "selector": ".nav, .chapter",
+          "minAlpha": 0.8
+        },
+        {
+          "id": "stage-light-never-behind-copy",
+          "rule": "The studio light sits behind the product only; it must never overlap a heading, paragraph, link or button.",
+          "kind": "geometry",
+          "selector": ".stage-light",
+          "mustNotOverlap": "h1, h2, h3, p, li, a, button"
+        }
+      ]
     }
   }
 }

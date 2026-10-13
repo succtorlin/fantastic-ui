@@ -74,9 +74,9 @@ The five disciplines decide **direction**. They don't, on their own, stop a surf
 
 This layer is adapted from [*Refactoring UI*](https://www.refactoringui.com/) by Adam Wathan & Steve Schoger. Several of the book's defaults **invert** on a dark ground, and those are marked `↯` in the reference rather than copied across. Where the mechanics and the disciplines disagree, the disciplines win: they are the direction, the mechanics are the mechanism.
 
-## Eleven theme presets, with automatic selection
+## Twelve theme presets, with automatic selection
 
-The five disciplines say *how* to design; a preset is a pre-committed answer to *what direction*. The skill ships eleven contrast-validated directions — from Coastal Editorial and Blueprint Mono to Midnight Showroom and Dispatch Yellow — each with a full token block, type pairing, and component grammar.
+The five disciplines say *how* to design; a preset is a pre-committed answer to *what direction*. The skill ships twelve contrast-validated directions — from Coastal Editorial and Blueprint Mono to Midnight Showroom, Dispatch Yellow and Gallery White (product-gallery minimalism with studio-lit products) — each with a full token block, type pairing, and component grammar.
 
 Selection is part of the workflow, not a menu you're shown: before writing a brief, the skill runs a preset check with three gates — the user named a direction → use it; the codebase already has a token system → **no preset** (recover and extend the existing brief instead of running a second design system); otherwise score the request against a signal table (medium, domain, imagery, density) and apply each preset's disqualifier. One confident match is adopted and announced in a line; near-ties get a short question; a half-fit is refused in favor of a fresh brief, because a stretched preset produces exactly the template output the skill exists to prevent. Data-dense analytics/finance surfaces are a stated gap — those route to the dark instrument direction, never to a preset because it happens to be dark.
 
@@ -202,9 +202,11 @@ skills/fantastic-ui/
     ├── ai-motifs.md                # domain → motif table, five-part AI prompt, consent and cost
     ├── product-surfaces.md         # retrofit procedure for app pages/panels/subpanels: audit → tokens →
     │                               #   primitives → migration, panel anatomy, nesting depth, state design
-    ├── theme-presets.md            # eleven named directions with contrast-validated token blocks and
+    ├── theme-presets.md            # twelve named directions with contrast-validated token blocks and
     │                               #   component grammar, plus the signal table and gates for automatic
     │                               #   preset selection (and refusal)
+    ├── gallery-modules.md          # Preset L kit: tone bands, glass nav + chapter strip, studio-lit
+    │                               #   product stage, bento tiles, spec numerals, gates
     ├── wcag-audit.md               # WCAG 2.2 AA check-and-fix phase: contrast-matrix script (semantic
     │                               #   tints included), the opacity rule, axe sweep with violations-vs-
     │                               #   incomplete triage, validating your own checker, auditing the real
@@ -225,7 +227,7 @@ The skill is framework-light: the worked code is React + CSS modules, but the di
 
 ## Verification boundaries
 
-The existing mechanics layer and all eleven preset declarations and verification tools remain included. Run the preset checker from a project with `playwright` and `@axe-core/playwright` installed; see [Verifying an applied preset](skills/fantastic-ui/references/theme-presets.md#verifying-an-applied-preset) for the command and coverage.
+The existing mechanics layer and all twelve preset declarations and verification tools remain included. Run the preset checker from a project with `playwright` and `@axe-core/playwright` installed; see [Verifying an applied preset](skills/fantastic-ui/references/theme-presets.md#verifying-an-applied-preset) for the command and coverage.
 
 A passing automated check does not establish design quality, actual user comprehension, or full WCAG conformance. Manually verify keyboard and screen-reader behavior, reduced motion, reflow, and the relevant loading, error, permission, and recovery states. A visual reference establishes intent, not live data or proven interaction behavior.
 

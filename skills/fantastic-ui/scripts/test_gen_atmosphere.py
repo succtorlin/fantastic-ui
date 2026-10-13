@@ -1563,6 +1563,100 @@ def test_batch_adopt_with_only():
         assert rows["crowding"]["adopted"] is True and "adopted" not in rows["trades"]
 
 
+# ---------------------------------------------------------------- studio
+
+GALLERY_LIGHT = ["#ffffff", "#f4f4f6", "#d5d5da", "#0062c4", "#2f9bff"]
+GALLERY_DARK = ["#000000", "#111113", "#2a2a2e", "#0062c4", "#2f9bff"]
+STUDIO_FOCUS = (0.5, 0.62)
+# (plate size, slot): a full-bleed hero and a product tile, both scrim `none`
+STUDIO_SLOTS = (("1600x900", "1440x800"), ("1600x900", "600x500"), ("1200x1000", "600x500"))
+
+
+def _studio_plate(tmp, palette, size, slot=None, seed=1, intensity=1.0, extra=()):
+    out = Path(tmp) / f"studio-{palette[0][1:]}-{size}-{slot}-{seed}.webp"
+    args = ["plate", "--palette", ",".join(palette), "--style", "studio", "--seed", str(seed),
+            "--size", size, "--focus", "%g,%g" % STUDIO_FOCUS, "--intensity", str(intensity),
+            "--out", str(out), *extra]
+    if slot:
+        args += ["--slot", slot, "--scrim", "none"]
+    rc, data, err = run_cli(*args)
+    return rc, data, err, out
+
+
+def test_studio_renders_deterministically():
+    with tempfile.TemporaryDirectory() as tmp:
+        a = _studio_plate(tmp, GALLERY_DARK, "800x450", seed=3, extra=("--allow-faint",))[3]
+        b = _studio_plate(tmp, GALLERY_DARK, "800x450", seed=3,
+                          extra=("--allow-faint", "--max-kb", "30"))[3]
+        assert a.read_bytes() == b.read_bytes()
+    x = G.render_plate(GALLERY_LIGHT, "studio", 9, 640, 360, 1.0, STUDIO_FOCUS)
+    y = G.render_plate(GALLERY_LIGHT, "studio", 9, 640, 360, 1.0, STUDIO_FOCUS)
+    z = G.render_plate(GALLERY_LIGHT, "studio", 10, 640, 360, 1.0, STUDIO_FOCUS)
+    assert x.dtype == np.uint8 and np.array_equal(x, y)
+    assert not np.array_equal(x, z)
+    # the seed only nudges the setup (aspect, horizon, tilt): never a new picture
+    assert np.abs(x.astype(int) - z.astype(int)).mean() < 4.0
+
+
+def test_studio_passes_visibility_and_structure_in_both_tones():
+    with tempfile.TemporaryDirectory() as tmp:
+        for palette in (GALLERY_LIGHT, GALLERY_DARK):
+            for size, slot in STUDIO_SLOTS:
+                rc, data, err, out = _studio_plate(tmp, palette, size, slot,
+                                                   extra=("--min-visible", "8,1",
+                                                          "--min-structure", "8,1"))
+                where = (palette[0], size, slot)
+                assert rc == 0 and out.exists(), (where, data, err)
+                vis, st = data["slotVisibility"], data["structure"]
+                assert G.passes_visibility(vis, (8, 1)), (where, vis)
+                assert G.passes_visibility(st, (8, 1)), (where, st)
+                # smooth light, no high-frequency content: the blur takes ~nothing away
+                for k in ("ge_1_1", "ge_1_3"):
+                    assert abs(vis[k] - st[k]) <= 2.5, (where, k, vis, st)
+
+
+def test_studio_has_no_high_frequency_content():
+    # raw pixels vs a 7x7 box blur: studio differs by rounding only; every
+    # textural or linear style differs by >= 10 levels somewhere
+    for palette in (GALLERY_LIGHT, GALLERY_DARK, RRG_PALETTE):
+        img = G.render_plate(palette, "studio", 1, 800, 450, 1.0, STUDIO_FOCUS).astype(float)
+        assert np.abs(img - G.box_blur(img, 3)).max() <= 1.0, palette
+    grain = G.render_plate(GALLERY_DARK, "grain", 1, 800, 450, 1.0, STUDIO_FOCUS).astype(float)
+    assert np.abs(grain - G.box_blur(grain, 3)).max() >= 10.0
+
+
+def test_studio_handles_the_light_tone():
+    assert G.palette_tone(GALLERY_LIGHT) == "light" and G.palette_tone(GALLERY_DARK) == "dark"
+    h, w = 450, 800
+    fy, fx = int(STUDIO_FOCUS[1] * h), int(STUDIO_FOCUS[0] * w)
+    lum = _luminance(G.render_plate(GALLERY_LIGHT, "studio", 1, w, h, 1.0, STUDIO_FOCUS))
+    # on white the pool sits AT the page, the surroundings fall slightly darker,
+    # the top fades back into the page, and nothing is lighter than the page
+    assert lum[fy, fx] >= 0.99 and lum[0].mean() >= 0.95, (lum[fy, fx], lum[0].mean())
+    assert lum[-1, 0] < 0.75 and lum[-1, -1] < 0.75, (lum[-1, 0], lum[-1, -1])
+    dark = _luminance(G.render_plate(GALLERY_DARK, "studio", 1, w, h, 1.0, STUDIO_FOCUS))
+    # on black the pool lifts toward the far ground; the top fades into the page
+    assert dark[fy, fx] > 0.015 and dark[0].mean() < dark[fy, fx] / 3, (dark[fy, fx],
+                                                                         dark[0].mean())
+    with tempfile.TemporaryDirectory() as tmp:
+        rc, data, err, out = _studio_plate(tmp, GALLERY_LIGHT, "1600x900", "1440x800")
+        assert rc == 0 and data["tone"] == "light", (data, err)
+        assert data["visibility"]["lighter_than_page"] == 0.0
+        rc, data, err, out = _studio_plate(tmp, GALLERY_DARK, "1600x900", "1440x800")
+        assert rc == 0 and data["tone"] == "dark" and data["visibility"]["darker_than_page"] == 0.0
+
+
+def test_studio_stays_under_budget():
+    with tempfile.TemporaryDirectory() as tmp:
+        for palette in (GALLERY_LIGHT, GALLERY_DARK):
+            for size in ("1600x900", "1600x320"):
+                rc, data, err, out = _studio_plate(tmp, palette, size, extra=("--allow-faint",))
+                assert rc == 0, (data, err)
+                assert out.stat().st_size <= 30 * 1024 and data["bytes"] == out.stat().st_size
+                with Image.open(out) as im:
+                    assert im.format == "WEBP" and im.size == tuple(map(int, size.split("x")))
+
+
 def test_help_for_new_subcommands():
     for sub in ("score", "batch"):
         proc = subprocess.run([sys.executable, str(SCRIPT), sub, "--help"],

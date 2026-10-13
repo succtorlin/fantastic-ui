@@ -51,7 +51,7 @@ The rules it serves:
 Subcommands (each prints exactly ONE JSON object on stdout; logs go to stderr):
 
   tokens    CSS custom properties -> ordered sRGB palette (tokens.json)
-  plate     render warp | grain | contour | rings to a <=max-kb WebP
+  plate     render warp | grain | contour | rings | studio to a <=max-kb WebP
   svg       tiny vector motif (grain | grid | rings): inline HTML, jsx or CSS data-URI
   ai        optional: baoyu-image-gen -> cover-crop -> same <=max-kb WebP
   compress  user-supplied image -> cover-crop -> same <=max-kb WebP
@@ -105,7 +105,7 @@ TOOL = "gen_atmosphere"
 DEFAULT_MAX_KB = 30
 QUALITY_START, QUALITY_STEP, QUALITY_FLOOR = 82, 6, 20
 BLUR_STEPS = (0, 1, 2, 3)
-STYLES = ("warp", "grain", "contour", "rings")
+STYLES = ("warp", "grain", "contour", "rings", "studio")
 SVG_STYLES = ("grain", "grid", "rings")
 AI_SUFFIX = (", no text, no letters, no logos, no people, no UI, "
              "abstract atmosphere, large calm empty areas")
@@ -696,15 +696,129 @@ def style_rings(width, height, seed, grounds, accent, accent_hi, intensity, focu
     return img
 
 
+# studio: light falling on a seamless backdrop (a cyclorama). All lengths are
+# in units of the scene height max(H, W x 9/16): a frame wider than 16:9 (a
+# 1600x320 strip) is a window onto the same 16:9 scene, not a stretched one.
+# Everything is a broad Gaussian: no lines, no grain.
+STUDIO_POOL = (0.42, 0.14)      # spotlight pool sigma (x, y below the focus): 3:1, very soft
+STUDIO_POOL_FAR = 0.6           # sigma y above the focus, as a share (foreshortened far edge)
+STUDIO_HORIZON = 0.05           # horizon sits this far below the focus
+STUDIO_SWEEP = (0.38, 0.20)     # backdrop glow sigma above / floor glow below it
+STUDIO_SPREAD = 0.9             # horizontal falloff sigma of the floor band
+STUDIO_WALL = 0.6               # horizontal falloff sigma of the backdrop wash (dark)
+STUDIO_MIX = (0.8, 0.6, 0.2)    # pool, sweep, reflection weights (dark)
+STUDIO_REFLECT = (1.5, 0.7)     # reflection sigma multipliers (wider, flatter)
+STUDIO_BAND = 0.08              # sigma of the cyc's curve shading at the horizon (light)
+STUDIO_SHADE = (0.25, 0.35, 0.7, 0.8)  # base, horizon band, floor, side weights (light)
+STUDIO_DEPTH = (1.0, 1.0)       # max mix toward the far ground (dark, light) at intensity 1;
+                                # calibrated 2026-10-12: gates pass from intensity 0.78 (dark)
+                                # / 0.80 (light) in a 1440x800 hero and a 600x500 tile
+STUDIO_TINT = 0.02              # accent cast in the pool (dark palettes), x intensity
+
+
+def _studio_frame(width, height, seed, focus):
+    """(X, Y, horizon, aspect): X, Y in scene-height units, rotated by the
+    seeded tilt, with the origin at the focus. The seed varies only the pool
+    aspect (+-15%), the horizon (+-3% of the scene height) and a tilt of +-3
+    degrees."""
+    j = _hash(np.full(3, seed, dtype=np.int64), np.array([11, 12, 13], dtype=np.int64), seed)
+    aspect = 1.0 + 0.30 * (float(j[0]) - 0.5)
+    horizon = STUDIO_HORIZON + 0.06 * (float(j[1]) - 0.5)
+    tilt = math.radians(6.0 * (float(j[2]) - 0.5))
+    ys, xs = np.mgrid[0:height, 0:width].astype(np.float32)
+    unit = np.float32(max(height, width * 9.0 / 16.0))
+    x = (xs + 0.5 - focus[0] * width) / unit
+    y = (ys + 0.5 - focus[1] * height) / unit
+    c, s = np.float32(math.cos(tilt)), np.float32(math.sin(tilt))
+    return x * c + y * s, y * c - x * s, horizon, aspect
+
+
+def _ground_ramp(grounds, t):
+    """Piecewise-linear blend through the ordered grounds, from the page (t=0)
+    to the ground that contrasts most (t=1). Each ground sits at its sRGB
+    distance from the page, so equal steps in t are equal steps in tone."""
+    t = np.clip(t, 0.0, 1.0)[..., None]
+    img = _flat(t.shape[1], t.shape[0], grounds[0])
+    dist = np.maximum.accumulate([float(np.linalg.norm(g - grounds[0])) for g in grounds])
+    if len(grounds) == 1 or dist[-1] <= 0.0:
+        return img
+    pos = dist / dist[-1]
+    for i in range(len(grounds) - 1):
+        if pos[i + 1] > pos[i]:
+            img += (grounds[i + 1] - grounds[i]) * np.clip((t - pos[i]) / (pos[i + 1] - pos[i]),
+                                                           0.0, 1.0)
+    return img
+
+
+def _studio_dark(grounds, accent, intensity, level, f):
+    """Dark page: the light lifts the backdrop toward the lighter grounds. The
+    backdrop wash (narrower, rising into the dark) meets the floor band (wider,
+    falling off toward the camera) at the horizon."""
+    wall = np.exp(-0.5 * (f["x"] / STUDIO_WALL) ** 2) * f["up"]
+    sweep = wall + (f["spread"] * f["down"] - wall) * f["below"]
+    wp, ws, wr = STUDIO_MIX
+    raw = wp * f["pool"] + ws * sweep + wr * f["reflect"]
+    lit = (1.0 - np.exp(-1.6 * raw)) / np.float32(1.0 - math.exp(-1.6 * (wp + ws + 0.5 * wr)))
+    img = _ground_ramp(grounds, lit * (STUDIO_DEPTH[0] * min(1.0, level)))
+    # The cast follows a much broader field than the pool: a tight chroma
+    # gradient turns into visible 4:2:0 blocks in lossy WebP.
+    cast = np.exp(-0.5 * ((f["x"] / (2.0 * f["sx"])) ** 2 + (f["y"] / (2.5 * f["sy"])) ** 2))
+    return _mix(img, accent, cast * lit * (STUDIO_TINT * intensity))
+
+
+def _studio_light(grounds, level, f):
+    """Light page: nothing can be brighter than the page, so the pool stays AT
+    the page and everything it does not reach falls slightly darker - the
+    cyc's curve at the horizon, the sides, and the floor toward the camera.
+    The top fades back into the page."""
+    lit = 1.0 - np.exp(-2.2 * (f["pool"] + 0.35 * f["reflect"]))
+    lit = lit / np.float32(1.0 - math.exp(-2.2))
+    band = np.exp(-0.5 * (f["dy"] / STUDIO_BAND) ** 2)
+    floor = _smooth(-0.02, 0.32, f["dy"])
+    wb, wc, wf, ws = STUDIO_SHADE
+    shade = f["up"] * (1.0 - lit) * (wb + wc * band + wf * floor + ws * (1.0 - f["spread"]))
+    return _ground_ramp(grounds, shade * (STUDIO_DEPTH[1] * min(1.0, level)))
+
+
+def style_studio(width, height, seed, grounds, accent, accent_hi, intensity, focus, light=False,
+                 weight=1.0):
+    """Studio light on a seamless backdrop: a wide, very soft elliptical pool
+    at the focus, a vertical sweep that fades into the page at the top, a
+    floor band around a horizon just below the focus, and a faint stretched
+    reflection of the pool on the floor. Dark palettes lift toward the
+    lighter grounds (+ a faint accent cast); light palettes keep the pool at
+    the page and let the floor and sides fall slightly darker. The falloff is
+    ground structure, so it takes the caller's intensity unscaled (render_plate
+    passes x LIGHT_ACCENT on light palettes; that is undone here). No dither:
+    +-0.5 LSB noise does not survive lossy WebP (measured: no less banding)."""
+    level = float(intensity) / (LIGHT_ACCENT if light else 1.0)
+    x, y, hz, aspect = _studio_frame(width, height, seed, focus)
+    sx, sy = STUDIO_POOL[0] * aspect, STUDIO_POOL[1]
+    # Perspective: the pool's far (upper) edge is foreshortened, its near edge reaches forward.
+    syy = np.where(y < 0, np.float32(sy * STUDIO_POOL_FAR), np.float32(sy))
+    dy = y - np.float32(hz)                          # + below the horizon
+    below = _smooth(-0.04, 0.04, dy)                 # soft floor mask
+    ym = y - np.float32(2.0 * hz)                    # the pool mirrored in the horizon
+    f = {"x": x, "y": y, "dy": dy, "below": below, "sx": sx, "sy": sy,
+         "pool": np.exp(-0.5 * ((x / sx) ** 2 + (y / syy) ** 2)),
+         "reflect": np.exp(-0.5 * ((x / (sx * STUDIO_REFLECT[0])) ** 2
+                                   + (ym / (sy * STUDIO_REFLECT[1])) ** 2)) * below,
+         "spread": np.exp(-0.5 * (x / STUDIO_SPREAD) ** 2),
+         "up": np.exp(-0.5 * (np.minimum(dy, 0.0) / STUDIO_SWEEP[0]) ** 2),    # 1 at/below
+         "down": np.exp(-0.5 * (np.maximum(dy, 0.0) / STUDIO_SWEEP[1]) ** 2)}  # 1 at/above
+    return _studio_light(grounds, level, f) if light else _studio_dark(grounds, accent,
+                                                                        intensity, level, f)
+
+
 _STYLE_FNS = {"warp": style_warp, "grain": style_grain,
-              "contour": style_contour, "rings": style_rings}
+              "contour": style_contour, "rings": style_rings, "studio": style_studio}
 
 
 def render_plate(palette: List[str], style: str, seed: int, width: int, height: int,
                  intensity: float = 0.6, focus: Tuple[float, float] = (0.75, 0.3),
                  weight: float = 1.0):
     """Return an HxWx3 uint8 sRGB array. Pure function of its arguments.
-    `weight` thickens contour/rings hairlines; warp and grain ignore it."""
+    `weight` thickens contour/rings hairlines; warp, grain and studio ignore it."""
     need_raster()
     if style not in _STYLE_FNS:
         raise CliError(f"unknown style {style!r}; choose from {', '.join(STYLES)}")
@@ -2621,7 +2735,7 @@ def build_parser() -> argparse.ArgumentParser:
                                    "ground (exit 1 page_mismatch). Default: tokens.json `page`")
     pl.add_argument("--weight", type=float, default=1.0,
                     help="contour/rings hairline width + mix multiplier %g..%g (default 1; "
-                         "recorded, ignored by warp/grain)" % WEIGHT_RANGE)
+                         "recorded, ignored by warp/grain/studio)" % WEIGHT_RANGE)
     _slot_args(pl)
     pl.add_argument("--ledger", help="append a JSON line describing this render")
     pl.set_defaults(fn=cmd_plate)

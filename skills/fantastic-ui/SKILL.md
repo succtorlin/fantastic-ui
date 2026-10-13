@@ -186,7 +186,7 @@ reference to it means this sentence. Example from the worked case:
 
 ### Step 0a — Run the preset check FIRST (do not skip, do not skip silently)
 
-Before writing a brief, decide whether one of the eleven presets in
+Before writing a brief, decide whether one of the twelve presets in
 [references/theme-presets.md](references/theme-presets.md) already is the brief.
 Work the gates in order and stop at the first that answers:
 
@@ -231,7 +231,7 @@ Every path needs the clause: preset, fresh brief, and recovered brief alike.
 would sit behind numbers"). Slots, tools and limits:
 [references/ai-atmosphere.md](references/ai-atmosphere.md).
 
-**Known gap, state it rather than forcing a fit:** all eleven presets are
+**Known gap, state it rather than forcing a fit:** all twelve presets are
 content- or product-led. **Data-heavy analytics, developer tools, dashboards
 and trading/finance surfaces are still not covered.** Two presets are dark, but
 Midnight Showroom sells objects and has no data grammar at all — no monospace
@@ -635,11 +635,13 @@ Additional gates when the work touched product surfaces:
 
 ## References
 
-- [references/theme-presets.md](references/theme-presets.md) — eleven named
+- [references/theme-presets.md](references/theme-presets.md) — twelve named
   directions (Coastal Editorial, Blueprint Mono, Marigold Report, Atelier Warm,
   Terracotta Commerce, Midnight Showroom, Broadcast Light, Studio Kinetic,
-  Campus Bright, Charter Navy, Dispatch Yellow): contrast-validated tokens,
-  grammar, imagery, signal table. Read at Step 0a, before writing a brief.
+  Campus Bright, Charter Navy, Dispatch Yellow, Gallery White): contrast-validated
+  tokens, grammar, imagery, signal table. Read at Step 0a, before writing a brief.
+- [references/gallery-modules.md](references/gallery-modules.md) — Preset L's
+  kit: tone bands, glass nav, studio-lit product stage, bento tiles. Read with L.
 - [references/visual-reference-analysis.md](references/visual-reference-analysis.md)
   — image/typography analysis, observed vs. inferred. Read at Step 0b.
 - [references/ai-atmosphere.md](references/ai-atmosphere.md) — the canonical
@@ -666,7 +668,7 @@ Additional gates when the work touched product surfaces:
   passes, text over imagery, fix patterns, guards. Read when entering the
   accessibility phase or on any a11y/WCAG request.
 - `scripts/verify-preset.mjs` + `scripts/preset-gates.json` — runnable gates for
-  all eleven presets; not density or "reads as the direction". Read "Verifying
+  all twelve presets; not density or "reads as the direction". Read "Verifying
   an applied preset" in theme-presets.md before running it.
 - `scripts/gen_atmosphere.py` — `tokens`, `plate`, `svg`, `ai`, `compress`,
   `score`, `batch`; ≤30 KB, a ledger line per asset; `plate --page` exits 1

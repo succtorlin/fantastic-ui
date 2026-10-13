@@ -190,6 +190,7 @@ Plate styles, matched to character:
 | `grain` | fine palette noise, paper or film | empty and auth states, print-leaning presets |
 | `contour` | topographic linework | technical and engineering directions, report covers |
 | `rings` | concentric instrument face | tall header bands of instrument products, covers |
+| `studio` | seamless studio light: cyclorama sweep, soft spotlight pool, floor reflection — smooth, no lines | the product stage of Preset L ([gallery-modules.md](gallery-modules.md)); light or black ground; behind the product, never the words |
 
 **Strips under ~200 px tall use `warp` or `ai`,** or `contour`/`rings` with
 `--weight`. `contour` and `rings` are hairlines (0.75–0.85 px). Scaled into a

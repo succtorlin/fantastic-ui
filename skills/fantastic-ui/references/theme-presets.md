@@ -16,7 +16,7 @@ Two rules that keep presets from becoming the costume party Shift 1 forbids:
   role that doesn't exist, that's a conversation about the role vocabulary, not
   a local addition.
 
-Nine of the eleven presets are **light-ground** and two are dark. That mix
+Ten of the twelve presets are **light-ground** and two are dark. That mix
 matters, because the accent rule inverts between them and the inversion is the
 single most useful thing in this file.
 
@@ -34,6 +34,11 @@ this in one direction or the other.
 
 Either way the failure is the same pairing. Expect to need one of the two
 splits in any preset you derive from a design you admire.
+
+One preset declares the pairing instead: **L · Gallery White**, whose deep blue
+carries white at 5.93:1. The rule is a contrast rule, so a preset may declare
+white-on-accent when it measures ≥4.5:1, and the gate then measures it rather
+than banning it.
 
 The clearest proof is Preset K: black on safety-yellow measures **13.75:1**,
 the strongest accent pairing in this file, and it earns that by never touching
@@ -894,6 +899,121 @@ wrong, not the token.
 
 ---
 
+## Preset L — "Gallery White"
+
+> Product-gallery minimalism: white and near-white bands, one deep blue for
+> links and the single buy action, the system's own sans at display size,
+> and products presented on seamless studio light — one idea per screen,
+> with nothing on the page that isn't the product or the sentence about it.
+
+Light, airy and product-led, with dark "stage" bands for the products that
+want drama. Suits hardware, consumer devices, premium apps and software
+launches — any page where one object or one capability is the hero and the
+page's job is to let it breathe. It is Apple-*like* in its principles
+(restraint, scale contrast, tone separation, studio-lit product) and owes the
+company nothing else: no names, marks, product imagery or exact brand values
+belong in it.
+
+**Not Midnight Showroom.** Both sell objects. F is near-black, all-caps,
+hard-edged and amber; L is white-first, sentence-case, soft-cornered and blue,
+and it drops to black only for a stage band.
+
+```css
+.page {
+  /* light: 17.20 / 9.53 / 5.37 on --ground; 15.66 / 8.68 / 4.89 on --ground-2 */
+  --ground:    #ffffff;
+  --ground-2:  #f4f4f6;   /* alternate bands and tiles — tone, not a border   */
+  --panel:     #fbfbfd;
+  --hair:      #d5d5da;   /* 1.46:1 — dividers inside nav/footer only        */
+  --hair-lit:  #e6e6ea;
+
+  --ink:       #1b1b1d;   /* 17.20:1 on --ground                            */
+  --ink-2:     #45454a;   /* 9.53:1                                         */
+  --muted:     #6a6a70;   /* 5.37:1 on white, 4.89:1 on --ground-2 — never on glass */
+
+  --accent:      #0062c4; /* text: 5.93:1 on white, 5.39:1 on --ground-2   */
+  --accent-fill: #0062c4;
+  --on-accent:   #ffffff; /* 5.93:1 — the one declared white partner, see below */
+
+  /* stage: dark bands and tiles                                            */
+  --stage:        #000000;
+  --stage-2:      #141416;
+  --stage-ink:    #f4f4f6; /* 19.12:1 on --stage, 16.75:1 on --stage-2      */
+  --stage-ink-2:  #a6a6ad; /* 8.68 / 7.60                                   */
+  --stage-muted:  #86868d; /* 5.81 / 5.09                                   */
+  --stage-accent: #3d9bff; /* links on the stage: 7.33 / 6.42              */
+
+  --up:   #1d8a4e;
+  --down: #c8322a;
+
+  /* The platform's own UI face — local only, zero downloads. On Apple
+     hardware this resolves to the system SF faces; elsewhere to Segoe UI
+     or Roboto. Never ship a licensed system font as a webfont.            */
+  --sans:    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --r-sheet: 0px;
+  --r-panel: 18px;
+  --r-card:  28px;   /* tiles: large and soft — the corner is part of the voice */
+  --r-pill:  980px;  /* buttons and chips are full pills                     */
+  --maxw:    980px;  /* the reading column; tiles may run to 1260px          */
+  --nav-h:   48px;
+}
+```
+
+**The declared exception — white on the accent.** Every other preset here
+forbids white on its accent, because every accent measured so far failed with
+white (2.07–3.80:1). The rule was always about contrast, not the colour:
+this blue carries white at **5.93:1**, and the white-on-blue pill *is* the
+direction's buy action. L declares the pairing (`"whiteOnAccent": "declared"`
+in preset-gates.json); the gate then measures it and fails anything under
+4.5:1 instead of banning it. The margin is narrower than it looks: at
+`#0b72e0` white is 4.67:1 and at `#1677e6` it is 4.36:1, a fail — so measure
+before you lighten the accent.
+
+**The trap is the glass.** The sticky nav is translucent with a backdrop blur.
+At 72% white over a black stage band, `--muted` falls to **2.71:1**; at 80% it
+is 3.35:1 and `--ink` holds at 10.71:1. So: the nav background is never under
+80% opacity, carries only `--ink`, and switches to the dark glass
+(`--stage` at 80%) over stage bands. Test it scrolled over the darkest band
+on the page — never only at the top.
+
+**Imagery.** Products are the user's own, knocked out or shot on seamless,
+via `compress`; never generated. Behind them, the `studio` plate — seamless
+studio light from the page's own tokens (`plate --style studio`, light or dark
+palette) — only under the product, never behind the headline or copy. Lifestyle
+or "atmosphere" `ai` images do not belong here: the studio light *is* the
+atmosphere. Module recipes, CSS and the gates in
+[gallery-modules.md](gallery-modules.md).
+
+### Component grammar
+
+- **One idea per band.** Every section is a full-width band in one tone
+  (`--ground`, `--ground-2` or `--stage`), with one headline, one sentence,
+  one or two actions and one product view. Bands alternate tone; nothing
+  separates them but the tone change — no rules, no shadows.
+- **Centred display headline, sentence case.** `--display`, weight 600,
+  tracking `-0.03em`, `clamp(40px, 6vw, 80px)`, line-height 1.05, `--ink`,
+  centred. Two short lines beat one long one. The centred hero is this
+  preset's whole point — do not apply it to dense or analytical surfaces.
+- **Pill plus chevron.** The primary action is a `--accent-fill` pill with
+  `--on-accent` text; the secondary is a text link in `--accent` with a
+  trailing chevron (›), never a second pill. At most one pill per band.
+- **Tiles separate by tone.** Bento tiles are `--ground-2` on `--ground` (or
+  `--stage-2` on `--stage`), radius `--r-card`, no border, no shadow, with the
+  product bleeding off the tile's bottom edge.
+- **Glass nav and a chapter strip.** A 48px translucent sticky nav, plus a
+  second sticky strip for the product's own sections with a small buy pill at
+  its right.
+- **Spec numerals.** Large `--display` numbers at weight 600 above a small
+  `--ink-2` caption, three or four across, no dividers.
+- **Bad at:** data-dense screens, dashboards, tables, anything operator-facing
+  — the scale and whitespace that make a product page calm make a working
+  surface slow. Use it for marketing and launch pages, not inside the app.
+
+---
+
 ## Shared grammar (recurs across the references, reusable beyond them)
 
 These devices carry across directions — they're structural, not stylistic, and
@@ -945,6 +1065,7 @@ even when every other signal matches.**
 | **I · Campus Bright** | marketing, catalogue | courses, bootcamps, membership | course thumbnails | dense | the brand is luxury, restrained or B2B-formal |
 | **J · Charter Navy** | marketing, booking | aviation, marine, logistics, finance | corporate, aircraft, people | medium | the brand wants warmth or a consumer-casual voice |
 | **K · Dispatch Yellow** | marketing, booking | taxi, courier, trades, plant hire | minimal or none supplied | medium | the work is premium, understated or editorial |
+| **L · Gallery White** | marketing, launch page | hardware, devices, premium apps, software launches | the user's own product shots | airy | the surface is data-dense, operator-facing, or has no product to show |
 
 Two signals is the adoption threshold. One signal is a coincidence — ask
 rather than assume. "No imagery supplied" is never a disqualifier by itself:
@@ -1009,6 +1130,10 @@ skill exists to prevent.
 | **I · Campus Bright** | Alternating | Soft yellow | Hairline | Dense | Thumbnails | Courses, bootcamps, membership | Restrained or luxury tone |
 | **J · Charter Navy** | Navy + white | Red | Hairline | Medium | Corporate | Aviation, marine, logistics, finance | Warmth, informality |
 | **K · Dispatch Yellow** | White + black | Safety yellow | Flat block | Medium | Minimal | Taxi, courier, trades, hire | Premium or understated work |
+| **L · Gallery White** | White + black stage | Deep blue | **Tone** | Airy | Product on studio light | Devices, premium apps, launches | Dense or operator screens |
+
+Preset L separates by **tone** alone: tiles and bands are a step lighter or
+darker than their ground, with neither borders nor shadows on them.
 
 Presets E and H use shadows for separation rather than hairlines. Both are
 considered exceptions: retail wants objects that look liftable, and Studio
@@ -1024,7 +1149,7 @@ Anti-Template Policy exists to prevent.
 ## Verifying an applied preset
 
 `scripts/verify-preset.mjs` runs a preset's gates against a live page.
-`scripts/preset-gates.json` holds the declaration for all eleven — accent and
+`scripts/preset-gates.json` holds the declaration for all twelve — accent and
 radii transcribed from each token block, separation from the comparison table,
 traps from each direction's own trap paragraph. Change a preset here, change it
 there.
