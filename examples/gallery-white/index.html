@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumen One — Preset L demo</title>
+<style>
+/* Preset L "Gallery White" — tokens exactly as theme-presets.md */
+.page {
+  --ground: #ffffff; --ground-2: #f4f4f6; --panel: #fbfbfd; --hair: #d5d5da; --hair-lit: #e6e6ea;
+  --ink: #1b1b1d; --ink-2: #45454a; --muted: #6a6a70;
+  --accent: #0062c4; --accent-fill: #0062c4; --on-accent: #ffffff;
+  --stage: #000000; --stage-2: #141416; --stage-ink: #f4f4f6; --stage-ink-2: #a6a6ad; --stage-muted: #86868d; --stage-accent: #3d9bff;
+  --up: #1d8a4e; --down: #c8322a;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --r-sheet: 0px; --r-panel: 18px; --r-card: 28px; --r-pill: 980px; --maxw: 980px; --nav-h: 48px;
+  --stage-plate: url("stage.webp"); --ground-plate: url("ground.webp");
+}
+html, body { margin: 0; }
+body { background: var(--ground); }
+.page { font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; }
+.skip { position: absolute; left: -9999px; color: var(--ink); background: var(--ground); }
+.skip:focus { left: 12px; top: 12px; z-index: 100; background: var(--ground); color: var(--ink); padding: 8px 12px; border-radius: var(--r-pill); outline: 2px solid var(--accent); }
+
+/* §1 bands */
+.band { padding-block: clamp(80px, 10vw, 160px); background: var(--ground); color: var(--ink); }
+.band--alt { background: var(--ground-2); }
+.band--stage { background: var(--stage); color: var(--stage-ink); }
+.band--stage .sub { color: var(--stage-ink-2); }
+.band--stage a:not(.pill) { color: var(--stage-accent); }
+.band__col { max-width: var(--maxw); margin-inline: auto; padding-inline: 22px; text-align: center; }
+
+/* §2 type */
+.eyebrow { font: 600 clamp(17px, 1.6vw, 21px)/1.2 var(--display); color: var(--accent); letter-spacing: -0.01em; margin: 0; }
+.band--stage .eyebrow { color: var(--stage-accent); }
+.headline { font: 600 clamp(40px, 6vw, 80px)/1.05 var(--display); letter-spacing: -0.03em; text-wrap: balance; margin: 8px 0 0; }
+.sub { font: 400 clamp(19px, 1.9vw, 24px)/1.35 var(--sans); color: var(--ink-2); max-width: 34ch; margin: 14px auto 0; text-wrap: pretty; }
+
+/* §3 pill + chevron */
+.actions { display: flex; gap: 28px; justify-content: center; align-items: center; margin-top: 24px; flex-wrap: wrap; }
+.pill { font: 400 17px/1 var(--sans); padding: 12px 22px; border-radius: var(--r-pill); background: var(--accent-fill); color: var(--on-accent); text-decoration: none; }
+.pill:hover { background: color-mix(in oklab, var(--accent-fill) 88%, var(--ink)); }
+.chev { font: 400 17px/1 var(--sans); color: var(--accent); text-decoration: none; }
+.chev::after { content: " \203A"; }
+.chev:hover { text-decoration: underline; text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.band--stage a:focus-visible { outline-color: var(--stage-accent); }
+
+/* §4 glass nav + chapter strip */
+.nav { position: sticky; top: 0; z-index: 50; height: var(--nav-h); display: flex; align-items: center; justify-content: center; gap: 36px;
+  font: 400 12px/1 var(--sans); color: var(--ink);
+  background: color-mix(in oklab, var(--ground) 80%, transparent);
+  backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); }
+.nav a { color: inherit; text-decoration: none; }
+.nav[data-over="stage"], .chapter[data-over="stage"] { color: var(--stage-ink); background: color-mix(in oklab, var(--stage) 80%, transparent); border-bottom-color: transparent; }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nav, .chapter { background: var(--ground); } .nav[data-over="stage"], .chapter[data-over="stage"] { background: var(--stage); } }
+.chapter { position: sticky; top: var(--nav-h); z-index: 49; height: 52px; display: flex; align-items: center; justify-content: space-between;
+  padding-inline: max(22px, calc((100% - var(--maxw)) / 2)); color: var(--ink);
+  background: color-mix(in oklab, var(--ground) 80%, transparent);
+  backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--hair); }
+.chapter strong { font: 600 21px/1 var(--display); letter-spacing: -0.01em; }
+.chapter .pill { padding: 7px 14px; font-size: 12px; }
+
+/* §5 hero stage */
+.hero { padding-bottom: 0; overflow: hidden; }
+.stage { position: relative; isolation: isolate; margin-top: clamp(32px, 5vw, 64px); }
+.stage-light { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: var(--stage-plate) center bottom / cover no-repeat; }
+.hero:not(.band--stage) .stage-light { background-image: var(--ground-plate); }
+.stage-product { display: block; width: min(760px, 88vw); height: auto; margin: 0 auto; }
+
+/* §6 tiles */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 1260px; margin-inline: auto; padding-inline: 12px; }
+.tile { position: relative; isolation: isolate; overflow: hidden; border-radius: var(--r-card); background: var(--ground-2); color: var(--ink); text-align: center; padding: 44px 32px 0; min-height: 520px; display: flex; flex-direction: column; }
+.band--alt .tile:not(.tile--stage) { background: var(--ground); }
+.tile--stage { background: var(--stage-2); color: var(--stage-ink); }
+.tile--stage .sub { color: var(--stage-ink-2); }
+.tile--stage .eyebrow, .tile--stage .chev { color: var(--stage-accent); }
+.tile .headline { font-size: clamp(28px, 3.4vw, 48px); }
+.tile .sub { font-size: 17px; }
+.tile figure { margin: auto 0 0; }
+.tile figure svg { display: block; width: 100%; height: auto; }
+@media (max-width: 767px) { .tiles { grid-template-columns: 1fr; } }
+
+/* §7 specs */
+.specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 40px 24px; max-width: var(--maxw); margin: 48px auto 0; text-align: center; }
+.spec b { display: block; font: 600 clamp(40px, 5vw, 64px)/1 var(--display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.spec span { display: block; margin-top: 8px; font: 400 15px/1.35 var(--sans); color: var(--ink-2); }
+.band--stage .spec span { color: var(--stage-ink-2); }
+
+footer.band { padding-block: 40px; font-size: 12px; color: var(--muted); }
+
+/* §8 motion */
+[data-reveal] { opacity: 0; transform: translateY(24px); transition: opacity 600ms cubic-bezier(.2,.7,.2,1), transform 600ms cubic-bezier(.2,.7,.2,1); }
+[data-reveal].in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { [data-reveal] { opacity: 1; transform: none; transition: none; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <a class="skip" href="#main">Skip to content</a>
+  <nav class="nav" aria-label="Site"><a href="#">Store</a><a href="#">Lumen</a><a href="#">Studio</a><a href="#">Support</a></nav>
+  <div class="chapter"><strong>Lumen One</strong><a class="pill" href="#buy">Buy</a></div>
+  <main id="main">
+    <section class="band hero" aria-labelledby="hero-h">
+      <div class="band__col">
+        <p class="eyebrow">Lumen One</p>
+        <h1 class="headline" id="hero-h">Light, measured.</h1>
+        <p class="sub">A desk lamp that reads the room and holds 4000 K all day.</p>
+        <div class="actions"><a class="pill" href="#buy">Buy</a><a class="chev" href="#more">Learn more</a></div>
+      </div>
+      <div class="stage">
+        <div class="stage-light" aria-hidden="true"></div>
+        <svg class="stage-product" viewBox="0 0 760 420" role="img" aria-label="Lumen One lamp, side view">
+          <ellipse cx="380" cy="392" rx="150" ry="14" fill="var(--hair)"/>
+          <rect x="300" y="360" width="160" height="26" rx="13" fill="var(--ink-2)"/>
+          <rect x="372" y="150" width="16" height="214" rx="8" fill="var(--ink-2)"/>
+          <rect x="250" y="112" width="300" height="46" rx="23" fill="var(--ink)"/>
+          <rect x="268" y="152" width="264" height="6" rx="3" fill="var(--stage-accent)"/>
+        </svg>
+      </div>
+    </section>
+
+    <section class="band band--stage" aria-labelledby="pro-h">
+      <div class="band__col" data-reveal>
+        <p class="eyebrow">Lumen One Studio</p>
+        <h2 class="headline" id="pro-h">Made for the night shift.</h2>
+        <p class="sub">Twice the output, half the glare, and a dimmer that goes to one lumen.</p>
+        <div class="actions"><a class="pill" href="#buy">Buy</a><a class="chev" href="#more">See the specs</a></div>
+        <div class="specs">
+          <div class="spec"><b>1,200</b><span>lumens at full</span></div>
+          <div class="spec"><b>2700–6500</b><span>kelvin, stepless</span></div>
+          <div class="spec"><b>92</b><span>colour rendering index</span></div>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="stage-light" aria-hidden="true"></div>
+        <svg class="stage-product" viewBox="0 0 760 420" role="img" aria-label="Lumen One Studio lamp, three-quarter view">
+          <ellipse cx="380" cy="392" rx="160" ry="14" fill="var(--stage-2)"/>
+          <rect x="296" y="358" width="168" height="28" rx="14" fill="var(--stage-ink-2)"/>
+          <rect x="371" y="140" width="18" height="222" rx="9" fill="var(--stage-ink-2)"/>
+          <rect x="236" y="100" width="328" height="50" rx="25" fill="var(--stage-ink)"/>
+          <rect x="256" y="144" width="288" height="6" rx="3" fill="var(--stage-accent)"/>
+        </svg>
+      </div>
+    </section>
+
+    <section class="band band--alt" aria-labelledby="tiles-h">
+      <h2 id="tiles-h" class="band__col headline" style="font-size:clamp(32px,4vw,56px)">Which Lumen is yours?</h2>
+      <div class="tiles" style="margin-top:48px">
+        <article class="tile" data-reveal>
+          <p class="eyebrow">Lumen One</p>
+          <h3 class="headline">Light, measured.</h3>
+          <p class="sub">From 129 · 18 months of light per charge.</p>
+          <div class="actions"><a class="pill" href="#buy">Buy</a><a class="chev" href="#more">Learn more</a></div>
+          <figure aria-hidden="true"><svg viewBox="0 0 560 260"><rect x="150" y="60" width="260" height="40" rx="20" fill="var(--ink)"/><rect x="272" y="98" width="16" height="140" rx="8" fill="var(--ink-2)"/><rect x="210" y="234" width="140" height="22" rx="11" fill="var(--ink-2)"/></svg></figure>
+        </article>
+        <article class="tile tile--stage" data-reveal>
+          <p class="eyebrow">Lumen One Studio</p>
+          <h3 class="headline">Made for the night shift.</h3>
+          <p class="sub">From 249 · stepless 2700–6500 K.</p>
+          <div class="actions"><a class="pill" href="#buy">Buy</a><a class="chev" href="#more">Learn more</a></div>
+          <figure aria-hidden="true"><svg viewBox="0 0 560 260"><rect x="140" y="56" width="280" height="44" rx="22" fill="var(--stage-ink)"/><rect x="271" y="98" width="18" height="140" rx="9" fill="var(--stage-ink-2)"/><rect x="204" y="234" width="152" height="22" rx="11" fill="var(--stage-ink-2)"/></svg></figure>
+        </article>
+      </div>
+    </section>
+  </main>
+  <footer class="band"><div class="band__col">Demo page for fantastic-ui Preset L. Fictional product; no real brand.</div></footer>
+</div>
+<script>
+const nav = document.querySelector(".nav");
+const bars = document.querySelectorAll(".nav, .chapter");
+const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { const over = e.target.classList.contains("band--stage") ? "stage" : ""; bars.forEach((b) => { b.dataset.over = over; }); } },
+  { rootMargin: `-${parseInt(getComputedStyle(nav).height)}px 0px -95% 0px` });
+document.querySelectorAll(".band").forEach((b) => io.observe(b));
+const rv = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { e.target.classList.add("in"); rv.unobserve(e.target); } }, { threshold: 0.15 });
+document.querySelectorAll("[data-reveal]").forEach((el) => rv.observe(el));
+</script>
+</body>
+</html>

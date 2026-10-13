@@ -80,6 +80,27 @@ The five disciplines say *how* to design; a preset is a pre-committed answer to 
 
 Selection is part of the workflow, not a menu you're shown: before writing a brief, the skill runs a preset check with three gates — the user named a direction → use it; the codebase already has a token system → **no preset** (recover and extend the existing brief instead of running a second design system); otherwise score the request against a signal table (medium, domain, imagery, density) and apply each preset's disqualifier. One confident match is adopted and announced in a line; near-ties get a short question; a half-fit is refused in favor of a fresh brief, because a stretched preset produces exactly the template output the skill exists to prevent. Data-dense analytics/finance surfaces are a stated gap — those route to the dark instrument direction, never to a preset because it happens to be dark.
 
+### Example: Gallery White
+
+<p align="center">
+  <img src="assets/gallery-white.png" alt="Two views of a launch page for a fictional desk lamp called Lumen One. Left: a white hero with a large black headline, a blue pill button, and the lamp on soft grey studio light. Right: a black stage band with a white headline, three large spec numbers, and the lamp on dark studio light." width="900" />
+</p>
+
+Ask for the preset by name:
+
+> *"/fantastic-ui build a one-page launch site for our desk lamp in Gallery White"*
+
+The skill announces the choice in one line before writing code, so you can redirect it. Then it builds the page from [gallery-modules.md](skills/fantastic-ui/references/gallery-modules.md):
+
+- white bands with one black stage
+- a glass nav that turns dark over the stage
+- display type, pill buttons and 28 px tiles
+- studio light behind the product, generated with `gen_atmosphere.py plate --style studio`
+
+Finally it runs `verify-preset.mjs --preset L`. That check fails a page with shadows or borders on tiles, a nav below 80% opacity, a weakened accent, or studio light behind text.
+
+The page above is in [examples/gallery-white](examples/gallery-white/), with the commands that made its plates and the measured results. A described look ("Apple-style", "white gallery, product on studio light") usually selects the same preset. An existing design system takes precedence unless you ask to replace it.
+
 ## Beyond the landing page: product surfaces
 
 The same five disciplines apply *inside* the product. The skill includes a dedicated workflow for modifying existing app pages, panels, and subpanels:
@@ -163,6 +184,7 @@ Once installed and available in your client's skill list, ask for things like:
 - *"Run a WCAG audit on this page and fix what fails"*
 - *"Make the app accessible / fix the contrast and keyboard issues"*
 - *"Build the site in the Marigold Report style"* (or any preset — or let the skill pick one)
+- *"Build a launch page for our desk lamp in Gallery White"* (see the [example](examples/gallery-white/))
 - *"Students cannot find the next step in this onboarding flow. Diagnose it and propose a fix."*
 - *"Audit this dashboard using Norman, Krug, and Nielsen; show evidence, severity, and separate scores."*
 - *"Use these screenshots to define the typography, composition, and responsive rules without replacing our existing design system."*
