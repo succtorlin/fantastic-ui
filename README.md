@@ -80,6 +80,16 @@ The five disciplines say *how* to design; a preset is a pre-committed answer to 
 
 Selection is part of the workflow, not a menu you're shown: before writing a brief, the skill runs a preset check with three gates — the user named a direction → use it; the codebase already has a token system → **no preset** (recover and extend the existing brief instead of running a second design system); otherwise score the request against a signal table (medium, domain, imagery, density) and apply each preset's disqualifier. One confident match is adopted and announced in a line; near-ties get a short question; a half-fit is refused in favor of a fresh brief, because a stretched preset produces exactly the template output the skill exists to prevent. Data-dense analytics/finance surfaces are a stated gap — those route to the dark instrument direction, never to a preset because it happens to be dark.
 
+### Your DESIGN.md comes first
+
+If the project has a [DESIGN.md](https://github.com/google-labs-code/design.md) (Google Labs' open format for describing a design system to coding agents), the skill reads it before considering any preset. It treats the file as the recorded direction and announces it in one line. Three rules govern it:
+
+- **Mismatches are always asked about.** `scripts/design_md.py drift` compares the file's tokens with the stylesheet's custom properties. Every difference, missing token or likely rename is put to you as a question, every time; the skill never decides which side is right.
+- **Replacing needs an explicit request.** Naming a preset in a project with a DESIGN.md gets you a question ("follow the file, or replace it?"), not a rewrite. Asked to replace it, the skill writes the new file beside the old one, shows the diff, and moves it into place only on a yes. Then it migrates the code, tokens first.
+- **No file? It offers to write one** once the direction is settled. `design_md.py export --preset L` turns any of the twelve presets into a DESIGN.md. All twelve pass the official linter (`@google/design.md` 0.4.0) with 0 errors and 0 warnings.
+
+Procedure: [design-md.md](skills/fantastic-ui/references/design-md.md).
+
 ### Example: Gallery White
 
 <p align="center">
@@ -185,6 +195,8 @@ Once installed and available in your client's skill list, ask for things like:
 - *"Make the app accessible / fix the contrast and keyboard issues"*
 - *"Build the site in the Marigold Report style"* (or any preset — or let the skill pick one)
 - *"Build a launch page for our desk lamp in Gallery White"* (see the [example](examples/gallery-white/))
+- *"Follow our DESIGN.md and check the CSS still matches it"*
+- *"Replace our DESIGN.md with Gallery White and migrate the app"*
 - *"Students cannot find the next step in this onboarding flow. Diagnose it and propose a fix."*
 - *"Audit this dashboard using Norman, Krug, and Nielsen; show evidence, severity, and separate scores."*
 - *"Use these screenshots to define the typography, composition, and responsive rules without replacing our existing design system."*
@@ -203,6 +215,8 @@ skills/fantastic-ui/
 │   ├── preset-gates.json           # universal and per-preset gate declarations
 │   ├── gen_atmosphere.py           # token plates, SVG texture, AI wrapper, compressor, slot scoring
 │   │                               #   (`score`), manifest builds (`batch`) — ≤30 KB, with a ledger
+│   ├── design_md.py                # DESIGN.md: find, read, drift vs the CSS, export a preset
+│   ├── test_design_md.py           # its tests (no network)
 │   ├── plate-check.js              # browser check: plate visibility + text over it, stale-CSS sentinel
 │   ├── plate-check.test.mjs        # `node --test` unit tests for its pure helpers
 │   └── plate-check-shot.mjs        # optional Playwright screenshot variant
@@ -227,6 +241,8 @@ skills/fantastic-ui/
     ├── theme-presets.md            # twelve named directions with contrast-validated token blocks and
     │                               #   component grammar, plus the signal table and gates for automatic
     │                               #   preset selection (and refusal)
+    ├── design-md.md                # a project's DESIGN.md: precedence, drift questions,
+    │                               #   create on a yes, replace only on an explicit request
     ├── gallery-modules.md          # Preset L kit: tone bands, glass nav + chapter strip, studio-lit
     │                               #   product stage, bento tiles, spec numerals, gates
     ├── wcag-audit.md               # WCAG 2.2 AA check-and-fix phase: contrast-matrix script (semantic

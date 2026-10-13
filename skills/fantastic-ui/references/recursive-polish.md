@@ -62,7 +62,10 @@ batch of work is already spent.
 
 ## Phase B — Reconcile prior art (do NOT write a second brief)
 
-Before writing any brief or token, detect whether a pass already exists: grep
+Before writing any brief or token, detect whether a pass already exists. Look
+for a DESIGN.md first (`scripts/design_md.py find`): when there is one, it is
+the brief. Read it, run `drift` against the stylesheet, and put every mismatch
+to the user before the sweep starts ([design-md.md](design-md.md)). Then grep
 for token names, accent variables, and shared primitive classes in the global
 stylesheet and across components.
 

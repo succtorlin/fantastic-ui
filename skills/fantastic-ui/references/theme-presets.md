@@ -943,7 +943,7 @@ and it drops to black only for a stage band.
   --stage-muted:  #86868d; /* 5.81 / 5.09                                   */
   --stage-accent: #3d9bff; /* links on the stage: 7.33 / 6.42              */
 
-  --up:   #1d8a4e;
+  --up:   #1a8047;   /* 4.97 on white, 4.53 on --ground-2 (was #1d8a4e: 4.38, a fail) */
   --down: #c8322a;
 
   /* The platform's own UI face — local only, zero downloads. On Apple

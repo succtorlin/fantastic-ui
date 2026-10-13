@@ -5,7 +5,8 @@ description: >-
   (app pages, dashboards, panels, and subpanels) that feel like the product,
   not a template. Use for landing, hero, homepage, premium/polished redesign,
   whole-app visual retrofit, data-heavy or technical UI, and accessibility or
-  WCAG work. Also use for confusing or unintuitive interactions, affordance,
+  WCAG work, and for following, checking against the CSS, creating or
+  replacing a project's DESIGN.md design-system file. Also use for confusing or unintuitive interactions, affordance,
   discoverability, mental-model, error-prevention, cognitive-walkthrough,
   usability, navigation, form, heuristic, or dark-pattern analysis. Covers
   editorial visual systems, live proof, generated token-driven decorative
@@ -190,10 +191,29 @@ Before writing a brief, decide whether one of the twelve presets in
 [references/theme-presets.md](references/theme-presets.md) already is the brief.
 Work the gates in order and stop at the first that answers:
 
+0. **Does the project have a DESIGN.md?** Run
+   `python3 scripts/design_md.py find --root .` first, every time. A DESIGN.md
+   (Google Labs' open format) is the project's recorded direction, and it
+   decides before the gates below. Procedure:
+   [references/design-md.md](references/design-md.md).
+   - **The user explicitly asks to replace it** ("replace our DESIGN.md with
+     Gallery White"): run the replace procedure. Write the new file beside the
+     old one, show the diff, and move it into place only on a yes. Then migrate
+     the code.
+   - **The user names a preset or a look, but does not ask to replace the
+     file**: do not apply it. Say the file exists and what direction it records,
+     then ask: *follow the file, or replace it with this preset?*
+   - **Otherwise follow it.** `read` it, then announce its direction in one line
+     with the imagery clause. Run `drift` against the stylesheet, and put every
+     mismatch to the user as a question, every time. Never decide which side is
+     right. Gates 1–3 do not run.
+
+   No file → continue with gate 1. After the direction is settled, offer to
+   write a DESIGN.md (`design_md.py export`), and write it only on a yes.
 1. **Did the user name a direction?** Any preset name, or a described look
    ("monochrome architectural", "warm cream deck"). → Use it. Their words win,
    including when they ask for something you would not have chosen.
-2. **Does the codebase already have a token system?** Grep the global
+2. **Does the codebase already have a token system (and no DESIGN.md)?** Grep the global
    stylesheet for token names, accent variables, shared primitive classes. If
    one exists → **no preset.** Recover its brief and extend it (Phase B of
    `recursive-polish.md`); the recovered brief line still gets an imagery
@@ -585,6 +605,9 @@ patterns and the token block:
 Run through this before calling the page done:
 
 - [ ] The one-sentence brief still describes the shipped page
+- [ ] DESIGN.md, if the project has one: `design_md.py drift` clean, or every
+      remaining mismatch kept by the user's explicit choice; never rewritten
+      without an explicit request and a shown diff
 - [ ] One accent color; semantic colors appear only with their meaning
 - [ ] No webfonts, no new dependencies, assets ≤ 30 KB each
 - [ ] Imagery plan executed, or its absence justified in the brief line
@@ -640,6 +663,9 @@ Additional gates when the work touched product surfaces:
   Terracotta Commerce, Midnight Showroom, Broadcast Light, Studio Kinetic,
   Campus Bright, Charter Navy, Dispatch Yellow, Gallery White): contrast-validated
   tokens, grammar, imagery, signal table. Read at Step 0a, before writing a brief.
+- [references/design-md.md](references/design-md.md) — a project's DESIGN.md:
+  find, read, drift (ask on every mismatch), create on a yes, replace only on
+  an explicit request. Read at Step 0a, gate 0.
 - [references/gallery-modules.md](references/gallery-modules.md) — Preset L's
   kit: tone bands, glass nav, studio-lit product stage, bento tiles. Read with L.
 - [references/visual-reference-analysis.md](references/visual-reference-analysis.md)
