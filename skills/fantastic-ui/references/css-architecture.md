@@ -40,6 +40,13 @@ name — rename per project, keep the *roles*):
   /* semantic — used ONLY with their meaning */
   --up: #35c4ac;
   --down: #e3563f;
+  /* optional third semantic for partial / stale / needs-attention states
+     (agent runs, budgets, stale data). Add it only when a surface has such
+     states; validate it in the contrast matrix like any ink. Here it shares
+     the accent's amber, so warn states MUST carry an icon + a word
+     ("Partial", "Stale"); see wcag-audit.md, "The accent must not
+     impersonate a semantic". */
+  --warn: #e8b04a;
 
   /* three type faces, all system stacks — zero font requests */
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", ui-serif, Georgia, serif;
@@ -54,7 +61,7 @@ name — rename per project, keep the *roles*):
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
   line-height: 1.6;
-  overflow-x: hidden;
+  overflow-x: clip; /* never `hidden`: it makes .page a scroll container and kills the sticky nav */
 }
 ```
 
@@ -182,8 +189,59 @@ flipped by a passive scroll listener at ~12px):
   (asymmetry = editorial); collapse 6 → 2 → 1 at ~1024px and ~640px.
 - Alternate band backgrounds (`--ground` / `--ground-2` / inset panels) so
   scrolling has texture without any imagery.
-- Test at 320 / 768 / 1024 / 1440. No horizontal overflow at any of them
-  (the root sets `overflow-x: hidden` as a backstop, not as the fix).
+- No horizontal overflow at any width in the breakpoint list below (the root
+  sets `overflow-x: clip` as a backstop, not as the fix; the six rules below
+  are the fix).
+
+## Mobile floor
+
+Six ways a crafted page breaks on a phone. Each is cheap to prevent and
+expensive to find afterwards, because every one of them looks fine at 1440.
+`scripts/lint-surface.mjs` catches M1, M5, M6 and the image-grid half of M2
+statically; M3 and M4 need a rendered page at 320 px.
+
+- **M1 — `clip`, never `hidden`, on wrappers.** `overflow-x: hidden` (or
+  `overflow: hidden`) on a wrapper that holds a sticky element (`.page`,
+  `#app`, `#__next`, a layout `div`) turns that wrapper into a scroll
+  container, and `position: sticky` then sticks to a box that never scrolls:
+  the nav simply stops sticking, with no error. `body` or `html` alone is the
+  exception, because their overflow propagates to the viewport, but setting it
+  on **both** breaks sticky the same way. `overflow-x: clip` hides the overflow
+  without creating a scroll container, so use it everywhere and stop counting
+  exceptions. Measured in Chromium at 375 px after an 800 px scroll: `.page {
+  overflow-x: hidden }` leaves the nav at top −800 px; `clip` keeps it at 0.
+  Check: scroll and confirm the nav's `getBoundingClientRect().top` stays `0`.
+- **M2 — let tracks shrink.** A grid track of bare `1fr` has an automatic
+  minimum equal to its widest child, so one long word or an image's intrinsic
+  width pushes the grid past the viewport. Write `repeat(n, minmax(0, 1fr))`
+  for every track that holds images, code, tables or long words, and give
+  flex children that hold text `min-width: 0`.
+- **M3 — clickable text never wraps.** A button or nav label that breaks onto
+  two lines at 320 px reads as two controls. Fix in this order: shorten the
+  label, then `white-space: nowrap`, then drop the item into an overflow
+  menu, then collapse the group. Never shrink the font below the body size.
+- **M4 — display type can break.** Big headings with a long word overflow
+  narrow screens. `h1, h2 { overflow-wrap: anywhere; min-width: 0; }` —
+  `anywhere`, not `break-word`, because only `anywhere` lowers the
+  min-content size the grid uses to size the track.
+- **M5 — one sticky owns `top: 0`.** Every other sticky element (a section
+  header, a table head, a chapter strip) offsets by the nav height
+  (`top: var(--nav-h)`), and the z-index tokens are split so the nav always
+  wins: `--z-nav` above `--z-sticky` above content. Two elements both stuck at
+  `top: 0` overlap on scroll.
+- **M6 — uppercase needs leading.** Uppercase display type set below
+  `line-height: 1` collides between lines (caps have no descender room to
+  borrow). Floor 1.0, recommended 1.02–1.08.
+
+Use `svh` (the small viewport height) for a full-height section on a
+scrolling page: plain `vh` is cropped by the mobile browser bar, and `dvh`
+resizes the section while the bar collapses, which shifts the layout under
+the reader's thumb. Keep `dvh` for a fixed app frame that should track the
+visible area ([phone-surfaces.md](phone-surfaces.md)).
+
+**Breakpoint list (the one place it lives):** check every page at 320, 375,
+390, 414, 768, 1024 and 1440 px. Phone-only screens use the subset in
+phone-surfaces.md's gate.
 
 ## Reveal-on-scroll
 
@@ -191,9 +249,14 @@ One attribute + one class, driven by a single IntersectionObserver (JS side
 in [canvas-hero.md](canvas-hero.md)):
 
 ```css
-[data-reveal] { opacity: 0; transform: translateY(18px); transition: opacity 0.7s, transform 0.7s; }
-[data-reveal].isIn { opacity: 1; transform: none; }
+/* Hidden only once the script has proven it is running: with JS off or
+   failed, every [data-reveal] element is simply visible. */
+.revealReady [data-reveal] { opacity: 0; transform: translateY(18px); transition: opacity 0.7s, transform 0.7s; }
+.revealReady [data-reveal].isIn { opacity: 1; transform: none; }
 ```
 
-Under `prefers-reduced-motion` the JS adds `isIn` to everything immediately —
-content is never hidden from someone who turned motion off.
+The observer adds `revealReady` to the page root before it observes
+anything; never author `opacity: 0` on content in plain CSS. Under
+`prefers-reduced-motion` the JS never adds `revealReady` at all — content is
+never hidden from someone who turned motion off. Which motion route to use
+for what, and the slop list: [motion-routes.md](motion-routes.md).

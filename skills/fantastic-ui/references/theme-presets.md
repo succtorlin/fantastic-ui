@@ -14,7 +14,12 @@ Two rules that keep presets from becoming the costume party Shift 1 forbids:
   from [css-architecture.md](css-architecture.md) — ground scale, hairlines,
   ink scale, one accent, semantics, three faces. If a preset seems to need a
   role that doesn't exist, that's a conversation about the role vocabulary, not
-  a local addition.
+  a local addition. The one optional role the presets leave out is `--warn`
+  (partial, stale, needs attention): add it only when the product has those
+  states, pick it ≥40° of OKLCH hue from the accent, `--up` and `--down` where
+  the palette allows, run it through the contrast matrix, and in every case
+  pair warn states with an icon and a word
+  ([wcag-audit.md](wcag-audit.md#the-accent-must-not-impersonate-a-semantic)).
 
 Ten of the twelve presets are **light-ground** and two are dark. That mix
 matters, because the accent rule inverts between them and the inversion is the

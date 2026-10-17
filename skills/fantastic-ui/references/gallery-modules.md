@@ -193,13 +193,16 @@ Real numbers only: the product's own figures with their units.
 ## 8. Motion — quiet, and gone under reduced motion
 
 ```css
-[data-reveal] { opacity: 0; transform: translateY(24px); transition: opacity 600ms cubic-bezier(.2,.7,.2,1), transform 600ms cubic-bezier(.2,.7,.2,1); }
-[data-reveal].in { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) { [data-reveal] { opacity: 1; transform: none; transition: none; } }
+/* hidden only after the script arms it: with JS off, everything shows */
+.reveal-ready [data-reveal] { opacity: 0; transform: translateY(24px); transition: opacity 600ms cubic-bezier(.2,.7,.2,1), transform 600ms cubic-bezier(.2,.7,.2,1); }
+.reveal-ready [data-reveal].in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .reveal-ready [data-reveal] { opacity: 1; transform: none; transition: none; } }
 ```
 
 One IntersectionObserver adds `.in` once; nothing scroll-jacks, nothing
-loops. The reveal pattern and its lifecycle are in [canvas-hero.md](canvas-hero.md).
+loops. The script adds `reveal-ready` to `<html>` just before it starts
+observing, and skips that under reduced motion, so a visitor without JS (or
+with motion off) never meets a hidden section. The reveal pattern and its lifecycle are in [canvas-hero.md](canvas-hero.md).
 
 ## 9. The studio light — generating it
 

@@ -19,6 +19,33 @@ Consequences:
 - **States are most of the UI.** Empty, loading, error, and stale states are
   seen constantly in real use and designed never. Design them first-class.
 
+### Back-office or workbench? Decide before density
+
+Ask what the surface revolves around, not how many people use it or what
+screen it is on:
+
+- **A batch of business objects** (orders, tickets, holdings, users,
+  listings) makes it a **back-office**. It is neutral and dense: tables,
+  filters, bulk actions, saved views. Character lives in precision, and the
+  accent is spent almost entirely on state and the one primary action.
+- **One thing the user does over and over** (a daily check-in, a writing
+  desk, a trading blotter for one book, a run console for one agent) makes it
+  a **workbench**. It can carry more character and a single focal surface,
+  and must make the repeated action nearly free: one keystroke or one tap,
+  no navigation, the last state remembered.
+
+The answer changes density, the shell (sidebar list vs single focal column)
+and how much of the brief's personality reaches the page. When the brief is
+just the word ("make me a dashboard", "工作台"), ask that one question rather
+than guessing. When an agent does the work inside either kind of surface, the
+run-console layer in [agent-console.md](agent-console.md) stacks on top.
+Forms, wizards, settings and review queues are in
+[workflow-surfaces.md](workflow-surfaces.md); a brief for one component (a
+button, an input, a card) skips this file and goes to
+[component-states.md](component-states.md); charts are in
+[data-charts.md](data-charts.md); phone-only product screens are in
+[phone-surfaces.md](phone-surfaces.md).
+
 ## Phase 1 — Audit (do this before any opinion)
 
 1. Inventory every route/page, and within each, every panel and subpanel.
@@ -45,6 +72,12 @@ Consequences:
    their meaning through the migration.
 5. Rank screens by traffic/importance. Migration order comes from this
    list, not from what's easiest.
+6. **Write down what must not change**, before any edit: the information
+   and controls on each screen, the navigation and IA, the primary font, the
+   accent's meaning, and any copy the user has asked to keep. Removing a
+   section, changing the primary font, changing the accent, or moving
+   navigation needs the user's explicit yes, every time, even mid-sweep. Say
+   each such change aloud; never let one ride inside a presentation diff.
 
 ## Phase 2 — One brief, app-level tokens
 
@@ -91,7 +124,13 @@ Build once, from tokens, before migrating any screen:
 - `.panelHead` — the panel header (anatomy below).
 - `.stat` — big mono number + small muted label, `tabular-nums`.
 - `.dataTable` — hairline row separators, mono numerals right-aligned,
-  header row in eyebrow style.
+  header row in eyebrow style. Sortable headers are real buttons with
+  `aria-sort` on the `th`; the table states its count ("1,204 orders ·
+  showing 1–50"); one row density is locked per table (compact 32–36 px,
+  default 40–48 px, comfortable 56–64 px, never mixed); loading uses skeleton
+  rows at the real row height so nothing jumps when data lands; a filtered
+  table that returns nothing shows the filtered-to-nothing state with a
+  clear-filters action, never the empty state.
 - `.state` — shared empty/loading/error presentation (below).
 - `.focusable`, `.eyebrow`, `.mono`, `.srOnly` — same as the marketing set.
 
@@ -205,6 +244,15 @@ event pulses in feeds — all drawn from palette tokens, DPR-aware, RAF paused
 on `visibilitychange`, one static frame under `prefers-reduced-motion` (the
 lifecycle rules in `canvas-hero.md` apply verbatim). Decorative animation has
 no place in-product; every moving pixel must encode a data change.
+
+The motion family that *does* belong in-product is the one most often
+missing: **state transitions**. A row added to a list, a filtered set
+re-sorting, a panel expanding to detail, a status flipping from running to
+done. Use the cheap native routes (CSS transitions, View Transitions, WAAPI)
+from [motion-routes.md](motion-routes.md) so the eye can follow what
+changed, and make every one instant under reduced motion. A count that
+animates up on page load, with nothing having changed, is the opposite: it
+shows a wrong number for a second and encodes nothing.
 
 ## Imagery in-product
 

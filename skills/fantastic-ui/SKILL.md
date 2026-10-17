@@ -3,8 +3,11 @@ name: fantastic-ui
 description: >-
   Design and build instrument-grade marketing pages and in-product surfaces
   (app pages, dashboards, panels, and subpanels) that feel like the product,
-  not a template. Use for landing, hero, homepage, premium/polished redesign,
-  whole-app visual retrofit, data-heavy or technical UI, and accessibility or
+  not a template. Use for landing, hero, homepage, portfolio, premium/polished
+  redesign, whole-app visual retrofit, data-heavy or technical UI, charts,
+  agent/AI consoles, wizards, settings and checkout flows, phone-only screens,
+  single components with all their states, motion that should not look
+  generic, and accessibility or
   WCAG work, and for following, checking against the CSS, creating or
   replacing a project's DESIGN.md design-system file. Also use for confusing or unintuitive interactions, affordance,
   discoverability, mental-model, error-prevention, cognitive-walkthrough,
@@ -64,6 +67,17 @@ Choose the smallest mode that covers the request:
 - **Navigation, forms, or content review:** use the Trunk Test, Krug's
   scanning/satisficing rules, and the Nielsen checklist; test keyboard,
   touch, zoom, and screen-reader paths as applicable.
+- **One component** ("just the button", "a date input", a brief under ~30
+  words naming one element): skip the page apparatus and run
+  [component-states.md](references/component-states.md) — eight states and a
+  preview file, drawn from the project's tokens.
+- **A surface an agent works in** (run console, copilot panel, approval
+  queue): the product-surface route plus
+  [agent-console.md](references/agent-console.md).
+- **Forms, wizards, settings, review queues, checkout:**
+  [workflow-surfaces.md](references/workflow-surfaces.md).
+- **Phone-only screens** (app prototypes, mobile web apps, H5 pages):
+  [phone-surfaces.md](references/phone-surfaces.md).
 
 Do not treat a heuristic score as a substitute for observing real users. Use
 analytics, support tickets, session recordings, or a small task test to check
@@ -137,6 +151,20 @@ failure, and recovery). Record each finding with:
   task failure, 4 catastrophic blocker;
 - a fix at the highest useful level (token → primitive → component → copy →
   instance), plus a verification method.
+
+Write each finding so the person reading it can see it without opening the
+code:
+
+- an **On screen:** line, saying what a visitor would actually see ("the
+  Save button wraps onto two lines at 375 px");
+- the failure mode as a **cost to that visitor** ("they read it as two
+  buttons and tap the wrong half"), never a restatement of the finding;
+- every term of art glossed once per reply, in one plain clause of what it
+  looks like ("focus ring: the outline that shows which control the
+  keyboard is on");
+- past about eight findings, list every severity 3–4 in full and give the
+  rest as a count by severity, with the full list on request. A wall of
+  forty equal-weight bullets hides the three that block shipping.
 
 Report two complementary scores, never one blended number:
 
@@ -231,6 +259,7 @@ Then act on the confidence you actually have:
 | Two or more are plausible | **Ask**, offering at most three, each with the one differentiator that decides it. |
 | A preset half-fits, or a disqualifier fires | **Say so and write a fresh brief.** A stretched preset produces exactly the template output the Anti-Template Policy exists to prevent. |
 | Nothing fits | Fresh brief via Step 0. Note which preset was closest and why it failed. |
+| The brief is only praise words ("premium", "clean", "make it pop") or the user cannot say what they want, and this is a marketing page | **Offer to show rather than ask.** Announce your recommended direction as usual, and offer three low-fidelity first-screen sketches (static, tokens + skeleton only, no imagery) that differ on *different* axes (palette, layout skeleton, type, motion), each labelled with one concrete noun ("Ledger", "Darkroom", "Field notes"). Build them only on a yes. Two sketches that could share a label, or labels that differ only by an adjective, are one sketch: rework. Inside an existing product, never: recover the app's brief instead. |
 
 **Always announce the outcome in one line before building**, with the
 imagery clause attached, so the user can redirect before code exists. When a
@@ -238,8 +267,13 @@ preset is adopted, this announcement is the brief line:
 
 > Using **Terracotta Commerce** — retail storefront, product photography,
 > soft-shadow cards. Imagery: your product shots via `compress`, timber band
-> via `ai`, else `plate --style warp`. Say the word if you'd rather I write a
-> fresh direction.
+> via `ai`, else `plate --style warp`. Not right? Say *darker* for a
+> Midnight Showroom ground, or *quieter* for no motion beyond state changes.
+
+End the announcement with one or two **named** forks that differ from each
+other (usually theme and motion), as above, rather than an open "say the
+word": a person can pick a named alternative in two words, and cannot easily
+describe the one they have not seen.
 
 > No preset fits: this is a data-dense operator console, and every preset
 > either fails at density or has no accent to encode state. Writing a fresh
@@ -268,6 +302,26 @@ you don't have a direction yet — interrogate the product first: What does it
 actually look like in use? What's its most impressive live behavior? What
 color already *means something* in it? A vague brief ("clean, modern") produces
 template output; a specific one produces a point of view.
+
+Then test the brief at **two altitudes** before using it:
+
+1. *Could someone guess this palette and layout from the product category
+   alone?* (fintech → navy and a line chart; wellness → sage and soft
+   cards). If yes, it is the first-order default.
+2. *Could they guess it from the category plus your rejection of the
+   obvious?* (fintech, not navy → dark terminal with amber). If yes, it is
+   the second-order default, and it is just as generic. This skill's own
+   worked example is the trap here: a warm dark terminal with a sodium accent
+   is right for a market terminal and a reflex everywhere else.
+
+A brief that survives both says something only this product could say: a
+colour that already means something in it, a texture taken from its real
+material, a layout borrowed from how the work is actually done.
+
+For marketing pages, add a one-line **Motion:** plan under the brief line,
+naming the beat for each of first screen, scroll, interaction and close, and
+the still version — the beat sheet in
+[references/motion-routes.md](references/motion-routes.md#the-beat-sheet).
 
 ## Step 0b — Translate visual references into a concrete specification
 
@@ -351,6 +405,14 @@ Non-negotiables for any canvas animation (full annotated pattern in
 Smaller instances of the same idea (sparklines painted into feature cards)
 make the whole page feel alive without any animation library.
 
+All other motion takes the **cheapest route that does the job**: CSS
+transitions, then native scroll-driven animation, then View Transitions and
+WAAPI, then Canvas 2D. GSAP and WebGL are not used in this skill. Content must
+survive removal: with every animation and all JavaScript stripped, the page
+is complete and legible. The route ladder, an effect-to-route lookup, the
+beat sheet and the motion slop to avoid:
+[references/motion-routes.md](references/motion-routes.md).
+
 **Imagery is part of the system.** Proof is live; atmosphere is *generated
 from the tokens* by `scripts/gen_atmosphere.py`, never chosen from stock, and
 never shows UI, text, people, logos or fake data. Plates follow
@@ -387,6 +449,38 @@ sections. The worked skeleton, generalizable:
 8. **Principles trio** — the "why trust us" values, stated plainly
 9. **Final CTA + honest fine print**
 
+This sequence is **one skeleton, for a product landing page**, not a
+template. Run it unchanged on every page and every page looks the same. Two
+rules keep it from converging:
+
+- **Count layout families.** A band's family is its structure: split
+  copy/visual, full-bleed atmosphere, asymmetric bento, list rows, single
+  centred statement, table, timeline, tabs. A page of eight bands uses at
+  least four families and no family more than twice; the nine bands above
+  already use six. Swap a band's family before adding a new band.
+- **Ration the eyebrows.** Mono accent eyebrows are a primitive, not a
+  default: on a marketing page at most `ceil(bands / 3)` of them, on the
+  bands that need a label to be found. (Product panels keep theirs; the
+  eyebrow is the panel head's anatomy.)
+
+Other page kinds have their own skeleton:
+
+- **Portfolio or personal site** — the work comes before the words. Lead
+  with one piece shown deeply (the problem, the move, the result, with the
+  real artefact), then the rest as **list rows** (`64px 1fr auto 90px`:
+  index, title + one line, year, thumbnail), not six identical cards. No
+  skill bars, no percentage meters, no "passionate about" paragraph. One
+  deep project beats six shallow ones.
+- **Agency or studio** — the capability is the product. At most three or
+  four services, and each band must be structurally different from the
+  others (a case table, a process timeline, a before/after), because four
+  matching cards say the services are interchangeable. Name clients and
+  numbers only when they are real and cleared.
+- **Lookbook or collection** — photography-led; use the visual-reference
+  procedure ([references/visual-reference-analysis.md](references/visual-reference-analysis.md))
+  and a content-led preset, since this skill's live-proof hero has nothing to
+  run.
+
 Copywriting voice: numbers are the protagonists (`5,000+ tickers`, `±70 mints
 a call`); microcopy in monospace reads like terminal output; fine print is
 honest ("Not investment advice · Track record is paper trading") — candor is
@@ -403,12 +497,22 @@ These are pass/fail, checked before shipping:
 - Any raster asset ≤ 30 KB WebP (the generator enforces it); decorative
   imagery static and `aria-hidden`
 - Motion on compositor properties only (`transform`, `opacity`); scroll work
-  via IntersectionObserver, never scroll handlers doing layout reads
+  via IntersectionObserver or native scroll-driven CSS, never scroll handlers
+  doing layout reads
 - Explicit dimensions on media; hero canvas gets width/height attributes
+- The **mobile floor** holds: wrappers use `overflow-x: clip` (never
+  `hidden`, which silently kills the sticky nav), image tracks are
+  `minmax(0, 1fr)`, buttons never wrap at 320 px, display words can break,
+  one sticky owns `top: 0`, uppercase leading ≥ 1.0 —
+  [css-architecture.md](references/css-architecture.md#mobile-floor)
 
 **Accessibility**
 - Every animation (canvas, reveals, marquee, pulse) gated behind
   `prefers-reduced-motion` — reveals appear instantly, canvas draws one frame
+- Nothing is hidden in plain CSS waiting for a script: a reveal's start state
+  is armed by the script that will finish it, so the page reads complete with
+  JavaScript off
+- Zoom is never blocked: no `user-scalable=no` or `maximum-scale=1`
 - Skip link as the first focusable element
 - A shared `.focusable` class: `outline: 2px solid var(--accent);
   outline-offset: 3px` on `:focus-visible` — designed focus, not default
@@ -483,6 +587,17 @@ composition follows attention instead: summary before detail, primary panel
 visibly primary (span, position, density — not louder color), and nesting
 depth encoded by the ground scale (each subpanel level exactly one ground
 step lighter, hairline-separated — never stacked shadows, max ~3 levels).
+
+**Decide the kind before the density.** A surface built around a batch of
+business objects (orders, tickets, holdings) is a **back-office**: neutral,
+dense, tables and bulk actions. A surface built around one thing the user
+does over and over is a **workbench**: one focal surface, more character, and
+the repeated action made nearly free. Ask when the brief is just "dashboard"
+or "工作台". When an agent does the work, the run-console layer in
+[agent-console.md](references/agent-console.md) stacks on either: a run
+stream instead of a chart, nine run states each with its action, a stop
+control that never leaves the screen, approval cards inside the stream, and
+cost as a receipt. Charts follow [data-charts.md](references/data-charts.md).
 
 **Imagery in-product:** one plate per route at most, never behind data; every
 panel and subpanel inherits it in its empty and first-run states, through the
@@ -587,6 +702,21 @@ inactive), find the replacement channel before deleting it — often another
 channel already carries it and the opacity was redundant. Procedure and the
 trap that follows it are in the reference.
 
+## After delivery — iterate, don't rebuild
+
+One complaint never justifies a rebuild. Map it to the one lever that
+answers it, change that, and show the before and after:
+
+| The user says | Pull this lever |
+|---|---|
+| "Too plain", "boring" | Add a proof artefact (sparkline, mini-table, live readout) to the flattest band, or put the route's plate in its slot. Not more colour. |
+| "Cluttered", "busy" | De-emphasise around the important thing ([ui-mechanics.md](references/ui-mechanics.md) §1); remove before resizing. |
+| "Generic", "looks AI-made" | Run the two-altitude check on the brief, then swap the most repeated layout family and the most generic element (usually palette or skeleton). |
+| "Wrong colours" | Re-run the preset gates or rewrite the brief's colour clause; fix tokens, never instances. |
+| "Too much motion" / "too static" | Move one beat on the beat sheet; never add a beat that does not show a state or the product. |
+| "Broken on my phone" | The mobile floor, M1 to M6, at 320 and 375 px. |
+| "I don't like it" (no reason) | Offer the two named forks from the announcement, rendered. |
+
 ## CSS architecture
 
 Use a CSS module (or equivalent scoping) with **every rule scoped under the
@@ -604,7 +734,17 @@ patterns and the token block:
 
 Run through this before calling the page done:
 
-- [ ] The one-sentence brief still describes the shipped page
+- [ ] **Promise kept**: paste the brief line (and the Motion line) back in
+      and check it clause by clause against the built page; any clause that
+      could not be built is said aloud at delivery, not quietly dropped
+- [ ] **It actually renders**: `node scripts/lint-surface.mjs --strict <files>`
+      has run and reports zero P0 (dead local references, the sticky-killing
+      `overflow-x: hidden`, zoom blocked, motion with no reduced-motion path
+      anywhere); every P1 fixed or explained; root-relative paths checked by
+      hand. A check that did not run is not a pass
+- [ ] JavaScript-off reload: every section present and readable
+- [ ] Mobile floor M1–M6 checked at 320 and 375 px
+      ([css-architecture.md](references/css-architecture.md#mobile-floor))
 - [ ] DESIGN.md, if the project has one: `design_md.py drift` clean, or every
       remaining mismatch kept by the user's explicit choice; never rewritten
       without an explicit request and a shown diff
@@ -625,11 +765,18 @@ Run through this before calling the page done:
 - [ ] `prefers-reduced-motion`: every animation has a static path (verify by
       toggling the OS setting or DevTools emulation)
 - [ ] Keyboard pass: skip link, visible focus rings, tabs operable
-- [ ] Responsive pass at 320 / 768 / 1024 / 1440 — bento collapses cleanly,
-      no horizontal overflow
+- [ ] Responsive pass at every width in the breakpoint list
+      ([css-architecture.md](references/css-architecture.md#mobile-floor)) —
+      bento collapses cleanly, no horizontal overflow
 - [ ] Tab-hidden pass: canvas RAF actually stops (check via Performance panel)
-- [ ] Copy pass: numbers concrete, fine print honest, zero hype adjectives
-      ("revolutionary", "powerful", "seamless" are banned)
+- [ ] Copy pass: numbers concrete and either sourced or labelled as
+      sample data, fine print honest, zero hype words (the list is
+      `lint-surface.mjs --rules`, `copy-buzzword`; "revolutionary",
+      "powerful" and "seamless" are the classic three), no em-dash
+      flourishes in prose,
+      no run of "X. Not Y." rebuttal lines, buttons say verb + object, one
+      label per action (the same CTA is not "Get started" here and "Try it"
+      there), no lorem ipsum or "John Doe"
 - [ ] **Accessibility phase completed**: token contrast matrix validated,
       axe-core (wcag2a/wcag2aa/wcag22aa tags) at zero critical/serious
       *violations*, every *incomplete* node measured and recorded, zero bare
@@ -655,6 +802,10 @@ Additional gates when the work touched product surfaces:
 - [ ] Cross-screen pass: accent means the same thing on every page; focus
       rings identical; density comparable between sibling panels
 - [ ] Before/after screenshots captured for each migrated screen
+- [ ] Nothing on the "must not change" list moved without the user's yes
+      (sections, primary font, accent meaning, navigation)
+- [ ] Agent, workflow, component, chart and phone surfaces pass the `## Gate`
+      in their own reference file
 
 ## References
 
@@ -686,7 +837,25 @@ Additional gates when the work touched product surfaces:
 - [references/canvas-hero.md](references/canvas-hero.md) — live canvas hero,
   sparklines, scroll reveal, lifecycle. Read when building any canvas or reveal.
 - [references/product-surfaces.md](references/product-surfaces.md) — retrofit
-  procedure, panel anatomy, nesting, states. Read whenever modifying in-product UI.
+  procedure, back-office vs workbench, panel anatomy, nesting, states. Read
+  whenever modifying in-product UI.
+- [references/agent-console.md](references/agent-console.md) — run stream,
+  nine run states, stop control, approval cards, cost receipt, phone form.
+  Read for any surface an agent works in.
+- [references/workflow-surfaces.md](references/workflow-surfaces.md) — one
+  page or steps, field kit, pre-submit check, derived totals, commit, review
+  queues, commerce flows. Read for forms, wizards, settings, checkout.
+- [references/component-states.md](references/component-states.md) — the
+  one-component route: eight states, geometry, preview file. Read when the
+  brief is one element.
+- [references/data-charts.md](references/data-charts.md) — chart by question,
+  accessibility grades, bars, tooltips, chart colour under one accent. Read
+  before drawing any chart.
+- [references/motion-routes.md](references/motion-routes.md) — route ladder,
+  effect lookup, beat sheet, motion slop, procedural motion. Read before any
+  motion beyond the canvas hero.
+- [references/phone-surfaces.md](references/phone-surfaces.md) — phone frame,
+  safe areas, thumb zone, touch, native furniture. Read for phone-only screens.
 - [references/recursive-polish.md](references/recursive-polish.md) — whole-app
   sweep with ledger and loop-until-dry. Read when the scope is every surface.
 - [references/wcag-audit.md](references/wcag-audit.md) — contrast matrix,
@@ -699,6 +868,14 @@ Additional gates when the work touched product surfaces:
 - `scripts/gen_atmosphere.py` — `tokens`, `plate`, `svg`, `ai`, `compress`,
   `score`, `batch`; ≤30 KB, a ledger line per asset; `plate --page` exits 1
   `page_mismatch`, a too-faint slot exits 4. Run it per ai-atmosphere.md §4.
+- `scripts/lint-surface.mjs` — static check of HTML/CSS/JSX for dead local
+  refs, the sticky-killing overflow, blocked zoom, missing reduced motion,
+  text opacity, colour literals outside tokens, AI-default palettes, copy
+  tells. Exit 0 unless `--strict`; prints what it cannot judge. A deliberate
+  exception carries `/* lint-surface-allow: <rule> — <reason> */` (or the
+  `//` / `<!-- -->` form) on or above the line; suppressions are reported,
+  and one without a reason is itself a finding. `--rules` lists every rule;
+  `--token-selector` / `--token-file` widen where literal colours are allowed.
 - `scripts/plate-check.js` — browser check of every plate host: visibility,
   text, stale-CSS sentinel. `templates/tests/` — consumer tests to copy.
   `evals/plate-visibility/` — fixture app and offline run for the tools.

@@ -1,0 +1,27 @@
+/* Ledgerline tokens, scoped on .page (Preset L style). */
+.page {
+  --ground: #ffffff; --ink: #1b1b1d; --muted: #6a6a70; --hair: #d5d5da;
+  --accent: #0062c4; --on-accent: #ffffff; --nav-h: 48px;
+  background: var(--ground);
+  color: var(--ink);
+}
+html { color-scheme: light; }
+body { margin: 0; overflow-x: clip; }
+.nav { position: sticky; top: 0; height: var(--nav-h); display: flex; gap: 24px; background: var(--ground); border-bottom: 1px solid var(--hair); }
+.chapter { position: sticky; top: var(--nav-h); background: var(--ground); }
+.kicker { text-transform: uppercase; letter-spacing: .08em; line-height: 1.2; color: var(--muted); }
+.headline { font: 600 40px/1.05 system-ui, sans-serif; }
+.note { color: var(--muted); }
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 0; list-style: none; }
+.card img { display: block; width: 100%; height: auto; object-fit: cover; }
+.btn { background: var(--accent); color: var(--on-accent); border: 0; border-radius: 2px; padding: 8px 14px; transition: opacity 200ms; }
+.btn:hover { background: color-mix(in oklab, var(--accent) 88%, var(--ink)); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.live::before { content: ""; display: inline-block; width: 7px; height: 7px; background: var(--accent); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .4; } }
+[data-reveal] { opacity: 0; transition: opacity 400ms; }
+[data-reveal].in { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .live::before { animation: none; }
+  [data-reveal] { opacity: 1; transition: none; }
+}

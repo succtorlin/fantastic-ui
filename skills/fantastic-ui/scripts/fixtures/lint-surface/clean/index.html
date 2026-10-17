@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ledgerline: positions</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="page">
+  <nav class="nav" aria-label="Site"><a href="#book">Book</a><a href="#watch">Watchlist</a></nav>
+  <div class="chapter"><strong>Positions</strong></div>
+  <main id="main">
+    <section class="band" aria-labelledby="book">
+      <p class="kicker">Book</p>
+      <h1 id="book" class="headline">Track every position against the close</h1>
+      <p class="note">Prices update at the close. Nothing is delayed.</p>
+      <ul class="cards">
+        <li class="card"><img src="mark.svg" width="64" height="64" alt=""><span>NVDA</span></li>
+        <li class="card"><img src="mark.svg" width="64" height="64" alt=""><span>MSFT</span></li>
+        <li class="card"><img src="mark.svg" width="64" height="64" alt=""><span>JPM</span></li>
+      </ul>
+      <button class="btn" type="button">Add a ticker</button>
+      <a class="link" href="#watch">Open the watchlist</a>
+      <span class="live" data-reveal>Live feed</span>
+    </section>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

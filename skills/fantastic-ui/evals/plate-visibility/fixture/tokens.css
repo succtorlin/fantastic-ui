@@ -16,6 +16,7 @@
 
   /* one accent (sodium amber) and its strong step */
   --accent: #f9a216;
+  --on-accent: #140e02;
   --accent-hi: #ea8b00;
 
   /* text */

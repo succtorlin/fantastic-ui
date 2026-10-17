@@ -79,6 +79,32 @@ Extend the matrix with every `semantic × alpha` combination the components
 actually use, then either lighten the ink or promote tinted-row text to the
 primary ink and carry hierarchy with size and face instead.
 
+### The accent must not impersonate a semantic
+
+Before the matrix is final, check the accent's hue against the semantic set.
+A green accent reads as "up / success" and a red or orange-red accent reads
+as "down / error" on every screen that also shows real gains and losses, so
+a primary button starts to look like a result. This is a perception failure,
+not a contrast one, and no ratio catches it. Measure it as hue distance in
+OKLCH: the accent should sit at least ~40° of hue away from every semantic
+it could be confused with, and differ in lightness or chroma as well. When
+you are choosing a fresh palette, **move the accent, never the semantic**:
+users already know what green and red mean in the domain.
+
+Some directions put the accent on a semantic hue on purpose. Preset J
+(Charter Navy) uses one action red for both `--accent` and `--down`, and
+Preset E's terracotta sits about 21° from its `--down`. Keep those tokens
+(they are contrast-validated), and pay for the shared hue with the hard rule
+that applies everywhere anyway (1.4.1, use of colour): **every semantic state
+also carries a non-colour channel** — a sign or arrow on a change (`+2.4%`,
+`▲`), an icon plus a word on a status ("Failed", "Partial", "Stale"). With
+that channel present, the hue overlap is a style cost, not an ambiguity;
+without it, it is a failure on any palette. The same applies to `--warn`,
+the optional third semantic ([css-architecture.md](css-architecture.md#the-token-block)).
+
+Charts follow the same rule: up/down never double as categorical series
+colours ([data-charts.md](data-charts.md#chart-colour)).
+
 ### Opacity is part of the contrast calculation — and it compounds
 
 **Never dim text with `opacity-*`.** This is the single highest-yield rule in
@@ -359,13 +385,23 @@ Enter / Space / Arrows / Escape:
   0.12em; word-spacing: 0.16em` via DevTools — no clipped or overlapping
   text (watch mono stat tiles and eyebrows; give them room, don't `ch`-lock
   widths)
+- Viewport meta never carries `user-scalable=no` or `maximum-scale=1`;
+  pinch zoom is how many low-vision users read a phone (1.4.4)
+- The six layout traps that pass at 1440 and break at 320 (sticky nav dead
+  under `overflow-x: hidden`, bare `1fr` tracks, wrapping buttons, unbroken
+  display words, two stickies at `top: 0`, cramped uppercase) are listed with
+  their fixes in [css-architecture.md](css-architecture.md#mobile-floor);
+  check each at 320 and 375 px
+- Disable JavaScript and reload once: every section is present and readable
+  (content authored at `opacity: 0` and revealed only by script fails here)
 
 ## Step 4 — WCAG 2.2 additions (easy to miss, all AA)
 
 - **2.4.11 Focus Not Obscured (Minimum)** — sticky nav/footers must not
   cover the focused element; `scroll-margin` fixes most cases
 - **2.5.7 Dragging Movements** — anything draggable (sliders, sortable
-  panels) has a single-pointer alternative (buttons, input field)
+  panels, swipe-to-act rows, bottom sheets) has a single-pointer alternative
+  (buttons, input field)
 - **2.5.8 Target Size (Minimum)** — every target ≥ 24×24 CSS px or has
   equivalent spacing; audit icon buttons in panel heads and table row
   actions, the usual offenders in dense UIs (pad the hit area, not the

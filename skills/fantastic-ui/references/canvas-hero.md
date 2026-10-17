@@ -178,9 +178,13 @@ with the canvas blank.
 Same idea at postage-stamp scale: painted area charts inside feature cards,
 selected by a `data-spark` attribute so one effect draws them all. Gradient
 stroke ending at full accent, gradient fill fading to transparent, a bright
-dot on the last point. Hardcoded plausible point arrays are fine — these are
-texture, not charts. Redraw on resize; no animation loop needed, so no
-reduced-motion branch required.
+dot on the last point. Hardcoded plausible point arrays are fine **on a
+marketing page only** — there they are texture, not charts. Inside the
+product a sparkline draws the user's real series or is not drawn: a made-up
+line next to a real number is a false statement. Charts proper (axes,
+tooltips, accessibility grades, colour ramps) are in
+[data-charts.md](data-charts.md). Redraw on resize; no animation loop
+needed, so no reduced-motion branch required.
 
 ```tsx
 useEffect(() => {
@@ -241,10 +245,15 @@ Reduced motion short-circuits to "everything visible immediately":
 useEffect(() => {
   const nodes = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"));
   const reduce = window.matchMedia("(prefers-reduced-motion:reduce)").matches;
-  if (reduce) {
-    nodes.forEach((n) => n.classList.add(s.isIn));
-    return;
-  }
+  // Reduced motion: never arm the hidden start state, so nothing is hidden.
+  if (reduce || !("IntersectionObserver" in window)) return;
+  // Elements already on screen are marked done first, so arming the hidden
+  // start state never blanks what the visitor is looking at (no 1→0→1 flash).
+  const vh = window.innerHeight;
+  nodes.forEach((n) => { if (n.getBoundingClientRect().top < vh) n.classList.add(s.isIn); });
+  // Arm the hidden start state only now that the observer is certain to run
+  // (CSS hides [data-reveal] only under .revealReady; see css-architecture.md).
+  root.classList.add(s.revealReady);
   const io = new IntersectionObserver(
     (entries) => {
       entries.forEach((e) => {
@@ -259,9 +268,15 @@ useEffect(() => {
     { threshold: 0.16, rootMargin: "0px 0px -8% 0px" },
   );
   nodes.forEach((n) => io.observe(n));
-  return () => io.disconnect();
+  return () => { io.disconnect(); root.classList.remove(s.revealReady); };
 }, []);
 ```
+
+Check it the way a visitor without JS sees it: disable JavaScript and
+reload — every section must be present and readable. Anything authored at
+`opacity: 0` in plain CSS fails this, and the reduced-motion backstop
+(`animation-duration: 0.01ms`) does not rescue it: a zero-length transition
+to an end state that is never applied still ends invisible.
 
 The nav-blur state is the only scroll listener on the page, and it does no
 layout reads: `window.addEventListener("scroll", () =>

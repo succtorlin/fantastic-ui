@@ -119,6 +119,11 @@ The same five disciplines apply *inside* the product. The skill includes a dedic
 - **A six-step retrofit procedure** — audit (inventory + color-literal grep baseline) → brief → mechanical tokens-first commit → shared primitives → screen-by-screen migration (one PR each, highest-traffic first) → a cross-screen consistency gate.
 - **Panel anatomy and nesting rules** — a uniform panel skeleton (mono eyebrow head, hairline separation, actions right), depth encoded by ground-scale steps instead of shadows, maximum three nesting levels.
 - **States as first-class design** — skeleton loading on the ground scale, honest empty states, error red confined to actual errors, stale-data timestamps.
+- **Back-office or workbench** — one question decides density and character: does the surface revolve around a batch of business objects, or one thing the user does over and over?
+- **Agent consoles** — a run stream instead of a chart, nine run states each with its required action, a stop control that never leaves the screen, approval cards inside the stream, and cost as a one-line receipt ([agent-console.md](skills/fantastic-ui/references/agent-console.md)).
+- **Workflows, components, charts, phones** — wizards, settings, review queues and checkout ([workflow-surfaces.md](skills/fantastic-ui/references/workflow-surfaces.md)); a one-component route with eight states and a preview file ([component-states.md](skills/fantastic-ui/references/component-states.md)); charts picked by the question with accessibility grades and a chart-only colour ramp ([data-charts.md](skills/fantastic-ui/references/data-charts.md)); phone-only screens with safe areas, thumb zone and native furniture ([phone-surfaces.md](skills/fantastic-ui/references/phone-surfaces.md)).
+- **Motion by the cheapest route** — CSS, native scroll-driven animation, View Transitions and WAAPI before canvas; no GSAP or WebGL; content survives with JavaScript off ([motion-routes.md](skills/fantastic-ui/references/motion-routes.md)).
+- **A static lint pass** — `scripts/lint-surface.mjs` catches dead local references, the `overflow-x: hidden` that silently kills a sticky nav, blocked zoom, missing reduced motion, opacity-dimmed text, colour literals outside tokens, AI-default palettes and copy tells, and prints what it cannot judge.
 
 ## Whole-app recursive polish
 
@@ -212,6 +217,9 @@ skills/fantastic-ui/
 ├── SKILL.md                        # the methodology + ship checklist
 ├── scripts/
 │   ├── verify-preset.mjs            # runnable checks against a live page (+ advisory imagery count)
+│   ├── lint-surface.mjs            # static lint: dead refs, sticky-killing overflow, zoom, reduced motion,
+│   │                               #   text opacity, literals outside tokens, AI defaults, copy tells
+│   ├── lint-surface.test.mjs       # mutation tests, one per rule
 │   ├── preset-gates.json           # universal and per-preset gate declarations
 │   ├── gen_atmosphere.py           # token plates, SVG texture, AI wrapper, compressor, slot scoring
 │   │                               #   (`score`), manifest builds (`batch`) — ≤30 KB, with a ledger
@@ -237,7 +245,15 @@ skills/fantastic-ui/
     ├── plate-slots.md              # named scrim + fit slots with exact CSS, score calls, measured ranges
     ├── ai-motifs.md                # domain → motif table, five-part AI prompt, consent and cost
     ├── product-surfaces.md         # retrofit procedure for app pages/panels/subpanels: audit → tokens →
-    │                               #   primitives → migration, panel anatomy, nesting depth, state design
+    │                               #   primitives → migration, panel anatomy, nesting depth, state design,
+    │                               #   back-office vs workbench
+    ├── agent-console.md            # run stream, nine run states, stop control, approval cards, cost receipt
+    ├── workflow-surfaces.md        # one page or steps, field kit, pre-submit check, commit, review queues,
+    │                               #   commerce flows
+    ├── component-states.md         # one-component route: eight states, geometry, preview file
+    ├── data-charts.md              # chart by question, accessibility grades, bars, chart colour under one accent
+    ├── motion-routes.md            # route ladder, effect lookup, beat sheet, motion slop
+    ├── phone-surfaces.md           # phone frame, safe areas, thumb zone, touch, native furniture
     ├── theme-presets.md            # twelve named directions with contrast-validated token blocks and
     │                               #   component grammar, plus the signal table and gates for automatic
     │                               #   preset selection (and refusal)
