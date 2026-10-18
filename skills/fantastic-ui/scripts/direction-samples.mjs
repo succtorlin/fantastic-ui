@@ -281,7 +281,7 @@ export function sheetHtml(manifest, rows, haveShots) {
     const id = esc(dir.id);
     const visual = haveShots
       ? `<a href="shots/${id}-desktop-full.png" title="Full page"><img src="shots/${id}-desktop.png" alt="${esc(dir.name)}, first screen at 1440 px"></a><a href="shots/${id}-phone.png" title="Phone, full page"><img src="shots/${id}-phone.png" alt="${esc(dir.name)} at 390 px"></a>`
-      : `<iframe src="${id}.html" title="${esc(dir.name)} sample" loading="lazy"></iframe>`;
+      : `<iframe src="${id}.html" title="${esc(dir.name)} sample (preview; use the link below to open it)" loading="lazy" inert></iframe>`;
     return `<article class="cand${rec ? " rec" : ""}" id="cand-${id}">
 <header><h2>${esc(dir.name)}${dir.preset ? ` <small>Preset ${esc(dir.preset)}</small>` : " <small>fresh direction</small>"}</h2>${rec ? `<span class="badge">Recommended</span>` : ""}</header>
 <div class="shots">${visual}</div>

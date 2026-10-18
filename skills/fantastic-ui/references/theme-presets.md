@@ -77,7 +77,7 @@ a data screen feel empty.
   /* ink scale — near-black with a blue cast, never pure #000 */
   --ink:       #16181d;
   --ink-2:     #5a6068;  /* 6.35:1 on --panel                    */
-  --muted:     #868d96;  /* captions only; fails AA under ~16px  */
+  --muted:     #666d75;  /* 4.6:1 on every text ground; AA as text */
 
   /* one accent: periwinkle. --accent is a FILL; --accent-ink is the
      readable variant for text and icons on light ground. */
@@ -168,7 +168,7 @@ layout, and excellent when the layout is strong.
 
   --ink:       #0f0f0f;  /* 19.2:1 on --panel                    */
   --ink-2:     #6b6b6b;  /* 5.33:1 on --panel                    */
-  --muted:     #9a9a9a;  /* decorative only — fails AA as text   */
+  --muted:     #707070;  /* 4.6:1 on every text ground; AA as text */
   --ink-on-invert:   #ffffff;
   --ink-2-on-invert: #a8a8a8;  /* 7.75:1 on --invert             */
 
@@ -245,7 +245,7 @@ real content — sparse pages expose the grid as emptiness.
 
   --ink:       #1a1a1a;  /* 8.42:1 on --accent, 16.1:1 on --panel        */
   --ink-2:     #4a4a4a;  /* 8.86:1 on --panel                            */
-  --muted:     #8c8c8c;  /* captions, page furniture                     */
+  --muted:     #5d5d5d;  /* 4.6:1 on every text ground; AA as text */
 
   --accent:     #f5a32a;  /* FILL ONLY — see the trap below              */
   --accent-ink: #9c5c10;  /* 5.31:1 white-on; use when white text is required */
@@ -319,7 +319,7 @@ filled; `ai` material close-ups qualify.
 
   --ink:       #473c33;  /* 8.66:1 on --ground-2                         */
   --ink-2:     #5c5046;  /* 6.32:1 on --ground-2                         */
-  --muted:     #8a7a6a;  /* DECORATIVE ONLY — 3.35:1, never body copy    */
+  --muted:     #746455;  /* 4.6:1 on every text ground; AA as text */
   --ink-on-invert:   #efe6da;  /* 8.66:1 on --invert                     */
   --ink-2-on-invert: #c9b9a6;  /* large text only on --invert            */
 
@@ -339,10 +339,10 @@ filled; `ai` material close-ups qualify.
 }
 ```
 
-**The trap.** `--muted` is a *material* tone, not a text tone: 3.35:1 on the
-cream ground. The reference uses it for tiny annotation labels, which fails.
-Body and label copy take `--ink-2`; reserve `--muted` for rules, dividers and
-swatch borders.
+**The trap.** The reference's muted taupe (`#8a7a6a`, 3.35:1 on the cream
+ground) was a material tone used for tiny annotation labels, which fails. This
+preset's `--muted` is deepened to clear 4.5:1 so labels may use it; rules,
+dividers and swatch borders take `--hair` / `--hair-lit`, never a text token.
 
 **Imagery.** Material close-ups (linen, oak, plaster, stone) in soft oat light via `ai`, the user's work via `compress`; moodboard gaps take `plate --style grain` swatches. Every photo slot is filled — empty frames are the failure mode.
 
@@ -392,7 +392,7 @@ analytical, where the softness reads as imprecision.
 
   --ink:       #2b2724;  /* 13.87:1 on --ground                          */
   --ink-2:     #6b625c;  /* 5.58:1 on --ground                           */
-  --muted:     #9a908a;
+  --muted:     #726863;  /* 4.6:1 on every text ground; AA as text */
 
   --accent:     #d98b5f;  /* FILL — see the trap                         */
   --accent-ink: #9c5329;  /* 5.70:1 white-on; the compliant CTA          */
@@ -473,7 +473,7 @@ reports a number.
 
   --ink:       #ffffff;  /* 19.6:1 on --ground                          */
   --ink-2:     #b8b8b8;  /* 9.80:1                                      */
-  --muted:     #7a7a7a;  /* 4.53:1 — passes, but only just; not <13px   */
+  --muted:     #898989;  /* 4.6:1 on every text ground; AA as text */
 
   /* On a dark ground the accent IS a text color — 9.11:1. Its FILL still
      needs dark ink; white on amber is 2.13:1. See the inverted trap below. */
@@ -551,7 +551,7 @@ an index of episodes rather than an argument.
 
   --ink:       #14161a;  /* 18.1:1 on --panel                           */
   --ink-2:     #4d545e;  /* 7.65:1 on --panel, 6.76 on --ground-2       */
-  --muted:     #7b838e;  /* 3.83:1 — DECORATIVE ONLY, never body copy   */
+  --muted:     #666d78;  /* 4.6:1 on every text ground; AA as text */
   --ink-on-invert:   #ffffff;
   --ink-2-on-invert: #a8afb8;  /* 8.40:1 on --invert                    */
 
@@ -572,9 +572,9 @@ an index of episodes rather than an argument.
 }
 ```
 
-**The trap.** `--muted` is 3.83:1 — it reads fine on a mock and fails in
-audit. Episode metadata, durations and dates all take `--ink-2`. Reserve
-`--muted` for separators and inactive icons.
+**The trap.** The comp's grey (`#7b838e`, 3.39:1) reads fine on a mock and
+fails in audit. `--muted` here is deepened to clear 4.5:1, so episode
+metadata, durations and dates may take it; separators take `--hair`.
 
 **Imagery.** Thumbnails are the user's own via `compress`; the hero photo via `ai` mood photography (studio, equipment, no people), else `plate --style warp` in cool greys under the uniform wash.
 
@@ -625,7 +625,7 @@ work sold on personality as much as capability.
 
   --ink:       #0a0a0a;  /* 19.8:1 on --panel                           */
   --ink-2:     #5c5c5c;  /* 6.69:1                                      */
-  --muted:     #8a8a8a;  /* 3.45:1 — DECORATIVE ONLY                    */
+  --muted:     #6f6f6f;  /* 4.6:1 on every text ground; AA as text */
   --ink-on-invert:   #ffffff;
   --ink-2-on-invert: #9e9e9e;  /* 7.39:1 on --invert                    */
 
@@ -646,9 +646,9 @@ work sold on personality as much as capability.
 }
 ```
 
-**The trap.** `--muted` at 3.45:1 and `--grid` at 1.18:1 are both below AA and
-both look usable in a comp. Grid lines are texture; muted is for inactive
-states. All copy takes `--ink` or `--ink-2`.
+**The trap.** `--grid` at 1.18:1 looks usable in a comp and is texture only:
+never text, never an icon. `--muted` is deepened to clear 4.5:1 (the comp's
+`#8a8a8a` was 3.45:1), so it may carry secondary copy.
 
 **Imagery.** Cut-out people must be the user's own team photos via `compress` — never generated people; with none, drop the device and let `svg --style grid` (the graph-paper ground) and the tilted path carry the page.
 
@@ -700,7 +700,7 @@ of this direction reads as an endless scroll.
 
   --ink:       #1c1c1c;  /* 15.9:1 on --panel, 10.26:1 on --accent       */
   --ink-2:     #55585e;  /* 7.13:1 on --panel                            */
-  --muted:     #8b8f96;
+  --muted:     #6d7177;  /* 4.6:1 on every text ground; AA as text */
   --ink-on-invert:   #ffffff;
   --ink-2-on-invert: #b9bcc2;  /* 9.68:1 on --invert                     */
 
@@ -753,13 +753,14 @@ background behind `--ink`, never by colouring the type.
 
 ## Preset J — "Charter Navy"
 
-> Corporate aviation: deep navy grounds carrying white content cards, a single
-> red reserved for action, and photography of the aircraft and the people
-> flying in it.
+> Corporate aviation: deep navy grounds carrying white content cards, navy
+> action buttons, a single red reserved for the marks that matter, and
+> photography of the aircraft and the people flying in it.
 
 Formal and premium without warmth. Suits aviation, marine, logistics,
 insurance, private banking — categories where the buyer needs to feel the
-operator is serious. The navy does the reassuring; the red does the asking.
+operator is serious. The navy does the reassuring and the acting; the red
+marks what to look at.
 
 ```css
 .page {
@@ -774,14 +775,16 @@ operator is serious. The navy does the reassuring; the red does the asking.
 
   --ink:       #14283c;  /* 15.0:1 on --panel                            */
   --ink-2:     #5a6b7d;  /* 5.48:1 on --panel                            */
-  --muted:     #8a99a8;
+  --muted:     #647280;  /* 4.6:1 on every text ground; AA as text */
   --ink-on-invert:   #ffffff;
   --ink-2-on-invert: #9fb3c8;  /* 6.89:1 on --invert                     */
 
-  /* Red is the ACTION colour and nothing else. Note the value: the obvious
-     #e23b34 gives 4.28:1 with white — just under AA. This one clears it. */
-  --accent:     #d92b24;  /* 4.86:1 with white                           */
-  --on-accent:  #ffffff;
+  /* Red MARKS and never carries text: metric fills, rules, chip outlines,
+     and red TEXT on white (4.86:1; the obvious #e23b34 gives 4.28:1 and
+     fails). White is never the accent's partner, so this preset defines
+     no on-accent ink: actions are navy, --invert with --ink-on-invert
+     (14.83:1). */
+  --accent:     #d92b24;  /* 4.86:1 as text on white                     */
   --accent-dim: rgba(217, 43, 36, 0.10);
 
   --up:   #1f7a4d;
@@ -799,11 +802,14 @@ operator is serious. The navy does the reassuring; the red does the asking.
 }
 ```
 
-**Two traps, both easy to walk into.** First, `#e23b34` — the shade the eye
+**Three traps, all easy to walk into.** First, `#e23b34` — the shade the eye
 reaches for — measures 4.28:1 against white and fails; `--accent` above is
 tuned to clear it. Second, red on the navy ground is **3.47:1**: never set red
-type or red icons on a navy section. Inside navy, action is a white or
-red-filled button, never coloured text.
+type or red icons on a navy section (gated: `red-type-on-navy`). Third, a
+red-filled button needs white text, and white is never the accent's partner:
+the primary action is a **navy** button (`--invert` fill, `--ink-on-invert`
+label) on white, and a **white** button (`--panel` fill, `--ink` label) inside
+navy bands. Red stays a mark.
 
 **Imagery.** Aircraft and cabin photography from the operator's library via `compress`; sky, cloud and material mood plates via `ai` (no livery, no people); else `plate --style warp` in navy for the band.
 
@@ -820,8 +826,10 @@ red-filled button, never coloured text.
 - **Form over photograph.** Booking panel as a `--panel` card sitting on a
   darkened image, fields at `--r-card` with `--hair` borders. The only place
   the direction allows a drop shadow.
-- **Dated article card.** Thumbnail with a small `--accent` date chip in the
-  top-left corner, title in `--ink`, one line of `--ink-2`. Three across.
+- **Dated article card.** Thumbnail with a small date chip in the top-left
+  corner: `--panel` fill, 1px `--accent` outline, `--accent` text (4.86:1 on
+  white), never white on red. Title in `--ink`, one line of `--ink-2`. Three
+  across.
 
 ---
 
@@ -854,7 +862,7 @@ signage.
 
   --ink:       #0b0b0b;
   --ink-2:     #4f4f4f;  /* 8.19:1 on --panel                            */
-  --muted:     #8f8f8f;
+  --muted:     #6f6f6f;  /* 4.6:1 on every text ground; AA as text */
   --ink-on-invert:   #ffffff;
   --ink-2-on-invert: #a3a3a3;  /* 7.80:1 on --invert                     */
 

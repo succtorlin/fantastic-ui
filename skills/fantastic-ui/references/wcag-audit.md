@@ -92,7 +92,7 @@ you are choosing a fresh palette, **move the accent, never the semantic**:
 users already know what green and red mean in the domain.
 
 Some directions put the accent on a semantic hue on purpose. Preset J
-(Charter Navy) uses one action red for both `--accent` and `--down`, and
+(Charter Navy) uses one red for both `--accent` (a mark, never a button) and `--down`, and
 Preset E's terracotta sits about 21° from its `--down`. Keep those tokens
 (they are contrast-validated), and pay for the shared hue with the hard rule
 that applies everywhere anyway (1.4.1, use of colour): **every semantic state
@@ -140,6 +140,10 @@ Dim with an ink token instead. Legitimate uses of opacity that stay allowed:
 - `transition-opacity` — declares the property, sets no value
 
 ## Step 2 — Automated sweep
+
+The skill's exam (`scripts/exam.mjs`, SKILL.md "The exam") runs the sweep
+below plus reflow, target-size, focus-ring and preset gates on every page in
+one command; run it first, then use the details here to fix what it finds.
 
 Run against every route/state, not just the homepage:
 

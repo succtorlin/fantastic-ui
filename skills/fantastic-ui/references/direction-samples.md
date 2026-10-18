@@ -141,8 +141,9 @@ direction's tokens before showing it.
 
 ## Check them against the gates
 
-Samples are held to the same gates as a shipped page. Run the checker on the
-output folder and show nothing until it reports every page passing:
+Samples are held to the same gates as a shipped page: `check-samples.mjs` is
+the skill's exam (`scripts/exam.mjs`, SKILL.md "The exam") run over the
+sample folder. Run it and show nothing until it reports every page passing:
 
 ```bash
 node ~/.claude/skills/fantastic-ui/scripts/check-samples.mjs design-samples

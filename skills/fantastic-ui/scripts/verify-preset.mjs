@@ -345,6 +345,22 @@ for (const theme of themeList) {
       }
       continue;
     }
+    if (trap.kind === "forbidden-pairing" && trap.fg && trap.bg) {
+      // A pairing the preset forbids, named by its two colours: no visible text
+      // may render in `fg` on a ground of `bg` (e.g. J: red type on navy).
+      const hits = await page.evaluate(({ helpers, scope, fgHex, bgHex }) => {
+        eval(helpers);
+        const want = paint(fgHex, "rgb(0,0,0)"), on = paint(bgHex, "rgb(0,0,0)");
+        const near = (a, b) => Math.abs(a[0]-b[0]) + Math.abs(a[1]-b[1]) + Math.abs(a[2]-b[2]) < 24;
+        const out = [];
+        for (const el of visibleTextNodes(scope)) {
+          if (near(paint(getComputedStyle(el).color, "rgb(0,0,0)"), want) && near(groundOf(el), on)) out.push((el.className || el.tagName).toString().slice(0, 26));
+        }
+        return out;
+      }, { helpers: HELPERS, scope: SCOPE, fgHex: trap.fg, bgHex: trap.bg });
+      record(`trap:${trap.id}`, hits.length === 0, hits.length ? `${hits.length} element(s) render ${trap.fg} on ${trap.bg}` : "none", hits.length ? trap.rule : "");
+      continue;
+    }
     if (trap.kind !== "geometry") continue;
     const hit = await page.evaluate(({ sel, against }) => {
       const gs = [...document.querySelectorAll(sel)];

@@ -54,7 +54,7 @@ eyebrow is the product name, not a category label.
 .pill     { font: 400 17px/1 var(--sans); padding: 12px 22px; border-radius: var(--r-pill);
             background: var(--accent-fill); color: var(--on-accent); text-decoration: none; }
 .pill:hover { background: color-mix(in oklab, var(--accent-fill) 88%, var(--ink)); }
-.chev     { font: 400 17px/1 var(--sans); color: var(--accent); text-decoration: none; }
+.chev     { display: inline-flex; align-items: center; min-height: 24px; font: 400 17px/1 var(--sans); color: var(--accent); text-decoration: none; }
 .chev::after { content: " ›"; }
 .chev:hover  { text-decoration: underline; text-underline-offset: 3px; }
 .pill:focus-visible, .chev:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
@@ -75,6 +75,11 @@ chevron link.
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
+/* markup: <header class="nav"><nav aria-label="Site">…links…</nav></header>
+   (the header is the sticky element itself: wrapping both bars in one
+   header would trap the sticky nav inside it) */
+.nav nav { display: flex; align-items: center; gap: 36px; }
+.nav a { display: inline-flex; align-items: center; min-height: 44px; color: inherit; text-decoration: none; }  /* 2.5.8 */
 .nav[data-over="stage"], .chapter[data-over="stage"] { color: var(--stage-ink);
   background: color-mix(in oklab, var(--stage) 80%, transparent);
   border-bottom-color: transparent; }

@@ -46,6 +46,55 @@ modifying existing product surfaces, start at
 [Applying the disciplines to product surfaces](#applying-the-disciplines-to-product-surfaces-pages-panels-subpanels)
 — the disciplines are the same; the procedure and anatomy differ.
 
+## The exam — nothing is done until it passes
+
+Every surface this skill builds or changes, in any project and for any task
+(a marketing page, a product screen, a panel, a component's preview file,
+direction samples), follows the rules in this file **and passes the exam**
+before the work is called done. This is not a polish step and not optional
+when time is short.
+
+```bash
+# each page the work built or changed, served by the project's dev server
+node ~/.claude/skills/fantastic-ui/scripts/exam.mjs \
+  --url http://localhost:3000/ --url http://localhost:3000/pricing \
+  --preset E \                      # when a preset is in use
+  --lint src/app/landing             # the source the work touched
+# a static folder (samples, a built site, a component preview) instead:
+node ~/.claude/skills/fantastic-ui/scripts/exam.mjs dist/
+```
+
+It runs, per page: axe-core with the WCAG 2.0/2.1/2.2 A and AA tags at 1440
+and 390 px; reflow at 320–1440 with no overflow and no clipped content; every
+link and button ≥24×24 px; no wrapping button labels; a skip link, landmarks,
+one `h1` and `lang`; a visible focus ring ≥2 px and ≥3:1 on every focusable;
+`verify-preset.mjs` when a preset is in use (contrast, zero webfonts, asset
+weight, reduced-motion path, token roles, accent restraint, separation, the
+preset's own traps); and `lint-surface.mjs --strict` over the touched source.
+
+The rules that make it an exam rather than a suggestion:
+
+1. **A FAIL means not done.** Fix it at the highest level (token → primitive →
+   component → instance) and run the exam again. Never report a page as done,
+   shipped or ready while any page fails.
+2. **Report the result.** The closing message states the exam's pass count
+   (`exam: 6/6 pass`) and what it could not judge. "It looks fine" is not a
+   result.
+3. **`incomplete` is not a pass.** Each node axe could not decide is measured
+   by hand and the measurement is recorded.
+4. **A wrong exam gets fixed, not skipped.** If a check is a false positive,
+   fix the check with a test that proves it, or (for lint only) add a
+   `lint-surface-allow` comment with its reason. Never weaken a rule to get a
+   pass, and never edit a preset's tokens away from its own rules to pass one
+   gate while breaking another.
+5. **What the exam cannot judge still has to be checked**: the screen-reader
+   walkthrough, motion review, plate visibility with `scripts/plate-check.js`
+   when plates are used, and the design calls in the ship checklist.
+6. **Tools.** The exam needs `playwright` and `@axe-core/playwright`. If the
+   project has neither, say so and add them as dev dependencies with the
+   user's agreement, or point `--modules` at an existing install. If the exam
+   cannot run, the work is reported as **not examined**, never as done.
+
 ## Usability foundation: make the instrument understandable
 
 Fantastic visual treatment never compensates for an interface that makes
@@ -764,6 +813,8 @@ patterns and the token block:
 
 Run through this before calling the page done:
 
+- [ ] **The exam passes** on every page built or changed
+      (`scripts/exam.mjs`), and the pass count is in the closing message
 - [ ] **Direction chosen by the user from rendered samples** that
       `check-samples.mjs` passed
       ([references/direction-samples.md](references/direction-samples.md)), or
@@ -911,9 +962,12 @@ Additional gates when the work touched product surfaces:
   pages and a side-by-side sheet from a manifest; screenshots at 1440 and 390
   when Playwright resolves (`--playwright <node_modules>`), contrast flags
   printed per candidate.
-- `scripts/check-samples.mjs` — holds direction samples to the gates (axe
-  WCAG 2.2 AA, reflow 320–1440, targets, focus, skip link, `verify-preset.mjs`
-  per preset sample, lint); writes `checks.json` and the sheet's gate lines.
+- `scripts/exam.mjs` — **the exam** every page must pass before work is
+  done: axe WCAG 2.2 AA, reflow 320–1440, targets, focus, skip link and
+  landmarks, `verify-preset.mjs` with `--preset`, `lint-surface` over
+  `--lint`. URLs or a static folder; exit 0 only when every page passes.
+- `scripts/check-samples.mjs` — the exam on a folder of direction samples,
+  plus `checks.json` and each sheet card's gate line.
 - `scripts/lint-surface.mjs` — static check of HTML/CSS/JSX for dead local
   refs, the sticky-killing overflow, blocked zoom, missing reduced motion,
   text opacity, colour literals outside tokens, AI-default palettes, copy

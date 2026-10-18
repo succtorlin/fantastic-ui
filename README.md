@@ -115,6 +115,14 @@ Finally it runs `verify-preset.mjs --preset L`. That check fails a page with sha
 
 The page above is in [examples/gallery-white](examples/gallery-white/), with the commands that made its plates and the measured results. A described look ("Apple-style", "white gallery, product on studio light") usually selects the same preset. An existing design system takes precedence unless you ask to replace it.
 
+## The exam: nothing is done until it passes
+
+Every page the skill builds or changes, in any project, has to pass `scripts/exam.mjs` before the work is called done: axe-core at WCAG 2.2 AA (desktop and phone), reflow from 320 to 1440 px with nothing clipped, 24 px targets, a visible 3:1 focus ring, skip link and landmarks, the preset's own gates when one is used, and the static lint. The closing message reports the pass count; a failing page is fixed and re-examined, never shipped with a note.
+
+```bash
+node ~/.claude/skills/fantastic-ui/scripts/exam.mjs --url http://localhost:3000/ --preset E --lint src/app/landing
+```
+
 ## Beyond the landing page: product surfaces
 
 The same five disciplines apply *inside* the product. The skill includes a dedicated workflow for modifying existing app pages, panels, and subpanels:
@@ -222,7 +230,9 @@ skills/fantastic-ui/
 ├── scripts/
 │   ├── verify-preset.mjs            # runnable checks against a live page (+ advisory imagery count)
 │   ├── direction-samples.mjs       # 2–3 candidate looks as sample pages + side-by-side sheet
-│   ├── check-samples.mjs           # holds samples to the gates: axe WCAG 2.2 AA, reflow, preset gates
+│   ├── exam.mjs                    # THE exam every page must pass: axe WCAG 2.2 AA, reflow, targets,
+│   │                               #   focus, landmarks, preset gates, lint (URLs or a folder)
+│   ├── check-samples.mjs           # the exam over a sample folder + the sheet's gate lines
 │   ├── lint-surface.mjs            # static lint: dead refs, sticky-killing overflow, zoom, reduced motion,
 │   │                               #   text opacity, literals outside tokens, AI defaults, copy tells
 │   ├── lint-surface.test.mjs       # mutation tests, one per rule

@@ -84,12 +84,6 @@
       "radii": { "sheet": 14, "panel": 12, "card": 8, "pill": 999 },
       "density": "medium",
       "traps": [
-        {
-          "id": "muted-is-material-not-text",
-          "rule": "--muted is a material tone at 3.35:1 — decorative only, never body copy.",
-          "kind": "token-usage",
-          "measured": 3.35
-        }
       ]
     },
     "E": {
@@ -154,7 +148,18 @@
       "separation": "hairline",
       "radii": { "sheet": 8, "panel": 8, "card": 6, "pill": 4 },
       "density": "medium",
-      "traps": []
+      "accentUsage": "marks-and-text",
+      "accentNote": "Red marks (metric fills, rules, chip outlines) and is a text colour on white (4.86:1); it never carries text. Actions are navy (--invert) with white, or white inside navy bands.",
+      "traps": [
+        {
+          "id": "red-type-on-navy",
+          "rule": "Red on the navy ground is 3.47:1: never set red type or red icons on a navy section.",
+          "kind": "forbidden-pairing",
+          "fg": "#d92b24",
+          "bg": "#0f2942",
+          "measured": 3.47
+        }
+      ]
     },
     "K": {
       "name": "Dispatch Yellow",

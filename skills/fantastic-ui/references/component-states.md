@@ -135,6 +135,18 @@ success        data-state=success [ Saved        ]
   reach by itself.
 - One labelled row per state, so a reviewer can point at a failure by name.
 
+## The exam
+
+The preview file is examined like any page, as a fragment (it has no skip
+link, landmarks or `h1` of its own):
+
+```bash
+node ~/.claude/skills/fantastic-ui/scripts/exam.mjs path/to/preview-folder --fragment
+```
+
+Every state row must pass: axe WCAG 2.2 AA, targets, focus ring, reflow and
+lint. A component is not done while its preview fails.
+
 ## Gate
 
 - [ ] The route was chosen on ≥2 signals with no counter-signal, and the skip

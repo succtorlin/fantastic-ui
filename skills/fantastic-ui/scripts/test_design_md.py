@@ -169,9 +169,15 @@ def test_export_components_only_carry_text_pairs_that_pass_aa():
 
 
 def test_export_turns_a_failing_pair_into_a_dont_with_its_ratio():
-    text = D.export("A", None)          # Coastal Editorial: --muted is captions-only on the sheet
-    assert re.search(r"Don't set `muted` as body text on `panel`: 3\.\d\d:1", text), text[-1500:]
-    assert "caption:" not in text.split("---", 2)[1]
+    text = D.export("I", None)          # Campus Bright: the soft yellow is a fill, never text
+    assert re.search(r"Don't set `accent` as body text on `panel`: 1\.\d\d:1", text), text[-1500:]
+    assert 'textColor: "{colors.accent}"' not in text.split("---", 2)[1], "a failing pair never becomes a component"
+
+
+def test_export_makes_a_component_of_a_passing_muted_pair():
+    text = D.export("A", None)          # every preset's --muted clears 4.5:1 since the 2026-10 fix
+    front = text.split("---", 2)[1]
+    assert "caption:" in front and 'textColor: "{colors.muted}"' in front, front[-800:]
 
 
 def test_export_follows_the_sheet_device_for_the_reading_surface():

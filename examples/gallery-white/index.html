@@ -42,7 +42,7 @@ body { background: var(--ground); }
 .actions { display: flex; gap: 28px; justify-content: center; align-items: center; margin-top: 24px; flex-wrap: wrap; }
 .pill { font: 400 17px/1 var(--sans); padding: 12px 22px; border-radius: var(--r-pill); background: var(--accent-fill); color: var(--on-accent); text-decoration: none; }
 .pill:hover { background: color-mix(in oklab, var(--accent-fill) 88%, var(--ink)); }
-.chev { font: 400 17px/1 var(--sans); color: var(--accent); text-decoration: none; }
+.chev { display: inline-flex; align-items: center; min-height: 24px; font: 400 17px/1 var(--sans); color: var(--accent); text-decoration: none; }
 .chev::after { content: " \203A"; }
 .chev:hover { text-decoration: underline; text-underline-offset: 3px; }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
@@ -53,7 +53,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
   font: 400 12px/1 var(--sans); color: var(--ink);
   background: color-mix(in oklab, var(--ground) 80%, transparent);
   backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); }
-.nav a { color: inherit; text-decoration: none; }
+.nav nav { display: flex; align-items: center; gap: 36px; }
+.nav a { display: inline-flex; align-items: center; min-height: 44px; color: inherit; text-decoration: none; }  /* 2.5.8: the 12px label keeps a 44px target */
 .nav[data-over="stage"], .chapter[data-over="stage"] { color: var(--stage-ink); background: color-mix(in oklab, var(--stage) 80%, transparent); border-bottom-color: transparent; }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .nav, .chapter { background: var(--ground); } .nav[data-over="stage"], .chapter[data-over="stage"] { background: var(--stage); } }
@@ -102,7 +103,7 @@ footer.band { padding-block: 40px; font-size: 12px; color: var(--muted); }
 <body>
 <div class="page">
   <a class="skip" href="#main">Skip to content</a>
-  <nav class="nav" aria-label="Site"><a href="#">Store</a><a href="#">Lumen</a><a href="#">Studio</a><a href="#">Support</a></nav>
+  <header class="nav"><nav aria-label="Site"><a href="#">Store</a><a href="#">Lumen</a><a href="#">Studio</a><a href="#">Support</a></nav></header>
   <div class="chapter"><strong>Lumen One</strong><a class="pill" href="#buy">Buy</a></div>
   <main id="main">
     <section class="band hero" aria-labelledby="hero-h">
