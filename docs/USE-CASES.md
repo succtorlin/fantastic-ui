@@ -14,7 +14,7 @@ A note on posture: this skill is opinionated on purpose. It will ask you to appr
 
 **What happens, in order:**
 
-1. **Preset check (silent unless it matters).** The skill scores your request against the eleven presets' signal table. Three outcomes: it adopts one and tells you in a line ("Using Blueprint Mono: developer tool, mono-heavy, light ground"); it asks a short question if two presets tie; or it declines all eleven and writes a fresh brief — data-dense analytics/finance products always get the fresh dark-instrument treatment, never a preset that merely happens to be dark.
+1. **You see the directions before any code.** Unless your project already has a DESIGN.md or a design system, or you named a look, the skill scores your request against the twelve presets and renders the two or three strongest directions as small sample pages using your product name, headline and numbers. A side-by-side sheet shows each at desktop and phone width, one marked recommended with the reason ("Blueprint Mono: developer tool, mono-heavy, light ground"). Data-dense analytics/finance products always get a fresh dark-instrument direction among the samples, never a preset that merely happens to be dark. You pick; nothing is built before that.
 2. **The one-sentence brief — your first approval gate.** Before any code you'll see something like: *"Light blueprint ground, single signal-orange accent, grid-paper texture, mono display over system sans, uptime data as the hero."* Everything downstream is judged against this sentence, so push back here, not at the end.
 3. **Tokens first.** A single token block (ground scale, hairlines, ink scale, one accent, semantics, three type faces) is committed before any component. This is deliberate: color literals outside the token file are banned and grep-enforced.
 4. **The hero is the product running.** Expect a `<canvas>` mini-instance, a live-data band, or a working interactive fragment — never a screenshot in a tilted browser frame. The canvas comes with its lifecycle contract: DPR-aware, RAF verifiably stops when the tab hides, one static frame under `prefers-reduced-motion`, full cleanup.
@@ -23,7 +23,7 @@ A note on posture: this skill is opinionated on purpose. It will ask you to appr
 
 **You get:** one page, zero webfonts, zero new dependencies, assets ≤ 30 KB each, keyboard-operable, axe-clean at WCAG 2.2 AA, and a hero a visitor can watch working.
 
-**How to steer:** name a preset up front ("use Marigold Report") to skip the check; say "match our existing brand" and the skill will recover tokens from your CSS instead of inventing any; say "mockup only, skip the gates" if you genuinely want a sketch.
+**How to steer:** name a preset up front ("use Marigold Report") to skip the samples; say "just build it" to get the recommendation without samples; say "match our existing brand" and the skill will recover tokens from your CSS instead of inventing any; say "mockup only, skip the gates" if you genuinely want a sketch.
 
 ---
 
@@ -94,9 +94,9 @@ This module is valuable even if you never touch the visual design — it's a sta
 
 > Which preset fits a scheduling product for universities? — or — Start the marketing site in Charter Navy.
 
-**What's on the shelf:** eleven named directions — Coastal Editorial, Blueprint Mono, Marigold Report, Atelier Warm, Terracotta Commerce, Midnight Showroom, Broadcast Light, Studio Kinetic, Campus Bright, Charter Navy, Dispatch Yellow. Nine light-ground, two dark, each shipping a one-sentence brief, a contrast-validated token block, and the component grammar that makes the direction read.
+**What's on the shelf:** twelve named directions — Coastal Editorial, Blueprint Mono, Marigold Report, Atelier Warm, Terracotta Commerce, Midnight Showroom, Broadcast Light, Studio Kinetic, Campus Bright, Charter Navy, Dispatch Yellow, Gallery White. Ten light-ground, two dark, each shipping a one-sentence brief, a contrast-validated token block, and the component grammar that makes the direction read.
 
-**How selection really works:** it's a workflow gate, not a menu. Named preset → used. Existing token system in the codebase → **no preset** (the existing brief is recovered and extended). Otherwise the request is scored against a signal table (medium, domain, imagery, density) with per-preset disqualifiers; a half-fit is *refused* in favor of a fresh brief, because a stretched preset produces exactly the template output this skill exists to prevent.
+**How selection really works:** it's a workflow gate, not a menu. Named preset → used. Existing token system in the codebase → **no preset** (the existing brief is recovered and extended). Otherwise the request is scored against a signal table (medium, domain, imagery, density) with per-preset disqualifiers; a half-fit is *refused* in favor of a fresh brief, because a stretched preset produces exactly the template output this skill exists to prevent. The top two or three candidates are then rendered as sample pages with your real content, side by side at desktop and phone width, with one recommended; you pick before anything is built.
 
 **The two hard rules:** one preset per application (your marketing site may diverge from your app; screens inside one app may not), and presets are token sets, not component libraries.
 

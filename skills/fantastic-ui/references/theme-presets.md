@@ -1072,28 +1072,34 @@ even when every other signal matches.**
 | **K · Dispatch Yellow** | marketing, booking | taxi, courier, trades, plant hire | minimal or none supplied | medium | the work is premium, understated or editorial |
 | **L · Gallery White** | marketing, launch page | hardware, devices, premium apps, software launches | the user's own product shots | airy | the surface is data-dense, operator-facing, or has no product to show |
 
-Two signals is the adoption threshold. One signal is a coincidence — ask
-rather than assume. "No imagery supplied" is never a disqualifier by itself:
+Two signals is the recommendation threshold. One signal is a coincidence:
+render it beside a stronger candidate rather than assume. "No imagery supplied" is never a disqualifier by itself:
 the slots get generated per [ai-atmosphere.md](ai-atmosphere.md). Two things
 generation cannot supply are the user's own products and people — E, F and H
 need those from the user or lose that device.
 
 ### Worked calls
 
+Each call names what Step 0a does next: render a sample set for a web page ([direction-samples.md](direction-samples.md)), or announce in one line for a document, deck or in-app screen. A user who names a preset skips both.
+
 - *"Landing page for a boutique hotel group, we have a photo library"* →
   marketing + hospitality + rich lifestyle = **A**, three signals, no
-  disqualifier. Adopt and say so.
+  disqualifier. **A** is the recommended sample, rendered beside the next
+  best (G or a fresh direction).
 - *"Investor-ready business plan we'll send as a PDF"* → document + business +
-  dense = **C**. Adopt.
+  dense = **C**. A document, not a web page, so no samples: announce C in
+  one line with a named fork.
 - *"Marketing site for a structural engineering firm"* → marketing +
-  engineering = **B**, two signals. Adopt.
+  engineering = **B**, two signals. Recommended sample, beside a fresh
+  direction (B has no accent, so show one that does).
 - *"Site for a furniture brand, quite editorial, lots of styled room shots"* →
-  retail pulls **E**, material photography pulls **D**. Two plausible: ask,
-  and give the differentiator — E if the job is selling individual products,
-  D if it is presenting a point of view.
+  retail pulls **E**, material photography pulls **D**. Render both, and
+  recommend by the differentiator — E if the job is selling individual
+  products, D if it is presenting a point of view.
 - *"Dashboard for our logistics platform"* → in-app + dense, and A, C and E are
   all disqualified. B survives on density but has no accent to encode state.
-  **No preset**: write a fresh brief, dark instrument direction.
+  **No preset**: an in-app screen, so no samples: announce a fresh brief,
+  dark instrument direction, with a named fork.
 - *"Make our admin panel less ugly"* → the codebase has tokens already. Gate 2
   stops the check before scoring: extend the existing system.
 

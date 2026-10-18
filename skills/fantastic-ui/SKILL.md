@@ -3,7 +3,9 @@ name: fantastic-ui
 description: >-
   Design and build instrument-grade marketing pages and in-product surfaces
   (app pages, dashboards, panels, and subpanels) that feel like the product,
-  not a template. Use for landing, hero, homepage, portfolio, premium/polished
+  not a template. When the look is not decided yet, it renders the two or
+  three best-fitting directions as sample pages to choose from before
+  building. Use for landing, hero, homepage, portfolio, premium/polished
   redesign, whole-app visual retrofit, data-heavy or technical UI, charts,
   agent/AI consoles, wizards, settings and checkout flows, phone-only screens,
   single components with all their states, motion that should not look
@@ -251,34 +253,60 @@ Work the gates in order and stop at the first that answers:
    `theme-presets.md` — medium, domain, imagery, density — and apply each
    preset's disqualifier.
 
-Then act on the confidence you actually have:
+For a web page, gate 3 never ends in a sentence the user has to picture. It
+ends in **sample pages**: the strongest two or three directions rendered side by side with the
+project's own words, one of them recommended, and nothing built until the user
+picks. Procedure, manifest and generator:
+[references/direction-samples.md](references/direction-samples.md).
 
-| Result | What you do |
+| Scoring result | Candidates to render |
 |---|---|
-| One preset matches on ≥2 signals with no disqualifier hit | **Adopt it.** State the choice in one line and continue without asking. |
-| Two or more are plausible | **Ask**, offering at most three, each with the one differentiator that decides it. |
-| A preset half-fits, or a disqualifier fires | **Say so and write a fresh brief.** A stretched preset produces exactly the template output the Anti-Template Policy exists to prevent. |
-| Nothing fits | Fresh brief via Step 0. Note which preset was closest and why it failed. |
-| The brief is only praise words ("premium", "clean", "make it pop") or the user cannot say what they want, and this is a marketing page | **Offer to show rather than ask.** Announce your recommended direction as usual, and offer three low-fidelity first-screen sketches (static, tokens + skeleton only, no imagery) that differ on *different* axes (palette, layout skeleton, type, motion), each labelled with one concrete noun ("Ledger", "Darkroom", "Field notes"). Build them only on a yes. Two sketches that could share a label, or labels that differ only by an adjective, are one sketch: rework. Inside an existing product, never: recover the app's brief instead. |
+| One preset matches on ≥2 signals with no disqualifier | That preset (**recommended**) plus the next one or two, each differing on ≥2 axes |
+| Two or more are plausible | The top two or three; recommend the one whose differentiator matches the brief |
+| A preset half-fits, or a disqualifier fires | A **fresh direction** (Step 0 brief with its own token block, recommended) plus the nearest preset or a second fresh option. A stretched preset produces exactly the template output the Anti-Template Policy exists to prevent |
+| Nothing fits | Two fresh directions that differ on ≥2 axes; note which preset came closest and why it failed |
 
-**Always announce the outcome in one line before building**, with the
-imagery clause attached, so the user can redirect before code exists. When a
-preset is adopted, this announcement is the brief line:
+```bash
+node scripts/direction-samples.mjs design-samples.json   # → design-samples/index.html + shots/
+```
+
+Look at every desktop and phone screenshot yourself before showing them, fix
+any contrast pair the script flags, then present the sheet with the
+recommendation first:
+
+> Three directions for Bramble, same words in each: **Field Notes**
+> (recommended — paper tones and a serif voice, the only one that reads as a
+> small bakery), **Atelier Warm** (calmer, needs real photos), **Terracotta
+> Commerce** (most order-focused, most generic). Sheet:
+> `design-samples/index.html`. Which one should I build?
+
+The pick becomes the brief line (with its imagery clause) and, on a yes, the
+project's DESIGN.md. If the user mixes two ("Field Notes with Atelier's
+type"), render the mix once more before building.
+
+**Skip the samples** when the direction is already fixed (gates 0–2: a
+DESIGN.md, a named look, an existing token system; unless the user asks to
+explore a redesign, then the current look is one of the samples), when the
+surface is a document, deck, in-app screen or phone-only app (the sample
+template is a web page), for a single component or a small edit, or when
+the user says "just build it". Then
+**announce the outcome in one line before building**, with the imagery clause
+attached, so the user can redirect before code exists:
 
 > Using **Terracotta Commerce** — retail storefront, product photography,
 > soft-shadow cards. Imagery: your product shots via `compress`, timber band
 > via `ai`, else `plate --style warp`. Not right? Say *darker* for a
 > Midnight Showroom ground, or *quieter* for no motion beyond state changes.
 
-End the announcement with one or two **named** forks that differ from each
-other (usually theme and motion), as above, rather than an open "say the
+End a one-line announcement with one or two **named** forks that differ from
+each other (usually theme and motion), as above, rather than an open "say the
 word": a person can pick a named alternative in two words, and cannot easily
-describe the one they have not seen.
+describe the one they have not seen. Either fork can be rendered as a sample
+on request.
 
-> No preset fits: this is a data-dense operator console, and every preset
-> either fails at density or has no accent to encode state. Writing a fresh
-> brief. Imagery: warp plate behind the page header, inherited by every
-> panel's empty states (gen_atmosphere, seed 7).
+> Extending your existing system (tokens in `globals.css`): dark instrument,
+> sodium accent. Imagery: warp plate behind the page header, inherited by
+> every panel's empty states (gen_atmosphere, seed 7).
 
 Every path needs the clause: preset, fresh brief, and recovered brief alike.
 "Imagery: none" is allowed only with its reason ("dense table route — a plate
@@ -734,6 +762,10 @@ patterns and the token block:
 
 Run through this before calling the page done:
 
+- [ ] **Direction chosen by the user from rendered samples**
+      ([references/direction-samples.md](references/direction-samples.md)), or
+      the samples skipped for a stated reason (fixed direction, one component,
+      "just build it")
 - [ ] **Promise kept**: paste the brief line (and the Motion line) back in
       and check it clause by clause against the built page; any clause that
       could not be built is said aloud at delivery, not quietly dropped
@@ -814,6 +846,10 @@ Additional gates when the work touched product surfaces:
   Terracotta Commerce, Midnight Showroom, Broadcast Light, Studio Kinetic,
   Campus Bright, Charter Navy, Dispatch Yellow, Gallery White): contrast-validated
   tokens, grammar, imagery, signal table. Read at Step 0a, before writing a brief.
+- [references/direction-samples.md](references/direction-samples.md) — when
+  the direction is open: render the top two or three as sample pages with real
+  content, compare at desktop and phone width, recommend one, build after the
+  pick. Read at Step 0a, gate 3.
 - [references/design-md.md](references/design-md.md) — a project's DESIGN.md:
   find, read, drift (ask on every mismatch), create on a yes, replace only on
   an explicit request. Read at Step 0a, gate 0.
@@ -868,6 +904,10 @@ Additional gates when the work touched product surfaces:
 - `scripts/gen_atmosphere.py` — `tokens`, `plate`, `svg`, `ai`, `compress`,
   `score`, `batch`; ≤30 KB, a ledger line per asset; `plate --page` exits 1
   `page_mismatch`, a too-faint slot exits 4. Run it per ai-atmosphere.md §4.
+- `scripts/direction-samples.mjs` + `templates/direction-sample/` — sample
+  pages and a side-by-side sheet from a manifest; screenshots at 1440 and 390
+  when Playwright resolves (`--playwright <node_modules>`), contrast flags
+  printed per candidate.
 - `scripts/lint-surface.mjs` — static check of HTML/CSS/JSX for dead local
   refs, the sticky-killing overflow, blocked zoom, missing reduced motion,
   text opacity, colour literals outside tokens, AI-default palettes, copy

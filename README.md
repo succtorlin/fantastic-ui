@@ -78,7 +78,11 @@ This layer is adapted from [*Refactoring UI*](https://www.refactoringui.com/) by
 
 The five disciplines say *how* to design; a preset is a pre-committed answer to *what direction*. The skill ships twelve contrast-validated directions — from Coastal Editorial and Blueprint Mono to Midnight Showroom, Dispatch Yellow and Gallery White (product-gallery minimalism with studio-lit products) — each with a full token block, type pairing, and component grammar.
 
-Selection is part of the workflow, not a menu you're shown: before writing a brief, the skill runs a preset check with three gates — the user named a direction → use it; the codebase already has a token system → **no preset** (recover and extend the existing brief instead of running a second design system); otherwise score the request against a signal table (medium, domain, imagery, density) and apply each preset's disqualifier. One confident match is adopted and announced in a line; near-ties get a short question; a half-fit is refused in favor of a fresh brief, because a stretched preset produces exactly the template output the skill exists to prevent. Data-dense analytics/finance surfaces are a stated gap — those route to the dark instrument direction, never to a preset because it happens to be dark.
+Selection is part of the workflow, not a menu you're shown: before writing a brief, the skill runs a preset check with three gates — the user named a direction → use it; the codebase already has a token system → **no preset** (recover and extend the existing brief instead of running a second design system); otherwise score the request against a signal table (medium, domain, imagery, density) with per-preset disqualifiers, and render the strongest two or three directions as sample pages to pick from (next section).
+
+### See the directions before anything is built
+
+When the look is not decided (no DESIGN.md, no existing design system, no look named), the skill does not describe options in words. It scores the request against the presets, picks the two or three strongest directions (often including a fresh one), and renders each as a small sample page using **your** product name, headline and numbers. A side-by-side sheet shows them at desktop and phone width, marks one as recommended with the reason, and the full build starts only after you pick. `scripts/direction-samples.mjs` builds the pages, screenshots and sheet from a short manifest, and flags any colour pair under 4.5:1 before you see it. Procedure: [direction-samples.md](skills/fantastic-ui/references/direction-samples.md).
 
 ### Your DESIGN.md comes first
 
@@ -217,6 +221,7 @@ skills/fantastic-ui/
 ├── SKILL.md                        # the methodology + ship checklist
 ├── scripts/
 │   ├── verify-preset.mjs            # runnable checks against a live page (+ advisory imagery count)
+│   ├── direction-samples.mjs       # 2–3 candidate looks as sample pages + side-by-side sheet
 │   ├── lint-surface.mjs            # static lint: dead refs, sticky-killing overflow, zoom, reduced motion,
 │   │                               #   text opacity, literals outside tokens, AI defaults, copy tells
 │   ├── lint-surface.test.mjs       # mutation tests, one per rule
@@ -229,6 +234,7 @@ skills/fantastic-ui/
 │   ├── plate-check.test.mjs        # `node --test` unit tests for its pure helpers
 │   └── plate-check-shot.mjs        # optional Playwright screenshot variant
 ├── templates/tests/                # consumer tests to copy: plate visibility, banded scrims in the CSS
+├── templates/direction-sample/     # the shared token-driven stylesheet for direction samples
 ├── evals/plate-visibility/         # fixture app, manifest and offline run for the imagery tools
 └── references/
     ├── visual-reference-analysis.md # composition, typography geometry, observation vs. inference,
@@ -247,6 +253,7 @@ skills/fantastic-ui/
     ├── product-surfaces.md         # retrofit procedure for app pages/panels/subpanels: audit → tokens →
     │                               #   primitives → migration, panel anatomy, nesting depth, state design,
     │                               #   back-office vs workbench
+    ├── direction-samples.md        # open direction → render 2–3 samples, recommend, build after the pick
     ├── agent-console.md            # run stream, nine run states, stop control, approval cards, cost receipt
     ├── workflow-surfaces.md        # one page or steps, field kit, pre-submit check, commit, review queues,
     │                               #   commerce flows
