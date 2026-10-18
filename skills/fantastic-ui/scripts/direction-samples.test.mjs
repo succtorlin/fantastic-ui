@@ -157,7 +157,7 @@ test("the sheet puts the recommendation first and flags weak pairs in plain word
   ];
   const html = sheetHtml({ recommended: "y", content: { brand: "B" } }, rows, false);
   assert.ok(html.indexOf("<h2>Y") > 0 && html.indexOf("<h2>Y") < html.indexOf("<h2>X"));
-  assert.match(html, /Below WCAG AA \(4\.5:1\): body ink 3\.10:1/);
+  assert.match(html, /Below WCAG AA: body ink 3\.10:1 \(needs 4\.5:1\)/);
 });
 
 test("a missing tokensFile is an input error (exit 2), not a crash", async () => {
@@ -165,4 +165,28 @@ test("a missing tokensFile is an input error (exit 2), not a crash", async () =>
   const m = manifest(); delete m.directions[0].tokensCss; m.directions[0].tokensFile = "nope.css";
   writeFileSync(join(dir, "m.json"), JSON.stringify(m));
   await assert.rejects(run(["node", "x", join(dir, "m.json"), "--no-shots"]), (e) => e instanceof InputError && /tokensFile/.test(e.message));
+});
+
+test("white text never sits on an accent unless the preset declares it", () => {
+  const J = derive(parseTokens(presetBlock("J").decls), "J");
+  assert.notEqual(J.ctaBgName, "accent", "J's red only reads with white, so the button takes the inverted fill");
+  const L = derive(parseTokens(presetBlock("L").decls), "L");
+  assert.equal(L.ctaBgName, "accent-fill", "L declares its white-on-accent pairing (whiteOnAccent: declared)");
+});
+
+test("number columns get the num class; prose columns do not", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "ds-"));
+  writeFileSync(join(dir, "m.json"), JSON.stringify(manifest()));
+  const { outDir } = await run(["node", "x", join(dir, "m.json"), "--no-shots", "--no-plates"]);
+  const a = readFileSync(join(outDir, "a.html"), "utf8");
+  assert.match(a, /<td class="num">20<\/td>/);
+  assert.match(a, /<td>Waterfalls<\/td>/);
+  assert.match(a, /<a class="skip" href="#main">/);
+  assert.match(a, /<main id="main">/);
+});
+
+test("check-samples refuses a missing folder with exit 2", async () => {
+  const { spawnSync } = await import("node:child_process");
+  const r = spawnSync(process.execPath, [new URL("./check-samples.mjs", import.meta.url).pathname, "/no/such/folder"], { encoding: "utf8" });
+  assert.equal(r.status, 2);
 });

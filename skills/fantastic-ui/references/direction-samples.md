@@ -58,9 +58,13 @@ then a footer line. It uses:
   with fake copy is judged on its fake copy.
 - the candidate's **real tokens** (the preset's block from theme-presets.md,
   or the fresh brief's block), its face trio, radii and separation;
-- an **imagery slot** drawn from the tokens, labelled with what will fill it
-  (`plate --style warp`, "your product shots", `ai` motif). It is a stand-in
-  for the slot, not the final image.
+- an **imagery slot** filled with a real plate rendered by
+  `gen_atmosphere.py` from the candidate's own palette (≤30 KB, through the
+  generator's visibility gate; on light pages `warp` is too soft, so it falls
+  back to `contour` or `studio`). The caption says which plate is shown and
+  what it stands in for ("contour plate from the tokens · stands in for: your
+  product shots"). Never a CSS gradient blob: if no plate passes, the slot is a
+  plain labelled panel.
 
 No canvas, no motion and no webfonts in samples: they compare direction, and
 render in seconds.
@@ -135,6 +139,35 @@ paints (body, secondary, section and card text, button, eyebrow) and flags
 any pair under 4.5:1 or not measurable. Fix a flagged pair in the
 direction's tokens before showing it.
 
+## Check them against the gates
+
+Samples are held to the same gates as a shipped page. Run the checker on the
+output folder and show nothing until it reports every page passing:
+
+```bash
+node ~/.claude/skills/fantastic-ui/scripts/check-samples.mjs design-samples
+```
+
+Per page it runs axe-core with the WCAG 2.0/2.1/2.2 A and AA tags at 1440 and
+390 px (violations fail; `incomplete` nodes are reported, never passed),
+checks reflow at 320/375/390/768/1024/1440 (no overflow, no content cut off),
+every link and button ≥24×24 px, no wrapping button labels, the skip link,
+landmarks, one `h1`, a visible `:focus-visible` ring ≥2 px and ≥3:1 on every
+focusable, runs `verify-preset.mjs` on every preset sample (contrast, zero
+webfonts, asset weight, focus ring, reduced-motion path, token roles, accent
+restraint, separation strategy and the preset's own traps, including white
+never partnering the accent), and `lint-surface.mjs --strict` over the
+folder. Results go to `checks.json` and onto each card in the sheet. It needs
+`playwright` and `@axe-core/playwright` (the same tools `verify-preset.mjs`
+uses), from the project or `--modules <node_modules>`. A failing sample is
+fixed in its tokens or replaced; it is never shown with a note.
+
+The generator already builds for these gates: a measured focus colour (≥3:1
+on the surface), 44 px nav targets, a skip link, a reduced-motion block,
+`--ink-2` for small text, number-only mono columns, and the white-on-accent
+rule (when only white reads on an accent, the button takes the preset's
+inverted fill unless its gates declare the pairing, as Preset L does).
+
 ## Show them
 
 1. **Look at every screenshot yourself first** (desktop and phone). A
@@ -164,7 +197,8 @@ version a new sample and show it once more before building.
 | Samples shown only when Step 0a left the direction open (table above) | the decision row is named in the reply |
 | Two or three candidates, each pair differing on ≥2 axes | list the axes per pair in the reply |
 | Real content, no placeholder copy | grep the generated HTML for `lorem`, `John Doe`, `Your headline` |
-| Token pairs readable | the script's contrast table: every listed pair ≥4.5:1, none "not measurable" |
+| Token pairs readable | the script's contrast table: every listed pair passes (4.5:1 text, 3:1 focus ring), none "not measurable" |
+| Every sample passes the gates | `check-samples.mjs` exits 0: all pages PASS in `checks.json`, each card in the sheet says "all pass" |
 | Phone view checked | a 390 px screenshot per candidate exists and was looked at |
 | One recommendation with a reason | the reply names it before the question |
 | Nothing built before the pick | no edits to the product's real files until the user chooses |

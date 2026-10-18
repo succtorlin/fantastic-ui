@@ -82,7 +82,7 @@ Selection is part of the workflow, not a menu you're shown: before writing a bri
 
 ### See the directions before anything is built
 
-When the look is not decided (no DESIGN.md, no existing design system, no look named), the skill does not describe options in words. It scores the request against the presets, picks the two or three strongest directions (often including a fresh one), and renders each as a small sample page using **your** product name, headline and numbers. A side-by-side sheet shows them at desktop and phone width, marks one as recommended with the reason, and the full build starts only after you pick. `scripts/direction-samples.mjs` builds the pages, screenshots and sheet from a short manifest, and flags any colour pair under 4.5:1 before you see it. Procedure: [direction-samples.md](skills/fantastic-ui/references/direction-samples.md).
+When the look is not decided (no DESIGN.md, no existing design system, no look named), the skill does not describe options in words. It scores the request against the presets, picks the two or three strongest directions (often including a fresh one), and renders each as a small sample page using **your** product name, headline and numbers. A side-by-side sheet shows them at desktop and phone width, marks one as recommended with the reason, and the full build starts only after you pick. `scripts/direction-samples.mjs` builds the pages, screenshots and sheet from a short manifest, and flags any colour pair under 4.5:1; `scripts/check-samples.mjs` then holds every sample to the same gates as a shipped page (WCAG 2.2 AA via axe, reflow 320–1440, targets, focus, the preset's own gates, lint), and nothing is shown until all pass. Procedure: [direction-samples.md](skills/fantastic-ui/references/direction-samples.md).
 
 ### Your DESIGN.md comes first
 
@@ -222,6 +222,7 @@ skills/fantastic-ui/
 ├── scripts/
 │   ├── verify-preset.mjs            # runnable checks against a live page (+ advisory imagery count)
 │   ├── direction-samples.mjs       # 2–3 candidate looks as sample pages + side-by-side sheet
+│   ├── check-samples.mjs           # holds samples to the gates: axe WCAG 2.2 AA, reflow, preset gates
 │   ├── lint-surface.mjs            # static lint: dead refs, sticky-killing overflow, zoom, reduced motion,
 │   │                               #   text opacity, literals outside tokens, AI defaults, copy tells
 │   ├── lint-surface.test.mjs       # mutation tests, one per rule

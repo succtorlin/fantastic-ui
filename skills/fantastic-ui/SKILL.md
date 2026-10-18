@@ -267,12 +267,14 @@ picks. Procedure, manifest and generator:
 | Nothing fits | Two fresh directions that differ on ≥2 axes; note which preset came closest and why it failed |
 
 ```bash
-node scripts/direction-samples.mjs design-samples.json   # → design-samples/index.html + shots/
+node scripts/direction-samples.mjs design-samples.json   # → design-samples/index.html + shots/ + plates/
+node scripts/check-samples.mjs design-samples            # WCAG 2.2 AA, reflow, targets, focus, preset gates, lint
 ```
 
-Look at every desktop and phone screenshot yourself before showing them, fix
-any contrast pair the script flags, then present the sheet with the
-recommendation first:
+Show nothing until `check-samples.mjs` reports every page passing: samples
+are held to the same gates as a shipped page. Then look at every desktop and
+phone screenshot yourself and present the sheet with the recommendation
+first:
 
 > Three directions for Bramble, same words in each: **Field Notes**
 > (recommended — paper tones and a serif voice, the only one that reads as a
@@ -762,7 +764,8 @@ patterns and the token block:
 
 Run through this before calling the page done:
 
-- [ ] **Direction chosen by the user from rendered samples**
+- [ ] **Direction chosen by the user from rendered samples** that
+      `check-samples.mjs` passed
       ([references/direction-samples.md](references/direction-samples.md)), or
       the samples skipped for a stated reason (fixed direction, one component,
       "just build it")
@@ -908,6 +911,9 @@ Additional gates when the work touched product surfaces:
   pages and a side-by-side sheet from a manifest; screenshots at 1440 and 390
   when Playwright resolves (`--playwright <node_modules>`), contrast flags
   printed per candidate.
+- `scripts/check-samples.mjs` — holds direction samples to the gates (axe
+  WCAG 2.2 AA, reflow 320–1440, targets, focus, skip link, `verify-preset.mjs`
+  per preset sample, lint); writes `checks.json` and the sheet's gate lines.
 - `scripts/lint-surface.mjs` — static check of HTML/CSS/JSX for dead local
   refs, the sticky-killing overflow, blocked zoom, missing reduced motion,
   text opacity, colour literals outside tokens, AI-default palettes, copy

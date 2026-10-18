@@ -9,6 +9,7 @@ html, body { margin: 0; }
 body { background: var(--ground); }
 
 .page {
+  position: relative;
   --s-accent: var(--accent, var(--ink));
   --s-sep: 1px solid var(--hair);
   --s-shadow: none;
@@ -20,8 +21,9 @@ body { background: var(--ground); }
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
-.page[data-sep="shadow"] { --s-sep: 1px solid transparent; --s-shadow: var(--lift-1, var(--lift, none)); }
-.page[data-sep="tone"]   { --s-sep: 1px solid transparent; }
+/* Shadow and tone directions separate surfaces without any border at all. */
+.page[data-sep="shadow"] { --s-sep: 0 solid transparent; --s-shadow: var(--lift-1, var(--lift, none)); }
+.page[data-sep="tone"]   { --s-sep: 0 solid transparent; }
 
 /* The sheet: presets with --r-sheet > 0 float the page on the backdrop. */
 .sheet { overflow: clip; }
@@ -35,13 +37,19 @@ body { background: var(--ground); }
 .wrap { max-width: var(--maxw, 1200px); margin: 0 auto; padding: 0 32px; }
 
 /* Nav */
-.nav { display: flex; align-items: center; gap: 28px; min-height: 64px; border-bottom: var(--s-sep); }
+.nav { display: flex; align-items: center; gap: 28px; min-height: 64px; border-bottom: var(--s-sep);
+       /* glass at ≥80% opacity (Preset L's trap): the page's own surface, nearly opaque */
+       background: color-mix(in oklab, var(--s-surface) 92%, transparent); }
 .brand { font-family: var(--display); font-size: 20px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; }
 .nav ul { display: flex; gap: 22px; margin: 0; padding: 0; list-style: none; font-size: 14px; color: var(--ink-2); }
 .nav nav { margin-left: auto; }
 .nav li { white-space: nowrap; }
-.nav li a { color: inherit; text-decoration: none; }
-.page a:focus-visible { outline: 2px solid var(--s-cta-bg); outline-offset: 3px; }
+.nav li a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; color: inherit; text-decoration: none; }
+/* Focus ring colour is measured by the generator (≥3:1 on the page surface). */
+.page a:focus-visible { outline: 2px solid var(--s-focus); outline-offset: 3px; }
+.skip { position: absolute; left: 16px; top: -200px; z-index: 10; padding: 10px 14px; background: var(--panel); color: var(--ink);
+        font: 600 14px/1.2 var(--sans); text-decoration: none; border: 2px solid var(--s-focus); border-radius: var(--r-card, 4px); }
+.skip:focus { top: 12px; }
 
 /* Buttons */
 .btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: var(--r-pill, var(--r-card, 6px));
@@ -75,26 +83,24 @@ body { background: var(--ground); }
 .hero--split .stat:first-child { border-top: 0; }
 
 .slot { position: relative; margin: 0; min-height: 340px; border-radius: var(--r-panel, var(--r-card, 6px)); overflow: clip;
-        background:
-          radial-gradient(120% 90% at 78% 22%, color-mix(in oklab, var(--s-accent) 34%, transparent), transparent 62%),
-          radial-gradient(90% 80% at 12% 88%, color-mix(in oklab, var(--ink) 16%, transparent), transparent 66%),
-          linear-gradient(160deg, var(--ground-2), var(--panel-2, var(--ground)));
-        border: var(--s-sep); box-shadow: var(--s-shadow); }
+        background: var(--ground-2); border: var(--s-sep); box-shadow: var(--s-shadow); }
+.slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .band.slot { min-height: 260px; }
-.slot figcaption { position: absolute; left: 14px; bottom: 12px; font: 500 11px/1.3 var(--mono); letter-spacing: 0.06em;
-                   color: var(--ink-2); background: color-mix(in oklab, var(--panel) 82%, transparent); padding: 6px 9px; border-radius: 4px; }
+.slot figcaption { position: absolute; left: 14px; bottom: 12px; z-index: 1; font: 500 12px/1.3 var(--mono); letter-spacing: 0.04em;
+                   color: var(--ink-2); background: var(--panel); padding: 6px 9px; border-radius: 4px; }
 .hero--stack .stats, .hero--statement .stats { margin-top: 20px; }
 
 /* The one real section */
 .section { padding: clamp(40px, 6vw, 80px) 0; background: var(--ground-2); border-top: var(--s-sep); }
 .section h2 { font-family: var(--display); font-weight: 600; font-size: clamp(26px, 3vw, 38px); letter-spacing: -0.015em; margin: 0 0 24px; }
+.table-wrap { overflow-x: auto; }
 .table { width: 100%; border-collapse: collapse; background: var(--panel); border: var(--s-sep); box-shadow: var(--s-shadow);
          border-radius: var(--r-card, 6px); overflow: clip; font-size: 15px; }
 .table th { text-align: left; font: 600 11px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2);
-            padding: 14px 18px; border-bottom: var(--s-sep); }
+            padding: 14px 18px; border-bottom: 1px solid var(--hair); }
 .table td { padding: 14px 18px; border-bottom: 1px solid var(--hair); }
 .table tr:last-child td { border-bottom: 0; }
-.table td + td, .table th + th { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.table .num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .cards { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; }
 .card { grid-column: span 2; background: var(--panel); border: var(--s-sep); box-shadow: var(--s-shadow); border-radius: var(--r-card, 6px); padding: 22px; }
 .card:first-child { grid-column: span 4; grid-row: span 2; display: flex; flex-direction: column; }
@@ -105,8 +111,8 @@ body { background: var(--ground); }
 .card h3 { font-family: var(--display); font-size: 19px; margin: 0 0 8px; }
 .card p { margin: 0; color: var(--ink-2); font-size: 15px; }
 .card .meta { display: block; margin-top: 14px; font: 600 13px/1 var(--mono); color: var(--s-eyebrow); }
-.list { list-style: none; margin: 0; padding: 0; border-top: var(--s-sep); }
-.list li { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 16px; align-items: baseline; padding: 18px 0; border-bottom: var(--s-sep); }
+.list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hair); }
+.list li { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 16px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--hair); }
 .list .idx { font: 600 13px/1 var(--mono); color: var(--ink-2); }
 .list strong { font-family: var(--display); font-size: 19px; font-weight: 600; }
 .list span { color: var(--ink-2); font-size: 15px; }
@@ -130,4 +136,11 @@ body { background: var(--ground); }
   .list li { grid-template-columns: 36px minmax(0, 1fr); }
   .list .meta { grid-column: 2; }
   .slot { min-height: 220px; }
+  .table { font-size: 14px; }
+  .table th, .table td { padding: 12px 10px; }
+}
+
+/* No motion in samples; the block states the reduced-motion path explicitly. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
