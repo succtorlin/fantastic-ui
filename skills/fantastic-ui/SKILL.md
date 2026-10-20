@@ -59,7 +59,8 @@ when time is short.
 node ~/.claude/skills/fantastic-ui/scripts/exam.mjs \
   --url http://localhost:3000/ --url http://localhost:3000/pricing \
   --preset E \                      # when a preset is in use
-  --lint src/app/landing             # the source the work touched
+  --lint src/app/landing \          # the source the work touched
+  --dialog "#open-menu"              # each trigger that opens an overlay
 # a static folder (samples, a built site, a component preview) instead:
 node ~/.claude/skills/fantastic-ui/scripts/exam.mjs dist/
 ```
@@ -70,7 +71,12 @@ link and button ≥24×24 px; no wrapping button labels; a skip link, landmarks,
 one `h1` and `lang`; a visible focus ring ≥2 px and ≥3:1 on every focusable;
 `verify-preset.mjs` when a preset is in use (contrast, zero webfonts, asset
 weight, reduced-motion path, token roles, accent restraint, separation, the
-preset's own traps); and `lint-surface.mjs --strict` over the touched source.
+preset's own traps); `lint-surface.mjs --strict` over the touched source; a
+**no-JS pass** (text a visitor sees must not be hidden when JavaScript is
+off: content survives removal); and, for each `--dialog` trigger at 1440 and
+390, a keyboard-opened, named, modal dialog that takes focus, keeps Tab
+inside, has a close button, passes axe while open, closes on Escape and
+returns focus. Every overlay the work adds gets a `--dialog`.
 
 The rules that make it an exam rather than a suggestion:
 
@@ -935,6 +941,11 @@ Additional gates when the work touched product surfaces:
 - [references/workflow-surfaces.md](references/workflow-surfaces.md) — one
   page or steps, field kit, pre-submit check, derived totals, commit, review
   queues, commerce flows. Read for forms, wizards, settings, checkout.
+- [references/third-party-components.md](references/third-party-components.md)
+  — adopting a catalog block, registry component or effect kit: rules fit,
+  licence file, source over registry, installer writes, the traps the exam
+  catches. Read before copying or installing any UI code the project did not
+  write.
 - [references/component-states.md](references/component-states.md) — the
   one-component route: eight states, geometry, preview file. Read when the
   brief is one element.
@@ -965,7 +976,8 @@ Additional gates when the work touched product surfaces:
 - `scripts/exam.mjs` — **the exam** every page must pass before work is
   done: axe WCAG 2.2 AA, reflow 320–1440, targets, focus, skip link and
   landmarks, `verify-preset.mjs` with `--preset`, `lint-surface` over
-  `--lint`. URLs or a static folder; exit 0 only when every page passes.
+  `--lint`, the no-JS pass, `--dialog <trigger>` per overlay. URLs or a
+  static folder; exit 0 only when every page passes.
 - `scripts/check-samples.mjs` — the exam on a folder of direction samples,
   plus `checks.json` and each sheet card's gate line.
 - `scripts/lint-surface.mjs` — static check of HTML/CSS/JSX for dead local

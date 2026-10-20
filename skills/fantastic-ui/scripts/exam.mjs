@@ -6,7 +6,9 @@
  *   node exam.mjs --url http://localhost:3000/ --url http://localhost:3000/pricing
  *   node exam.mjs --url http://localhost:3000/ --preset E --lint src/app/landing
  *   node exam.mjs path/to/static-site            (serves the folder itself)
+ *   node exam.mjs --url http://localhost:3000/ --dialog "#open-menu"
  *   options: --preset <A-L>  --lint <path>...  --modules <node_modules>  --json <file>
+ *            --dialog <trigger selector>...  (each overlay the page opens)
  *            --fragment  (a component preview, not a whole page: skips only the
  *                         skip-link, landmark and single-h1 checks)
  *
@@ -24,6 +26,13 @@
  *      (contrast, zero webfonts, asset weight, focus ring, reduced-motion path,
  *      token roles, accent restraint, separation, the preset's own traps)
  *   5. scripts/lint-surface.mjs --strict over every --lint path (or the folder)
+ *   6. the no-JS pass: text a visitor sees with JavaScript is not hidden when
+ *      JavaScript is off (content must survive removal; the opacity:0-until-
+ *      a-script-reveals-it trap)
+ *   7. with --dialog <selector>, at 1440 and 390: Enter on the trigger opens a
+ *      named modal dialog that takes focus, keeps Tab/Shift+Tab inside, has a
+ *      close button and passes axe while open; Escape closes it and focus
+ *      returns to the trigger. A selector found on no page fails.
  * Exit 0 only when every page passes; 1 when anything fails; 2 on bad input.
  * Needs playwright and @axe-core/playwright, from the project, --modules or
  * $PLAYWRIGHT_DIR (the same tools verify-preset.mjs uses).
@@ -161,30 +170,146 @@ async function keyboardChecks(page) {
   return out;
 }
 
-export async function auditPage(browser, AxeBuilder, url) {
+// Text-bearing elements a visitor reads, keyed so the JS and no-JS loads can
+// be compared. Runs in the page.
+function readableText() {
+  const SEL = "h1, h2, h3, h4, h5, h6, p, li, a, button, figcaption, td, th, dt, dd, blockquote, label";
+  const shown = (el) => {
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height) return false;
+    let op = 1;
+    for (let e = el; e; e = e.parentElement) {
+      const cs = getComputedStyle(e);
+      if (cs.visibility === "hidden" || cs.display === "none") return false;
+      op *= parseFloat(cs.opacity);
+      if (cs.clipPath && /inset\(\s*(50%|100%)/.test(cs.clipPath)) return false;
+    }
+    return op >= 0.1;
+  };
+  const out = {};
+  for (const el of document.querySelectorAll(SEL)) {
+    if (el.closest("noscript, dialog:not([open]), [hidden], [aria-hidden=true]")) continue;
+    const text = el.textContent.replace(/\s+/g, " ").trim().slice(0, 50);
+    if (!text) continue;
+    const key = `<${el.tagName.toLowerCase()}> "${text}"`;
+    const prev = out[key];
+    out[key] = { present: true, shown: (prev?.shown || false) || shown(el) };
+  }
+  return out;
+}
+
+async function scrollThrough(page) {
+  await page.evaluate(async () => {
+    const step = Math.max(200, innerHeight * 0.8);
+    for (let y = 0; y < document.documentElement.scrollHeight; y += step) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 120)); }
+    scrollTo(0, 0);
+    await new Promise((r) => setTimeout(r, 900));
+  });
+}
+
+/**
+ * The no-JS pass. SKILL.md: with all JavaScript stripped the page is complete
+ * and legible. Text a visitor sees with JavaScript must not be in the page
+ * but hidden without it (the `opacity: 0` until-a-script-reveals-it trap).
+ * Text that only exists once JavaScript renders it (a client-fetched panel)
+ * is judged by that panel's own loading state, not here.
+ */
+export async function noJsChecks(browser, url, withJs) {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, javaScriptEnabled: false });
+  const page = await ctx.newPage();
+  await page.goto(url, { waitUntil: "load" });
+  await page.waitForTimeout(300);
+  const bare = await page.evaluate(readableText);
+  await ctx.close();
+  const hidden = Object.keys(withJs).filter((k) => withJs[k].shown && bare[k] && !bare[k].shown);
+  if (!hidden.length) return [];
+  return [`hidden without JavaScript (${hidden.length}): ${hidden.slice(0, 4).join(", ")}${hidden.length > 4 ? ", …" : ""}; hide it in CSS only behind a class the script adds`];
+}
+
+/**
+ * The dialog check, for one trigger selector at the page's current width:
+ * keyboard-open it, then it must be a named modal dialog that takes focus,
+ * keeps Tab and Shift+Tab inside, has a close button, passes axe while open,
+ * closes on Escape and returns focus to the trigger. Returns null when the
+ * trigger is not on this page.
+ */
+export async function dialogChecks(page, AxeBuilder, selector, width) {
+  const at = `dialog "${selector}" at ${width}`;
+  const trigger = page.locator(selector).first();
+  if (!(await trigger.count())) return null;
+  if (!(await trigger.isVisible())) return [`${at}: trigger is not visible`];
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(450);
+  const DLG = "dialog[open], [role=dialog], [role=alertdialog]";
+  const state = () => page.evaluate((DLG) => {
+    const vis = (el) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none" && parseFloat(cs.opacity) > 0.1; };
+    const d = [...document.querySelectorAll(DLG)].find(vis);
+    if (!d) return { open: false, activeTag: document.activeElement?.tagName };
+    const label = d.getAttribute("aria-label") || (d.getAttribute("aria-labelledby") || "").split(/\s+/).map((id) => document.getElementById(id)?.textContent || "").join(" ").trim();
+    const modal = d.matches("dialog") ? d.matches(":modal") : d.getAttribute("aria-modal") === "true";
+    const name = (b) => (b.getAttribute("aria-label") || b.textContent || "").trim();
+    const close = [...d.querySelectorAll("button, [role=button]")].some((b) => vis(b) && /close|dismiss|cancel|done|back|×|✕/i.test(name(b)));
+    return { open: true, label, modal, close, inside: d.contains(document.activeElement) };
+  }, DLG);
+  const s = await state();
+  if (!s.open) return [`${at}: Enter on the trigger opened no visible dialog (use <dialog> + showModal(), or role="dialog")`];
+  const out = [];
+  if (!s.label) out.push(`${at}: dialog has no accessible name (aria-labelledby its heading, or aria-label)`);
+  if (!s.modal) out.push(`${at}: dialog is not modal (showModal(), or aria-modal="true" with a focus trap)`);
+  if (!s.close) out.push(`${at}: no visible close button inside the dialog`);
+  if (!s.inside) out.push(`${at}: focus did not move into the dialog`);
+  const escaped = new Set();
+  for (const key of ["Tab", "Tab", "Tab", "Tab", "Tab", "Tab", "Shift+Tab", "Shift+Tab", "Shift+Tab"]) {
+    await page.keyboard.press(key);
+    // Past the last control a native modal hands focus to the browser's own
+    // UI (activeElement is <body>); that is not the page behind the dialog.
+    const inside = await page.evaluate((DLG) => { const a = document.activeElement; return !a || a === document.body || !!a.closest(DLG); }, DLG);
+    if (!inside) escaped.add(key);
+  }
+  if (escaped.size) out.push(`${at}: ${[...escaped].join(" and ")} moved focus out of the open dialog`);
+  const res = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
+  for (const v of res.violations) out.push(`${at}: axe ${v.id} (${v.impact}) ×${v.nodes.length} while open: ${v.nodes[0].target.join(" ")}`);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(450);
+  const after = await state();
+  if (after.open) out.push(`${at}: Escape did not close the dialog`);
+  else if (!(await trigger.evaluate((el) => el === document.activeElement || el.contains(document.activeElement)))) out.push(`${at}: focus did not return to the trigger on close (it is on <${(after.activeTag || "nothing").toLowerCase()}>)`);
+  return out;
+}
+
+export async function auditPage(browser, AxeBuilder, url, { dialogs = [] } = {}) {
   const problems = [];
+  const found = new Set();
+  let withJs = null;
   for (const width of WIDTHS) {
     const ctx = await browser.newContext({ viewport: { width, height: 900 } });
     const page = await ctx.newPage();
     await page.goto(url, { waitUntil: "load" });
     // Read the page the way a visitor does: scroll it top to bottom so
     // scroll-revealed content has arrived before anything is measured.
-    await page.evaluate(async () => {
-      const step = Math.max(200, innerHeight * 0.8);
-      for (let y = 0; y < document.documentElement.scrollHeight; y += step) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 120)); }
-      scrollTo(0, 0);
-      await new Promise((r) => setTimeout(r, 900));
-    });
+    await scrollThrough(page);
     problems.push(...await layoutChecks(page, width));
     if (width === 1440 || width === 390) {
       const res = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
       for (const v of res.violations) problems.push(`axe ${v.id} (${v.impact}) ×${v.nodes.length} at ${width}: ${v.nodes[0].target.join(" ")}`);
       for (const v of res.incomplete) problems.push(`axe could not decide ${v.id} ×${v.nodes.length} at ${width}: ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join(", ")} (measure by hand)`);
     }
-    if (width === 1440) problems.push(...await keyboardChecks(page));
+    if (width === 1440) {
+      withJs = await page.evaluate(readableText);
+      problems.push(...await keyboardChecks(page));
+    }
+    if ((width === 1440 || width === 390) && dialogs.length) {
+      for (const sel of dialogs) {
+        await page.goto(url, { waitUntil: "load" });
+        const r = await dialogChecks(page, AxeBuilder, sel, width);
+        if (r) { found.add(sel); problems.push(...r); }
+      }
+    }
     await ctx.close();
   }
-  return [...new Set(problems)];
+  problems.push(...await noJsChecks(browser, url, withJs));
+  return { problems: [...new Set(problems)], dialogsFound: found };
 }
 
 export function presetOf(html) {
@@ -217,7 +342,7 @@ function lintPaths(paths) {
  * to serve a static folder and exam every .html in it. Returns
  * { results: { name: problems[] }, lint: findings[] }.
  */
-export async function exam({ targets = [], dir = null, preset = null, lint = [], modules = null, fragment = false } = {}) {
+export async function exam({ targets = [], dir = null, preset = null, lint = [], modules = null, fragment = false, dialogs = [] } = {}) {
   const { chromium, AxeBuilder } = await loadTools(modules);
   let srv = null, base = null, list = targets;
   if (dir) {
@@ -233,9 +358,12 @@ export async function exam({ targets = [], dir = null, preset = null, lint = [],
   }
   const browser = await chromium.launch();
   const results = {};
+  const dialogsFound = new Set();
   try {
     for (const t of list) {
-      let problems = await auditPage(browser, AxeBuilder, t.url);
+      const audit = await auditPage(browser, AxeBuilder, t.url, { dialogs });
+      audit.dialogsFound.forEach((d) => dialogsFound.add(d));
+      let problems = audit.problems;
       if (fragment) problems = problems.filter((p) => !/skip link|landmark|h1 elements/.test(p));
       if (t.preset) problems.push(...await presetGates(base, t.url, t.preset, modules));
       results[t.name] = problems;
@@ -244,6 +372,8 @@ export async function exam({ targets = [], dir = null, preset = null, lint = [],
     await browser.close();
     if (srv) srv.close();
   }
+  const missing = dialogs.filter((d) => !dialogsFound.has(d));
+  if (missing.length) (results[list[0].name] ||= []).push(...missing.map((d) => `dialog trigger "${d}" is on none of the examined pages`));
   const lintFindings = lintPaths(lint);
   for (const fd of lintFindings) {
     const key = dir ? (fd.file ? fd.file.split("/").pop() : "index.html") : "lint";
@@ -265,7 +395,7 @@ export function report(results) {
 
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
   const a = process.argv.slice(2);
-  const opt = { targets: [], lint: [], modules: null, preset: null, fragment: false, dir: null };
+  const opt = { targets: [], lint: [], modules: null, preset: null, fragment: false, dir: null, dialogs: [] };
   let jsonOut = null;
   for (let i = 0; i < a.length; i++) {
     const [k, v] = a[i].includes("=") ? a[i].split(/=(.*)/s) : [a[i], null];
@@ -276,6 +406,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
     else if (k === "--modules") opt.modules = val();
     else if (k === "--json") jsonOut = val();
     else if (k === "--fragment") opt.fragment = true;
+    else if (k === "--dialog") opt.dialogs.push(val());
     else if (!k.startsWith("--")) opt.dir = k;
     else { console.error(`exam: unknown option ${k}`); process.exit(2); }
   }

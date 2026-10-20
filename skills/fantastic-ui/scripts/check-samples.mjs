@@ -29,7 +29,7 @@ function stampSheet(dir, results) {
     const probs = results[page] || [];
     const text = probs.length
       ? `Gates: ${probs.length} problem${probs.length > 1 ? "s" : ""} (see checks.json)`
-      : "Gates: WCAG 2.2 AA (axe), targets, focus, reflow 320–1440, preset gates, lint: all pass";
+      : "Gates: WCAG 2.2 AA (axe), targets, focus, reflow 320–1440, no-JS, preset gates, lint: all pass";
     return `<p class="checks${probs.length ? " flag" : ""}" data-page="${page}">${text}</p>`;
   });
   writeFileSync(p, html);

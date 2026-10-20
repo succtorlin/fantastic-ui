@@ -144,8 +144,11 @@ link, landmarks or `h1` of its own):
 node ~/.claude/skills/fantastic-ui/scripts/exam.mjs path/to/preview-folder --fragment
 ```
 
-Every state row must pass: axe WCAG 2.2 AA, targets, focus ring, reflow and
-lint. A component is not done while its preview fails.
+Every state row must pass: axe WCAG 2.2 AA, targets, focus ring, reflow,
+the no-JS pass and lint. A component that opens an overlay (dialog, sheet,
+drawer, menu-as-dialog) adds `--dialog <trigger selector>`. A component is
+not done while its preview fails. A component copied from a library follows
+[third-party-components.md](third-party-components.md) first.
 
 ## Gate
 

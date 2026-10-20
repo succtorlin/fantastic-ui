@@ -82,7 +82,7 @@ Selection is part of the workflow, not a menu you're shown: before writing a bri
 
 ### See the directions before anything is built
 
-When the look is not decided (no DESIGN.md, no existing design system, no look named), the skill does not describe options in words. It scores the request against the presets, picks the two or three strongest directions (often including a fresh one), and renders each as a small sample page using **your** product name, headline and numbers. A side-by-side sheet shows them at desktop and phone width, marks one as recommended with the reason, and the full build starts only after you pick. `scripts/direction-samples.mjs` builds the pages, screenshots and sheet from a short manifest, and flags any colour pair under 4.5:1; `scripts/check-samples.mjs` then holds every sample to the same gates as a shipped page (WCAG 2.2 AA via axe, reflow 320–1440, targets, focus, the preset's own gates, lint), and nothing is shown until all pass. Procedure: [direction-samples.md](skills/fantastic-ui/references/direction-samples.md).
+When the look is not decided (no DESIGN.md, no existing design system, no look named), the skill does not describe options in words. It scores the request against the presets, picks the two or three strongest directions (often including a fresh one), and renders each as a small sample page using **your** product name, headline and numbers. A side-by-side sheet shows them at desktop and phone width, marks one as recommended with the reason, and the full build starts only after you pick. `scripts/direction-samples.mjs` builds the pages, screenshots and sheet from a short manifest, and flags any colour pair under 4.5:1; `scripts/check-samples.mjs` then holds every sample to the same gates as a shipped page (WCAG 2.2 AA via axe, reflow 320–1440, targets, focus, no-JS, the preset's own gates, lint), and nothing is shown until all pass. Procedure: [direction-samples.md](skills/fantastic-ui/references/direction-samples.md).
 
 ### Your DESIGN.md comes first
 
@@ -117,10 +117,10 @@ The page above is in [examples/gallery-white](examples/gallery-white/), with the
 
 ## The exam: nothing is done until it passes
 
-Every page the skill builds or changes, in any project, has to pass `scripts/exam.mjs` before the work is called done: axe-core at WCAG 2.2 AA (desktop and phone), reflow from 320 to 1440 px with nothing clipped, 24 px targets, a visible 3:1 focus ring, skip link and landmarks, the preset's own gates when one is used, and the static lint. The closing message reports the pass count; a failing page is fixed and re-examined, never shipped with a note.
+Every page the skill builds or changes, in any project, has to pass `scripts/exam.mjs` before the work is called done: axe-core at WCAG 2.2 AA (desktop and phone), reflow from 320 to 1440 px with nothing clipped, 24 px targets, a visible 3:1 focus ring, skip link and landmarks, the preset's own gates when one is used, the static lint, a no-JS pass (nothing a visitor reads is hidden when JavaScript is off), and for every overlay a dialog check (named, modal, focus kept inside, Escape closes, focus returns). The closing message reports the pass count; a failing page is fixed and re-examined, never shipped with a note.
 
 ```bash
-node ~/.claude/skills/fantastic-ui/scripts/exam.mjs --url http://localhost:3000/ --preset E --lint src/app/landing
+node ~/.claude/skills/fantastic-ui/scripts/exam.mjs --url http://localhost:3000/ --preset E --lint src/app/landing --dialog "#open-menu"
 ```
 
 ## Beyond the landing page: product surfaces
@@ -135,6 +135,7 @@ The same five disciplines apply *inside* the product. The skill includes a dedic
 - **Agent consoles** — a run stream instead of a chart, nine run states each with its required action, a stop control that never leaves the screen, approval cards inside the stream, and cost as a one-line receipt ([agent-console.md](skills/fantastic-ui/references/agent-console.md)).
 - **Workflows, components, charts, phones** — wizards, settings, review queues and checkout ([workflow-surfaces.md](skills/fantastic-ui/references/workflow-surfaces.md)); a one-component route with eight states and a preview file ([component-states.md](skills/fantastic-ui/references/component-states.md)); charts picked by the question with accessibility grades and a chart-only colour ramp ([data-charts.md](skills/fantastic-ui/references/data-charts.md)); phone-only screens with safe areas, thumb zone and native furniture ([phone-surfaces.md](skills/fantastic-ui/references/phone-surfaces.md)).
 - **Motion by the cheapest route** — CSS, native scroll-driven animation, View Transitions and WAAPI before canvas; no GSAP or WebGL; content survives with JavaScript off ([motion-routes.md](skills/fantastic-ui/references/motion-routes.md)).
+- **Adopting someone else's component** — a catalog block, registry `add` or effect kit is checked against the skill's rules, its licence file (not the badge), its real source and its installer's writes before it goes in, then examined like your own code ([third-party-components.md](skills/fantastic-ui/references/third-party-components.md)).
 - **A static lint pass** — `scripts/lint-surface.mjs` catches dead local references, the `overflow-x: hidden` that silently kills a sticky nav, blocked zoom, missing reduced motion, opacity-dimmed text, colour literals outside tokens, AI-default palettes and copy tells, and prints what it cannot judge.
 
 ## Whole-app recursive polish
@@ -231,7 +232,8 @@ skills/fantastic-ui/
 │   ├── verify-preset.mjs            # runnable checks against a live page (+ advisory imagery count)
 │   ├── direction-samples.mjs       # 2–3 candidate looks as sample pages + side-by-side sheet
 │   ├── exam.mjs                    # THE exam every page must pass: axe WCAG 2.2 AA, reflow, targets,
-│   │                               #   focus, landmarks, preset gates, lint (URLs or a folder)
+│   │                               #   focus, landmarks, preset gates, lint, no-JS pass, --dialog
+│   ├── exam.test.mjs               # browser tests for the no-JS pass and the dialog check
 │   ├── check-samples.mjs           # the exam over a sample folder + the sheet's gate lines
 │   ├── lint-surface.mjs            # static lint: dead refs, sticky-killing overflow, zoom, reduced motion,
 │   │                               #   text opacity, literals outside tokens, AI defaults, copy tells
@@ -269,6 +271,8 @@ skills/fantastic-ui/
     ├── workflow-surfaces.md        # one page or steps, field kit, pre-submit check, commit, review queues,
     │                               #   commerce flows
     ├── component-states.md         # one-component route: eight states, geometry, preview file
+    ├── third-party-components.md   # adopting a catalog/registry component: rules fit, licence file,
+    │                               #   source over registry, installer writes, traps the exam catches
     ├── data-charts.md              # chart by question, accessibility grades, bars, chart colour under one accent
     ├── motion-routes.md            # route ladder, effect lookup, beat sheet, motion slop
     ├── phone-surfaces.md           # phone frame, safe areas, thumb zone, touch, native furniture

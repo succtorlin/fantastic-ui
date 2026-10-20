@@ -154,7 +154,7 @@ Per page it runs axe-core with the WCAG 2.0/2.1/2.2 A and AA tags at 1440 and
 checks reflow at 320/375/390/768/1024/1440 (no overflow, no content cut off),
 every link and button ≥24×24 px, no wrapping button labels, the skip link,
 landmarks, one `h1`, a visible `:focus-visible` ring ≥2 px and ≥3:1 on every
-focusable, runs `verify-preset.mjs` on every preset sample (contrast, zero
+focusable, the no-JS pass (nothing hidden when JavaScript is off), runs `verify-preset.mjs` on every preset sample (contrast, zero
 webfonts, asset weight, focus ring, reduced-motion path, token roles, accent
 restraint, separation strategy and the preset's own traps, including white
 never partnering the accent), and `lint-surface.mjs --strict` over the
