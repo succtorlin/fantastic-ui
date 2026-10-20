@@ -117,11 +117,95 @@ The page above is in [examples/gallery-white](examples/gallery-white/), with the
 
 ## The exam: nothing is done until it passes
 
-Every page the skill builds or changes, in any project, has to pass `scripts/exam.mjs` before the work is called done: axe-core at WCAG 2.2 AA (desktop and phone), reflow from 320 to 1440 px with nothing clipped, 24 px targets, a visible 3:1 focus ring, skip link and landmarks, the preset's own gates when one is used, the static lint, a no-JS pass (nothing a visitor reads is hidden when JavaScript is off), and for every overlay a dialog check (named, modal, focus kept inside, Escape closes, focus returns). The closing message reports the pass count; a failing page is fixed and re-examined, never shipped with a note.
+Every page the skill builds or changes, in any project, has to pass `scripts/exam.mjs` before the work is called done. A failing page is fixed and examined again, never shipped with a note, and the closing message reports the pass count (`exam: 3/3 pass`).
+
+| Check | What fails it |
+| --- | --- |
+| axe-core, WCAG 2.0/2.1/2.2 A + AA, at 1440 and 390 px | any violation; `incomplete` nodes are listed for measuring by hand, never passed |
+| Reflow at 320, 375, 390, 768, 1024 and 1440 px | horizontal overflow, or content cut off under `overflow-x: clip` |
+| Targets and labels | a link or button under 24×24 px; a button label that wraps |
+| Keyboard and structure | no skip link first, a missing `header`/`nav`/`main`/`footer`, not exactly one `h1`, no `lang`, a focus ring under 2 px or 3:1 |
+| No-JS pass | text a visitor sees with JavaScript is in the page but hidden without it |
+| `--dialog <trigger>`, at 1440 and 390 | the trigger opens no dialog from the keyboard; the dialog has no name, is not modal, lacks a close button, lets Tab out, fails axe while open, ignores Escape or loses focus on close |
+| `--preset <A–L>` | any of that preset's gates in `verify-preset.mjs` (contrast, zero webfonts, asset weight, reduced motion, token roles, accent restraint, separation, its own traps) |
+| `--lint <path>` | any `lint-surface.mjs --strict` finding in the touched source |
+
+The exam needs `playwright` and `@axe-core/playwright`, installed in the project or pointed to with `--modules <node_modules>`. Without them the work is reported as **not examined**, not as done.
+
+### Examples
+
+A landing page and its pricing page on the dev server, built in Preset E, with the source that changed:
 
 ```bash
-node ~/.claude/skills/fantastic-ui/scripts/exam.mjs --url http://localhost:3000/ --preset E --lint src/app/landing --dialog "#open-menu"
+node ~/.claude/skills/fantastic-ui/scripts/exam.mjs \
+  --url http://localhost:3000/ --url http://localhost:3000/pricing \
+  --preset E --lint src/app/landing
 ```
+
+A page that opens overlays. Pass each trigger's selector; a selector found on none of the pages fails:
+
+```bash
+node ~/.claude/skills/fantastic-ui/scripts/exam.mjs \
+  --url http://localhost:3000/settings \
+  --dialog "#delete-account" --dialog "[data-open=shortcuts]"
+```
+
+A static folder (a built site, direction samples, a component preview). The exam serves the folder itself and examines every `.html` page in it; `--fragment` drops the page-only checks (skip link, landmarks, one `h1`) for a component preview:
+
+```bash
+node ~/.claude/skills/fantastic-ui/scripts/exam.mjs dist/
+node ~/.claude/skills/fantastic-ui/scripts/exam.mjs previews/button --fragment
+node ~/.claude/skills/fantastic-ui/scripts/exam.mjs dist/ --json exam.json   # results for CI
+```
+
+Exit codes: `0` every page passes, `1` something failed, `2` bad input.
+
+### What a failure looks like
+
+`scripts/fixtures/exam/traps/` reproduces two traps catalog components often ship: an intro line held at `opacity: 0` until a script fades it in, and a help panel that is a `div` with `role="dialog"` and nothing else. The real output:
+
+```text
+$ node exam.mjs fixtures/exam/traps --dialog "#open-help"
+FAIL  index.html
+    dialog "#open-help" at 1440: dialog has no accessible name (aria-labelledby its heading, or aria-label)
+    dialog "#open-help" at 1440: dialog is not modal (showModal(), or aria-modal="true" with a focus trap)
+    dialog "#open-help" at 1440: no visible close button inside the dialog
+    dialog "#open-help" at 1440: focus did not move into the dialog
+    dialog "#open-help" at 1440: Tab and Shift+Tab moved focus out of the open dialog
+    dialog "#open-help" at 1440: Escape did not close the dialog
+    hidden without JavaScript (1): <p> "Electric bikes by the day, collected at the ferry."; hide it in CSS only behind a class the script adds
+
+exam: 0/1 pass · NOT DONE until every page passes
+```
+
+(The same six dialog lines repeat at 390 px; they are left out here.) The passing twin, `fixtures/exam/good/`, shows both fixes: a native `<dialog>` opened with `showModal()`, named by its heading, with a Close button and focus returned to the trigger; and the fade gated in CSS behind a class the script adds, so without JavaScript the line is simply there:
+
+```html
+<script>document.documentElement.classList.add("js");</script>
+<style>
+  html.js .reveal { opacity: 0; transition: opacity 0.4s; }
+  html.js .reveal.in { opacity: 1; }
+</style>
+```
+
+```text
+$ node exam.mjs fixtures/exam/good --dialog "#open-booking"
+PASS  index.html
+
+exam: 1/1 pass
+```
+
+### Example: adopting a component from a library
+
+> *"/fantastic-ui add the responsive modal from that UI catalog to our settings page"*
+
+Before anything is copied, the skill follows [third-party-components.md](skills/fantastic-ui/references/third-party-components.md):
+
+1. **Rules fit.** The component is refused if it needs WebGL, GSAP, a webfont or a second accent, and a native `<dialog>` is offered instead when it does the same job.
+2. **Licence file.** It reads the licence file at the revision being copied, not the README badge, and says what it allows (use in this product, or redistribution in a kit).
+3. **Source over registry.** It lists the real imports, maps them to the project's own helpers, and replaces hard-coded colours, fonts and radii with tokens.
+4. **Installer writes.** If an `npx … add` command is involved, it shows the pinned version and every file it would write (global CSS included) and asks before running it.
+5. **Exam.** The adopted modal is examined like the project's own code: `exam.mjs --url http://localhost:3000/settings --dialog "#open-modal"`.
 
 ## Beyond the landing page: product surfaces
 
@@ -210,6 +294,8 @@ Once installed and available in your client's skill list, ask for things like:
 - *"Apply the same style across all the app's pages and subpanels"*
 - *"Polish every single surface of the app — make sure nothing is missed"*
 - *"Run a WCAG audit on this page and fix what fails"*
+- *"Add a settings drawer, and make sure it passes the exam with the dialog check"*
+- *"We want this hero effect from a component library. Is it allowed, and how do we adopt it safely?"*
 - *"Make the app accessible / fix the contrast and keyboard issues"*
 - *"Build the site in the Marigold Report style"* (or any preset — or let the skill pick one)
 - *"Build a launch page for our desk lamp in Gallery White"* (see the [example](examples/gallery-white/))
@@ -234,6 +320,8 @@ skills/fantastic-ui/
 │   ├── exam.mjs                    # THE exam every page must pass: axe WCAG 2.2 AA, reflow, targets,
 │   │                               #   focus, landmarks, preset gates, lint, no-JS pass, --dialog
 │   ├── exam.test.mjs               # browser tests for the no-JS pass and the dialog check
+│   ├── fixtures/exam/              # a page that passes the exam and its trap twin (hidden text, fake dialog)
+│   ├── direction-samples.test.mjs  # generator tests (no browser)
 │   ├── check-samples.mjs           # the exam over a sample folder + the sheet's gate lines
 │   ├── lint-surface.mjs            # static lint: dead refs, sticky-killing overflow, zoom, reduced motion,
 │   │                               #   text opacity, literals outside tokens, AI defaults, copy tells
@@ -303,7 +391,7 @@ The skill is framework-light: the worked code is React + CSS modules, but the di
 
 ## Verification boundaries
 
-The existing mechanics layer and all twelve preset declarations and verification tools remain included. Run the preset checker from a project with `playwright` and `@axe-core/playwright` installed; see [Verifying an applied preset](skills/fantastic-ui/references/theme-presets.md#verifying-an-applied-preset) for the command and coverage.
+The existing mechanics layer and all twelve preset declarations and verification tools remain included. Run the exam (and the preset checker it calls) from a project with `playwright` and `@axe-core/playwright` installed; see [Verifying an applied preset](skills/fantastic-ui/references/theme-presets.md#verifying-an-applied-preset) for the command and coverage.
 
 A passing automated check does not establish design quality, actual user comprehension, or full WCAG conformance. Manually verify keyboard and screen-reader behavior, reduced motion, reflow, and the relevant loading, error, permission, and recovery states. A visual reference establishes intent, not live data or proven interaction behavior.
 
