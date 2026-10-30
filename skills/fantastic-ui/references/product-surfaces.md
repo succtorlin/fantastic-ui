@@ -124,7 +124,7 @@ Build once, from tokens, before migrating any screen:
 - `.panelHead` — the panel header (anatomy below).
 - `.stat` — big mono number + small muted label, `tabular-nums`.
 - `.dataTable` — hairline row separators, mono numerals right-aligned,
-  header row in eyebrow style. Sortable headers are real buttons with
+  header row as panel labels (body face, uppercase, tracked, `--ink-2`). Sortable headers are real buttons with
   `aria-sort` on the `th`; the table states its count ("1,204 orders ·
   showing 1–50"); one row density is locked per table (compact 32–36 px,
   default 40–48 px, comfortable 56–64 px, never mixed); loading uses skeleton
@@ -132,7 +132,7 @@ Build once, from tokens, before migrating any screen:
   table that returns nothing shows the filtered-to-nothing state with a
   clear-filters action, never the empty state.
 - `.state` — shared empty/loading/error presentation (below).
-- `.focusable`, `.eyebrow`, `.mono`, `.srOnly` — same as the marketing set.
+- `.focusable`, `.panel-label`, `.mono` (data only), `.srOnly` — same as the marketing set.
 
 ## Panel anatomy
 
@@ -141,25 +141,26 @@ re-learns a screen:
 
 ```
 ┌──────────────────────────────────────────────┐
-│ — EYEBROW LABEL          meta · actions  ⋯  │  ← head: mono eyebrow left,
-│ Panel Title (only if eyebrow isn't enough)   │    quiet meta/actions right,
+│ PANEL LABEL              meta · actions  ⋯  │  ← head: panel label left,
+│ Panel Title (only if the label isn't enough) │    quiet meta/actions right,
 ├──────────────────────────────────────────────┤    hairline below
 │  body — data at panel density                │
 │  ┌────────────────────────────────────────┐  │
-│  │ — SUBPANEL EYEBROW                     │  │  ← subpanel: ground-2,
+│  │ SUBPANEL LABEL                         │  │  ← subpanel: ground-2,
 │  │  denser body                           │  │    same anatomy, one
 │  └────────────────────────────────────────┘  │    ground step lighter
 └──────────────────────────────────────────────┘
 ```
 
-- **Head**: eyebrow (mono, uppercase, tracked, accent or muted — accent only
-  if this panel is the screen's primary), optional title in the display
+- **Head**: a panel label that names the data (body face, uppercase, tracked
+  ≤0.1em, accent or muted — accent only if this panel is the screen's
+  primary; mono is for the figures, not the label), optional title in the display
   face only for top-level panels; actions right-aligned, icon-quiet.
 - **Separation** is always a hairline (`--hair`), never a shadow, never a
   background jump of more than one ground step.
 - **Primary panel** on a screen is marked by *position and span* (top-left,
-  widest column) and may use the accent in its eyebrow. Sibling panels use
-  muted eyebrows. Never mark primacy with a different background color.
+  widest column) and may use the accent in its label. Sibling panels use
+  muted labels. Never mark primacy with a different background color.
 - **Actions**: one primary action per screen gets the accent button; panel-
   level actions are ghost/hairline buttons. If every panel has an accent
   button, none of them matters.
@@ -176,7 +177,7 @@ re-learns a screen:
 - Radius steps down or stays equal with depth — a subpanel is never rounder
   than its parent.
 - A subpanel that becomes a full page (drill-down navigation) keeps its
-  eyebrow text as the page's breadcrumb/eyebrow — vocabulary continuity is
+  label text as the page's breadcrumb — vocabulary continuity is
   what makes drill-downs feel instrumented.
 
 ## States (design these before the happy path)
@@ -302,7 +303,7 @@ Run after the last screen migrates; these are pass/fail:
       success or a gain; none are decoration
 - [ ] Focus ring identical everywhere; full keyboard traversal of the two
       most complex screens
-- [ ] Panel anatomy identical everywhere (eyebrow, hairline, actions-right)
+- [ ] Panel anatomy identical everywhere (panel label, hairline, actions-right)
 - [ ] Nesting depth ≤ 3 on every screen; no shadows encoding depth
 - [ ] Every panel has designed empty/loading/error states (throttle the
       network and kill the API to verify, don't assume)

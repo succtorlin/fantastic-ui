@@ -49,7 +49,7 @@ Rules for sections:
 
 - **Section numbers only when something refers back to them**: the step rail,
   the pre-submit check, a summary row. A number nothing points at is ordinal
-  decoration; use a mono eyebrow instead.
+  decoration; let the section's heading carry it instead.
 - **Group by proximity**: the gap inside a section is clearly smaller than the
   gap between sections ([ui-mechanics.md §2](ui-mechanics.md#2-spacing-and-sizing--pick-a-scale-then-obey-it)).
 - **Collapsed advanced sections show what they hold**: `Advanced · 2 changed`.

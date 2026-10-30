@@ -64,6 +64,8 @@ useEffect(() => {
   window.addEventListener("resize", size, { passive: true });
 
   // -- entities: simulated but plausible -----------------------------------
+  // Simulated values must read as samples: caption the figure "Sample data"
+  // and name them in the handoff (SKILL.md § Real proof first).
   // Each dot orbits at a base radius with a slow sinusoidal wobble, so paths
   // look organic, not mechanical. Most dots wear the accent color; a couple
   // wear the semantic up/down colors so the legend reads truthfully.

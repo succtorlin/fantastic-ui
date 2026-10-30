@@ -83,7 +83,6 @@ node ~/.claude/skills/fantastic-ui/scripts/direction-samples.mjs design-samples.
   "content": {
     "brand": "Bramble",
     "nav": ["Menu", "How it works", "Pick-up times"],
-    "eyebrow": "Saturday pre-orders",
     "headline": "Bread that is still warm when you get there.",
     "sub": "Order by Thursday 6 pm, collect between 8 and 11 on Saturday.",
     "cta": "Order for Saturday",
@@ -118,8 +117,11 @@ node ~/.claude/skills/fantastic-ui/scripts/direction-samples.mjs design-samples.
 - `recommended` is required, ids are file names (case-insensitive; `index`,
   `sample` and `shots` are reserved), and unknown `hero`, `proof`, `section`
   or `separation` values are refused.
+- `eyebrow` (optional): a line above the headline only when it carries a fact
+  (a date, a version, a product name); a category label fails the deletion test
+  (SKILL.md § Kickers), so leave it out.
 - `hero`: `split` (copy beside a proof panel), `statement` (oversized
-  left-aligned headline over a wide imagery band), `stack` (editorial: eyebrow,
+  left-aligned headline over a wide imagery band), `stack` (editorial: optional fact line,
   headline, then the imagery band and stats beneath).
 - `proof`: `stats` (big mono numbers) or `image` (the labelled imagery slot).
 - `section` (per direction, overriding the content's `kind`): `table`,

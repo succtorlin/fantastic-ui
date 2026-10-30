@@ -96,28 +96,22 @@ Small composable classes used everywhere via `className={`${s.a} ${s.b}`}`:
 ```css
 .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
 
-/* mono kicker with a rule-line — the section signature */
-.eyebrow {
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.22em;
+/* data label: names the figure beside it (panel heads, stat and figure
+   captions). Body face, not mono. Never a section opener on a marketing page:
+   a band opens with its heading (SKILL.md § Kickers). */
+.panel-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--sodium);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6em;
-}
-.eyebrow::before {
-  content: "";
-  width: 22px; height: 1px;
-  background: var(--sodium);
-  opacity: 0.6;
+  color: var(--ink-2);
 }
 
 /* data voice */
 .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
-/* display headline — clamp, tight leading, accent italic for THE word */
+/* display headline — clamp, tight leading; the accent word (one <em>, hero h1
+   only, when the direction names it as its signature) */
 .display {
   font-size: clamp(2.6rem, 6.4vw, 5rem);
   line-height: 1.02;
@@ -125,12 +119,12 @@ Small composable classes used everywhere via `className={`${s.a} ${s.b}`}`:
 }
 .display em { font-style: italic; color: var(--sodium-hi); }
 
-/* buttons: mono face, 2px radius (instrument, not pill), lift on hover */
+/* buttons: body face (mono is for data), 2px radius (instrument, not pill),
+   lift on hover */
 .btn {
   display: inline-flex; align-items: center; gap: 0.5em;
-  font-family: var(--mono);
-  font-size: 0.82rem;
-  letter-spacing: 0.04em;
+  font-size: 0.875rem;
+  font-weight: 600;
   padding: 0.85em 1.35em;
   border-radius: 2px;
   border: var(--edge);

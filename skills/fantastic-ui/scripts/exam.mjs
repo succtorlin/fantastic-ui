@@ -10,13 +10,13 @@
  *   options: --preset <A-L>  --lint <path>...  --modules <node_modules>  --json <file>
  *            --dialog <trigger selector>...  (each overlay the page opens)
  *            --fragment  (a component preview, not a whole page: skips only the
- *                         skip-link, landmark and single-h1 checks)
+ *                         skip-link, landmark, single-h1 and fold checks)
  *
  * Per page:
  *   1. axe-core, WCAG 2.0/2.1/2.2 A+AA tags, at 1440 and 390 px: zero
  *      violations; every `incomplete` node is reported (measure it by hand),
  *      never silently passed
- *   2. reflow at 320/375/390/768/1024/1440: no horizontal overflow and no
+ *   2. reflow at 320/375/390/768/1024/1440/1920: no horizontal overflow and no
  *      content cut off (overflow-x: clip hides overflow from scrollWidth);
  *      every link and button ≥24×24 px (2.5.8); no button label wrapping (M3)
  *   3. keyboard and structure: a skip link first, a visible :focus-visible
@@ -29,7 +29,11 @@
  *   6. the no-JS pass: text a visitor sees with JavaScript is not hidden when
  *      JavaScript is off (content must survive removal; the opacity:0-until-
  *      a-script-reveals-it trap)
- *   7. with --dialog <selector>, at 1440 and 390: Enter on the trigger opens a
+ *   7. composition: at 1024 and wider no paragraph runs past ~100 characters a
+ *      line (the uncapped container at 1920); at 1440 and 390 no line of text
+ *      is painted under another element (sticky and fixed chrome excepted);
+ *      at 1280×800 the hero h1 and its first action sit above the fold
+ *   8. with --dialog <selector>, at 1440 and 390: Enter on the trigger opens a
  *      named modal dialog that takes focus, keeps Tab/Shift+Tab inside, has a
  *      close button and passes axe while open; Escape closes it and focus
  *      returns to the trigger. A selector found on no page fails.
@@ -45,7 +49,9 @@ import { createRequire } from "node:module";
 import { spawn, spawnSync } from "node:child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-export const WIDTHS = [320, 375, 390, 768, 1024, 1440];
+export const WIDTHS = [320, 375, 390, 768, 1024, 1440, 1920];
+export const FOLD = { width: 1280, height: 800 };
+const MAX_CPL = 100;
 export const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 const MIME = { ".html": "text/html", ".css": "text/css", ".webp": "image/webp", ".png": "image/png", ".js": "text/javascript", ".json": "application/json" };
 
@@ -136,6 +142,104 @@ async function layoutChecks(page, width) {
     }
     return out;
   }, width);
+}
+
+// Line length: characters per rendered line of each prose block. At 1920 an
+// uncapped container shows up here as 150-character lines.
+async function measureChecks(page, width) {
+  return page.evaluate(({ width, max }) => {
+    for (const el of document.querySelectorAll("p, li, dd, blockquote")) {
+      // site chrome is skipped; a hero <header> holding the h1 is content
+      const head = el.closest("header");
+      if (el.closest("nav, footer, table, pre, dialog:not([open])") || (head && !head.querySelector("h1")) || el.querySelector("p, li, ul, ol, div")) continue;
+      const cs = getComputedStyle(el);
+      if (cs.whiteSpace === "nowrap" || cs.textOverflow === "ellipsis" || (cs.webkitLineClamp && cs.webkitLineClamp !== "none")) continue;
+      const text = el.textContent.replace(/\s+/g, " ").trim();
+      if (text.length < 120) continue;
+      const range = document.createRange(); range.selectNodeContents(el);
+      const tops = [];
+      for (const r of range.getClientRects()) if (r.width > 1 && !tops.some((t) => Math.abs(t - r.top) < 4)) tops.push(r.top);
+      if (!tops.length) continue;
+      const cpl = text.length / tops.length;
+      if (cpl > max) return [`line length ~${Math.round(cpl)} characters at ${width}: "${text.slice(0, 40)}…" (cap the measure near 65–75ch, and the container near 1360–1520px)`];
+    }
+    return [];
+  }, { width, max: MAX_CPL });
+}
+
+// Text painted under another element. Each line box's centre is hit-tested;
+// a hit that is neither the text nor an ancestor, paints something (a
+// background, an image) and is not sticky or fixed chrome covers the text.
+async function coverChecks(page, width) {
+  await page.evaluate(() => scrollTo(0, 0));
+  return page.evaluate(({ width, src }) => {
+    const h = new Function(`return (${src})()`)();
+    const out = [];
+    const chrome = (el) => { for (let e = el; e; e = e.parentElement) if (/^(fixed|sticky)$/.test(getComputedStyle(e).position)) return true; return false; };
+    // A transparent layer (a stretched link's ::after) hides nothing; its own
+    // text covers only where that text actually is.
+    const paints = (el, x, y) => {
+      for (let e = el; e; e = e.parentElement) if (parseFloat(getComputedStyle(e).opacity) < 0.1) return false;
+      if (el.matches("img, svg, canvas, video, picture, iframe")) return true;
+      const cs = getComputedStyle(el), bg = h.parse(cs.backgroundColor);
+      if ((bg && bg.a > 0.5) || cs.backgroundImage !== "none") return true;
+      const rg = document.createRange(); rg.selectNodeContents(el);
+      return [...rg.getClientRects()].some((q) => x >= q.left && x <= q.right && y >= q.top && y <= q.bottom);
+    };
+    for (const el of document.querySelectorAll("h1, h2, h3, h4, p, li, a, button, label, figcaption, td, th, dt, dd, blockquote")) {
+      if (el.closest("[aria-hidden=true], dialog:not([open]), [hidden]") || chrome(el)) continue;
+      // clamped or ellipsised text reports rects for lines it never paints
+      const ecs = getComputedStyle(el);
+      if (ecs.textOverflow === "ellipsis" || (ecs.webkitLineClamp && ecs.webkitLineClamp !== "none")) continue;
+      const text = el.textContent.replace(/\s+/g, " ").trim();
+      if (!text) continue;
+      const range = document.createRange(); range.selectNodeContents(el);
+      for (const r of [...range.getClientRects()].slice(0, 6)) {
+        if (r.width < 3 || r.height < 3) continue;
+        const x = r.left + r.width / 2, y = r.top + r.height / 2;
+        if (x < 0 || y < 0 || x > innerWidth || y > innerHeight) continue;
+        const hit = document.elementFromPoint(x, y);
+        if (!hit || el.contains(hit) || hit.contains(el) || chrome(hit) || !paints(hit, x, y)) continue;
+        out.push(`text under another element at ${width}: <${el.tagName.toLowerCase()}> "${text.slice(0, 30)}" is covered by <${hit.tagName.toLowerCase()}${hit.className && typeof hit.className === "string" ? "." + hit.className.trim().split(/\s+/).join(".") : ""}>`);
+        break;
+      }
+      if (out.length >= 4) break;
+    }
+    return out;
+  }, { width, src: pageHelpers.toString() });
+}
+
+// The first screen at 1280×800 holds the hero headline and the first action
+// that follows it (outside the nav), without scrolling.
+export async function foldChecks(browser, url) {
+  const ctx = await browser.newContext({ viewport: FOLD });
+  const page = await ctx.newPage();
+  await page.goto(url, { waitUntil: "load" });
+  await page.waitForTimeout(300);
+  const out = await page.evaluate(({ height }) => {
+    const h1 = document.querySelector("h1");
+    if (!h1) return [];
+    const o = [];
+    const r = h1.getBoundingClientRect();
+    if (r.bottom > height) o.push(`hero headline ends at ${Math.round(r.bottom)}px, below the 1280×${height} fold (pull the display size or the padding down)`);
+    // The hero block: the h1's section or header. Without one (an h1 straight
+    // in <main> or <article>), only the next few blocks after the h1 count, so
+    // a link deep in an article is not taken for the hero's action.
+    const block = h1.closest("section, header, [class*=hero]");
+    const near = [];
+    if (!block) for (let e = h1.nextElementSibling, k = 0; e && k < 4; e = e.nextElementSibling, k++) near.push(e);
+    const pool = block ? [...block.querySelectorAll("a[href], button")] : near.flatMap((e) => (e.matches("a[href], button") ? [e] : [...e.querySelectorAll("a[href], button")]));
+    // site chrome: nav, and any header that is not the one holding the h1
+    const chrome = (a) => a.closest("nav, dialog") || (a.closest("header") && !a.closest("header").contains(h1));
+    const action = pool.find((a) => !chrome(a) && !a.classList.contains("skip") && (h1.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING) && a.getBoundingClientRect().height > 0);
+    if (action) {
+      const b = action.getBoundingClientRect().bottom;
+      if (b > height) o.push(`first action "${action.textContent.trim().slice(0, 30)}" ends at ${Math.round(b)}px, below the 1280×${height} fold`);
+    }
+    return o;
+  }, FOLD);
+  await ctx.close();
+  return out;
 }
 
 async function keyboardChecks(page) {
@@ -290,6 +394,8 @@ export async function auditPage(browser, AxeBuilder, url, { dialogs = [] } = {})
     // scroll-revealed content has arrived before anything is measured.
     await scrollThrough(page);
     problems.push(...await layoutChecks(page, width));
+    if (width >= 1024) problems.push(...await measureChecks(page, width));
+    if (width === 1440 || width === 390) problems.push(...await coverChecks(page, width));
     if (width === 1440 || width === 390) {
       const res = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
       for (const v of res.violations) problems.push(`axe ${v.id} (${v.impact}) ×${v.nodes.length} at ${width}: ${v.nodes[0].target.join(" ")}`);
@@ -309,6 +415,7 @@ export async function auditPage(browser, AxeBuilder, url, { dialogs = [] } = {})
     await ctx.close();
   }
   problems.push(...await noJsChecks(browser, url, withJs));
+  problems.push(...await foldChecks(browser, url));
   return { problems: [...new Set(problems)], dialogsFound: found };
 }
 
@@ -364,7 +471,7 @@ export async function exam({ targets = [], dir = null, preset = null, lint = [],
       const audit = await auditPage(browser, AxeBuilder, t.url, { dialogs });
       audit.dialogsFound.forEach((d) => dialogsFound.add(d));
       let problems = audit.problems;
-      if (fragment) problems = problems.filter((p) => !/skip link|landmark|h1 elements/.test(p));
+      if (fragment) problems = problems.filter((p) => !/skip link|landmark|h1 elements|1280×800 fold/.test(p));
       if (t.preset) problems.push(...await presetGates(base, t.url, t.preset, modules));
       results[t.name] = problems;
     }
@@ -412,7 +519,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
   }
   if (opt.preset && !/^[A-L]$/.test(opt.preset)) { console.error("exam: --preset must be A-L"); process.exit(2); }
   exam(opt).then(({ results }) => {
-    if (jsonOut) writeFileSync(jsonOut, JSON.stringify({ examinedAt: new Date().toISOString(), widths: WIDTHS, axeTags: AXE_TAGS, results }, null, 2));
+    if (jsonOut) writeFileSync(jsonOut, JSON.stringify({ examinedAt: new Date().toISOString(), widths: WIDTHS, fold: FOLD, axeTags: AXE_TAGS, results }, null, 2));
     process.exit(report(results) ? 1 : 0);
   }).catch((e) => {
     console.error(`exam: ${e.message}`);

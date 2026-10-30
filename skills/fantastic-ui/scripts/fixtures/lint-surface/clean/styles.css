@@ -9,7 +9,7 @@ html { color-scheme: light; }
 body { margin: 0; overflow-x: clip; }
 .nav { position: sticky; top: 0; height: var(--nav-h); display: flex; gap: 24px; background: var(--ground); border-bottom: 1px solid var(--hair); }
 .chapter { position: sticky; top: var(--nav-h); background: var(--ground); }
-.kicker { text-transform: uppercase; letter-spacing: .08em; line-height: 1.2; color: var(--muted); }
+.panel-label { text-transform: uppercase; letter-spacing: .08em; line-height: 1.2; color: var(--muted); }
 .headline { font: 600 40px/1.05 system-ui, sans-serif; }
 .note { color: var(--muted); }
 .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 0; list-style: none; }

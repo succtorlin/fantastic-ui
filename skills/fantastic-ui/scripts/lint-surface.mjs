@@ -31,10 +31,16 @@ export const RULES = [
   { id: "uppercase-tight-leading", severity: "P1", description: "uppercase text with line-height below 1.0 (caps collide on wrap)" },
   { id: "two-sticky-top0", severity: "P1", description: "more than one position: sticky + top: 0 in the run (offset the others by --nav-h)" },
   { id: "bare-1fr-image-grid", severity: "P1", description: "repeat(n, 1fr) columns in a file that styles images (use minmax(0, 1fr))" },
+  { id: "tracked-caps", severity: "P1", description: "uppercase tracked past 0.04em outside a data label (panel head, table head, stat caption): the kicker" },
+  { id: "accent-word", severity: "P1", description: "an <em>/<i>/<mark> accent word in an h2-h6, or a second one in an h1 (once per page, hero only)" },
+  { id: "placeholder-proof", severity: "P1", description: "placeholder people, companies or lorem ipsum in visible copy (an invented testimonial or proof)" },
+  { id: "form-goes-nowhere", severity: "P1", description: "a form with no action whose submit is prevented and nothing in the run sends it (the fake send)" },
   { id: "root-relative-ref", severity: "P2", description: "a root-relative /… reference: the site root is unknown to a static pass, check by hand" },
   { id: "suppression-without-reason", severity: "P2", description: "a lint-surface-allow comment with no reason after the rule id" },
   { id: "copy-buzzword", severity: "P2", description: "hype word in visible copy" },
   { id: "copy-em-dash", severity: "P2", description: "em dash in visible prose" },
+  { id: "mono-as-costume", severity: "P2", description: "monospace on buttons, nav, links or labels: mono is for data (mark a mono-material direction with a `fui: mono-material` comment)" },
+  { id: "logo-wall-claim", severity: "P2", description: "\"Trusted by\" / \"Join thousands\" style proof claim: name the real customer with permission, or cut it" },
   { id: "button-label-vague", severity: "P2", description: "button or link label that does not say what happens (Submit, Click here, OK, repeated Learn more / Get started)" },
 ];
 const SEV = Object.fromEntries(RULES.map((r) => [r.id, r.severity]));
@@ -67,6 +73,25 @@ const COLOR_RE = /(?<![\w&#/$-])#(?:[0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{3,4})(?![\w
 const BUZZ_RE = /\b(revolutionary|revolutioni[sz]e[sd]?|powerful|seamless(?:ly)?|streamlin(?:e[sd]?|ing)|empower(?:s|ed|ing)?|leverag(?:e[sd]?|ing)|unlock(?:s|ed|ing)?|elevat(?:e[sd]?|ing)|supercharg(?:e[sd]?|ing)|game[- ]chang(?:er|ing)|next[- ]generation|cutting[- ]edge|effortless(?:ly)?|world[- ]class)\b/gi;
 const TW_PAL_RE = /^(?:bg|text|border(?:-[trblxyse])?|from|via|to|ring|fill|stroke|outline|decoration|shadow|accent|caret|divide|placeholder)-(?:indigo|violet|purple)-\d{2,3}(?:\/\d+)?$/;
 const TW_RESPONSIVE = /^(?:sm|md|lg|xl|2xl|dark|print)$/;
+// Selectors where tracked caps name a figure (SKILL.md § Kickers), plus wordmarks.
+const DATA_LABEL_RE = /(?:^|[^\w-])(?:th|thead|caption|figcaption|legend|dt)(?![\w-])|(?:^|[^a-z0-9])(?:panel|stats?|kpi|metrics?|table|col-head|data-label|brand|logo|wordmark)(?=$|[^a-z0-9])/i;
+const MONO_RE = /var\(\s*--(?:font-)?mono\b|\bmonospace\b|ui-monospace|SFMono|Menlo|Consolas|JetBrains Mono/i;
+const COSTUME_RE = /^(?:button|a|nav|label)(?![\w-])|\.(?:[\w-]*-)?(?:btn|button|cta|nav|menu|link|eyebrow|kicker|overline|tag|chip|badge|pill)(?![\w])/i;
+const DATA_SEL_RE = /(?:^|[^a-z0-9])(?:num|number|stats?|price|ticker|code|kbd|pre|samp|figure|metrics?|value|time|date|mono|kpi)(?=$|[^a-z0-9])/i;
+const PLACEHOLDER_RE = /\b(lorem ipsum|dolor sit amet|jane doe|john doe|john smith|acme(?: corp(?:oration)?| inc)?|your name here)\b|\[(?:name|company(?: name)?|title|customer)\]/gi;
+const LOGO_WALL_RE = /\b(trusted by|loved by|used by (?:teams|companies|thousands|millions|leading)|join (?:\d[\d,.]*\+?|thousands|millions|hundreds) of)\b/gi;
+const NETWORK_RE = /\$?fetch\s*\(|XMLHttpRequest|sendBeacon|\baxios\b|\bky\s*[.(]|\$\.(?:ajax|post)\b|\.requestSubmit\s*\(|\.submit\s*\(\s*\)|\bsupabase\b|\btrpc\b|\bWebSocket\b|\.mutate(?:Async)?\s*\(|\buseMutation\b|\bgraphql\b|\bserver\$|["']use server["']/;
+// What a fake send prints: Hallmark's "Sent", "You're on the list", "Thanks" (or a set-sent flag in a component).
+const SUCCESS_RE = /\b(?:thanks|thank you|sent|success(?:fully)?|subscribed|you(?:'|’)re (?:on the list|in)|received|reserved|confirmed)\b|\bset(?:Sent|Submitted|Success|Done|Subscribed)\s*\(\s*true/i;
+// Letter-spacing in em, or px read against a 16px base; NaN when not a length.
+// var(--x) resolves through the run's custom properties; calc() of one length unwraps.
+const trackingEm = (v, vars = new Map(), depth = 0) => {
+  let t = (v || "").trim();
+  const cm = /^calc\(\s*([^()]+?)\s*\)$/.exec(t); if (cm) t = cm[1];
+  const vm = /^var\(\s*(--[\w-]+)\s*(?:,\s*([^)]+))?\)$/.exec(t);
+  if (vm && depth < 5) return vars.has(vm[1]) ? trackingEm(vars.get(vm[1]), vars, depth + 1) : vm[2] ? trackingEm(vm[2], vars, depth + 1) : NaN;
+  const m = /^(-?\d*\.?\d+)(em|rem|px)$/.exec(t); return !m ? NaN : m[2] === "px" ? Number(m[1]) / 16 : Number(m[1]);
+};
 
 // ---------- text utilities ----------
 const blankRange = (s, a, b) => s.slice(0, a) + s.slice(a, b).replace(/[^\n]/g, " ") + s.slice(b);
@@ -256,7 +281,9 @@ export function lint(paths, opts = {}) {
   const col = collect(paths); const skipped = [...col.skipped]; const files = [];
   for (const p of col.files) { try { files.push(loadFile(p)); } catch (e) { skipped.push(`${p} (${e.code ?? "unreadable"})`); } }
   const findings = [], seen = new Set(), motion = [], sticky = [], rootHidden = [];
-  let guard = false;
+  const monoCostume = [], forms = [];
+  let guard = false, monoMaterial = false, network = false, prevented = false, success = false;
+  const vars = new Map();
   const rel = (abs) => { const r = relative(cwd, abs); return !r || r.startsWith("../..") ? abs : r; };
   const suppressed = [];
   // A suppression covers its own line and the next; blockOff lets a comment above a selector cover that rule block.
@@ -267,10 +294,14 @@ export function lint(paths, opts = {}) {
     if (allow) { suppressed.push({ rule, file: rel(f.abs), line, reason: allow.reason }); return; }
     findings.push({ rule, severity: SEV[rule], file: rel(f.abs), line, message });
   };
+  // custom properties of the whole run first, so a token file read later still resolves var()
+  for (const f of files) for (const [a, b] of f.css) { const vre = /(--[\w-]+)\s*:\s*([^;{}]+)/g; let vm; const c = f.clean.slice(a, b); while ((vm = vre.exec(c))) vars.set(vm[1], vm[2].trim()); }
   for (const f of files) for (const [line, list] of f.allow) for (const x of list) if (!x.reason) add("suppression-without-reason", f, f.starts[line - 1], `lint-surface-allow: ${x.rule} has no reason; write why the rule does not apply here after a dash.`);
 
   for (const f of files) {
     if (/prefers-reduced-motion/.test(f.clean)) guard = true;
+    if (/fui:\s*mono-material/.test(f.text)) monoMaterial = true;
+    for (const [a, b] of f.scripts) { const code = f.clean.slice(a, b); if (NETWORK_RE.test(code)) network = true; if (/\bpreventDefault\s*\(/.test(code)) prevented = true; if (SUCCESS_RE.test(code)) success = true; }
     const isTokenFile = tokenFiles.has(f.abs);
     // True when an offset sits inside a string literal: code-like text there is data, not syntax.
     const inString = (off) => { const S = f.strings; let lo = 0, hi = S.length - 1; while (lo <= hi) { const m = (lo + hi) >> 1; if (S[m].end <= off) lo = m + 1; else if (S[m].start > off) hi = m - 1; else return true; } return false; };
@@ -296,6 +327,22 @@ export function lint(paths, opts = {}) {
       }
       const counts = {}; for (const v of vague) counts[v.key] = (counts[v.key] ?? 0) + 1;
       for (const v of vague) if (v.always || counts[v.key] > 1) add("button-label-vague", f, v.off, `${v.always ? "" : `${counts[v.key]}× `}"${v.label}" says nothing about the destination; name the action or the thing ("Read the pricing notes", "Save changes").`);
+    }
+
+    // the accent word: once per page, in the h1 only
+    let h1Accents = 0;
+    for (const [a, b] of f.markup) {
+      const hre = /<(h[1-6])\b[^>]*>([\s\S]*?)<\/\1\s*>/gi; hre.lastIndex = a; let hm;
+      while ((hm = hre.exec(f.clean)) && hm.index < b) {
+        const inner = hm[2], lvl = hm[1].toLowerCase(), are = /<(em|i|mark|span)\b([^>]*)>([\s\S]*?)<\/\1\s*>/gi; let am;
+        while ((am = are.exec(inner))) {
+          // an icon (<i class="fa-star"></i>) has no text; a span counts only when it is an accent class
+          if (!visible(am[3]) || (am[1].toLowerCase() === "span" && !/\bclass(?:Name)?\s*=\s*["'{][^>]*\baccent/i.test(am[2]))) continue;
+          const off = hm.index + hm[0].indexOf(inner) + am.index;
+          if (lvl === "h1" && ++h1Accents === 1) continue;
+          add("accent-word", f, off, lvl === "h1" ? "a second accent word in an h1; the accent word appears once per page, in the hero headline. Set this heading one weight, one style, one colour." : `an accent word inside an ${lvl}; headings below the hero are one weight, one style, one colour. Emphasise with a line break or a second line at a second size.`);
+        }
+      }
     }
 
     // scripts: motion, refs, JSX style objects, colour strings, copy strings
@@ -355,6 +402,15 @@ export function lint(paths, opts = {}) {
         const v = lh ? num(lh.value) : fs ? num((/\/\s*([\d.]+%?)/.exec(fs.value) ?? [])[1] ?? "") : NaN;
         if (v < 1) add("uppercase-tight-leading", f, (lh ?? fs).off, `uppercase with line-height ${v} on ${bl.sel}; caps have no descenders, so wrapped lines collide. Use at least 1.0 (1.1 for display).`);
       }
+      const ls = dval(bl, "letter-spacing");
+      if (ls && !bl.kf && bl.sel !== "[style]" && trackingEm(ls.value, vars) > 0.04 && (/uppercase/.test(dval(bl, "text-transform")?.value ?? "") || /small-caps/.test(dval(bl, "font-variant-caps", "font-variant")?.value ?? "")) && !splitTop(bl.sel).every((part) => DATA_LABEL_RE.test(part)))
+        add("tracked-caps", f, ls.off, `${bl.sel} sets uppercase tracked ${ls.value}: the kicker. Delete the label and reread the section; if nothing was lost, open it with the heading. Tracked caps are for data labels (panel heads, table heads, stat captions), so name the selector for one (.panel-label) if this labels a figure.`, bl.off);
+      const ff = dval(bl, "font-family", "font");
+      if (ff && !bl.kf && bl.sel !== "[style]" && MONO_RE.test(ff.value)) {
+        // a :hover/:focus restyle of the same selector is the same cause, reported once
+        const parts = splitTop(bl.sel).filter((part) => COSTUME_RE.test(lastCompound(part)) && !DATA_SEL_RE.test(part) && !/:(?:hover|focus(?:-visible|-within)?|active|visited)\b/.test(part));
+        if (parts.length) monoCostume.push({ f, off: ff.off, blockOff: bl.off, what: parts.join(", ") });
+      }
       const gtc = dval(bl, "grid-template-columns", "grid-template");
       if (gtc && cssOwnsImages) { const v = gtc.value.replace(/minmax\([^)]*\)/g, "M"); if (/repeat\(\s*[\w-]+\s*,\s*1fr\s*\)/.test(v) || (v.match(/(^|\s)1fr\b/g) ?? []).length >= 2) add("bare-1fr-image-grid", f, gtc.off, `grid-template-columns: ${gtc.value} lets an image's min-content width blow the track open; use repeat(n, minmax(0, 1fr)).`); }
     }
@@ -373,6 +429,11 @@ export function lint(paths, opts = {}) {
       if (name === "meta" && /^viewport$/i.test(attr(attrs, "name")?.value ?? "")) {
         const c = attr(attrs, "content"); const v = c?.value ?? "";
         if (/user-scalable\s*=\s*(no|0)\b/i.test(v) || /maximum-scale\s*=\s*(0?\.\d+|1(\.0+)?)(?![\d.])/i.test(v)) add("zoom-blocked", file, tg.start, `viewport meta "${v}" blocks pinch zoom (WCAG 1.4.4); use "width=device-width, initial-scale=1".`);
+      }
+      if (name === "form") {
+        // action="#" or "" posts nowhere; hx-*, method=post|dialog, data-endpoint and role=search are real or declared
+        const act = attr(attrs, "action"), nowhere = !act || (act.value != null && /^\s*#?\s*$/.test(act.value));
+        if (nowhere && !attr(attrs, "data-endpoint") && !attrs.some((x) => /^(?:hx|data-hx)-/.test(x.name)) && !/^(?:dialog|post)$/i.test(attr(attrs, "method")?.value ?? "") && attr(attrs, "role")?.value !== "search" && (!isJs || attr(attrs, "onSubmit", "onsubmit"))) forms.push({ f: file, off: tg.start });
       }
       for (const a of attrs) {
         if (a.value == null || a.voff == null) continue;
@@ -398,6 +459,11 @@ export function lint(paths, opts = {}) {
         const textAlpha = bases.find((b) => plain(b) && (/^text-opacity-\d+$/.test(b.base) || /^text-(?!transparent)[a-z]+(?:-\d+)?\/\d+$/.test(b.base)));
         if (textAlpha) add("opacity-on-text", file, tg.start, `${textAlpha.base} dims text with alpha; use a muted colour token so contrast is a known number.`);
         else if (opN && (has(/^(text|font|leading|tracking)-/) || innerText(tags, t, file).length >= 2)) add("opacity-on-text", file, tg.start, `${opN.base} on an element that holds text; dim with a muted colour token instead, opacity fails contrast unpredictably.`);
+        const trackT = bases.find((b) => plain(b) && (/^tracking-(?:wider|widest)$/.test(b.base) || trackingEm((/^tracking-\[(.+)\]$/.exec(b.base) ?? [])[1], vars) > 0.04));
+        if (trackT && has(/^uppercase$/) && !/^(th|caption|figcaption|legend|dt)$/.test(name) && !cls.some((c) => DATA_LABEL_RE.test(c)))
+          add("tracked-caps", file, tg.start, `uppercase + ${trackT.base} on <${tg.name}>: the kicker. Delete the label and reread; if nothing was lost, open with the heading. Tracked caps are for data labels (panel heads, table heads, stat captions).`);
+        if (has(/^font-mono$/) && (/^(button|a|nav|label|Button|Link)$/.test(tg.name) || attr(attrs, "role")?.value === "button") && !cls.some((c) => c !== "font-mono" && DATA_SEL_RE.test(c)))
+          monoCostume.push({ f: file, off: tg.start, what: `<${tg.name} class="font-mono">` });
         const idv = attr(attrs, "id")?.value;
         const elRoots = roots.filter((r) => (r[0] === "." ? cls.includes(r.slice(1)) : r[0] === "#" ? idv === r.slice(1) : r === name));
         if (elRoots.length && has(/^overflow(-[xy])?-hidden$/)) rootHidden.push({ f: file, off: tg.start, kinds: new Set(elRoots.map(rootKind)), what: `<${tg.name}> overflow-hidden class` });
@@ -422,6 +488,10 @@ export function lint(paths, opts = {}) {
   function copyChecks(f, off, txt) {
     let m; BUZZ_RE.lastIndex = 0;
     while ((m = BUZZ_RE.exec(txt))) add("copy-buzzword", f, off + m.index, `"${m[0]}" is a hype word; say what the product does, with a number or a noun ("${snip(txt, m.index)}").`);
+    PLACEHOLDER_RE.lastIndex = 0;
+    while ((m = PLACEHOLDER_RE.exec(txt))) add("placeholder-proof", f, off + m.index, `"${m[0]}" is placeholder copy; a quote, name or customer on the page must be the user's real one. Leave a labelled text slot for it, or cut it ("${snip(txt, m.index)}").`);
+    LOGO_WALL_RE.lastIndex = 0;
+    while ((m = LOGO_WALL_RE.exec(txt))) add("logo-wall-claim", f, off + m.index, `"${m[0]}" is a proof claim; it needs the real customers, named with permission, or it goes ("${snip(txt, m.index)}").`);
     const words = txt.split(/\s+/).filter((w) => /[A-Za-z]/.test(w)).length;
     const k = txt.indexOf("\u2014");
     if (k >= 0 && words >= 3) add("copy-em-dash", f, off + k, `em dash in prose ("${snip(txt, k)}"); use a comma, a colon or a new sentence.`);
@@ -451,6 +521,8 @@ export function lint(paths, opts = {}) {
   const bothPropagating = kindsHidden.has("html") && kindsHidden.has("body");
   const breaking = rootHidden.filter((r) => r.kinds.has("other") || bothPropagating);
   if (breaking.length && sticky.length) for (const r of breaking) add("overflow-hidden-kills-sticky", r.f, r.off, `${r.what} ${r.kinds.has("other") ? "turns a wrapper into a scroll container" : "plus hidden overflow on the other of html/body stops propagation to the viewport"}, so position: sticky in this run stops sticking; use overflow-x: clip.`, r.blockOff);
+  if (!monoMaterial) for (const c of monoCostume) add("mono-as-costume", c.f, c.off, `${c.what} set in monospace; mono is for data (numbers, tickers, code). Use the body face, or mark a mono-material direction with a \`fui: mono-material\` comment.`, c.blockOff);
+  if (prevented && success && !network) for (const fm of forms) add("form-goes-nowhere", fm.f, fm.off, "a <form> with no action whose submit is prevented, the run prints a success message, and nothing in it sends the form (no fetch, XHR, sendBeacon or client library): the fake send. Wire it, or mark it pending with data-endpoint=\"\" and show no success state until it is wired.");
   const top0 = []; for (const s of sticky) if (s.top0 && !top0.some((x) => x.sel === s.sel)) top0.push(s);
   if (top0.length > 1) for (const s of top0.slice(1)) add("two-sticky-top0", s.f, s.off, `${s.sel} is a second sticky top: 0 (first: ${top0[0].sel}); they stack on the same line. Offset it with top: var(--nav-h).`);
 

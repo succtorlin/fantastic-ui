@@ -603,7 +603,7 @@ metadata, durations and dates may take it; separators take `--hair`.
 ## Preset H — "Studio Kinetic"
 
 > Agency monochrome with motion built into the layout: pure black on
-> graph-paper white, pill eyebrows, cut-out people, and process cards tilted
+> graph-paper white, pill tags, cut-out people, and process cards tilted
 > along a dashed path.
 
 The playful sibling of Blueprint Mono. Same absence of color, opposite
@@ -660,9 +660,10 @@ never text, never an icon. `--muted` is deepened to clear 4.5:1 (the comp's
   personality. Two rules keep it from becoming noise: rotation never exceeds
   4°, and the reading order must survive the scatter — set them in DOM order
   and let CSS do the tilting, so a screen reader gets 01→04 regardless.
-- **Pill eyebrow.** Section labels as a `--r-pill` outline chip — 1px `--hair`
-  border, 11px, `--ink-2`, e.g. "About us", "How we work". Every section gets
-  one; it is the page's connective tissue.
+- **Pill tags.** Facts set as `--r-pill` outline chips — 1px `--hair` border,
+  `--ink-2`, sentence case: a service, a city, a duration on a card. Never a
+  section opener ("About us", "How we work" above a heading fails the deletion
+  test, SKILL.md § Kickers); sections open with their headings.
 - **Graph-paper ground.** A 24px `--grid` grid, `background-image` on
   `--ground`, faded out behind dense text with a radial mask. Texture only.
 - **Cut-out people.** Subjects knocked out of their background and placed to

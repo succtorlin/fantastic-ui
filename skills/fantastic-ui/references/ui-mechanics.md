@@ -38,7 +38,7 @@ label `--muted` and small, value in `--ink`. Never the reverse.
 ### Document hierarchy ≠ visual hierarchy
 An `<h2>` does not have to look bigger than the `<h3>` under it. Choose the tag for the
 outline, choose the size for the eye. A section heading that exists only for structure can
-be a small uppercase mono eyebrow and still be an `<h2>`.
+be a small panel label and still be an `<h2>`.
 
 ### Don't put grey text on a colored background ↯
 Grey works on white because it blends toward the background. On a colored or tinted panel
@@ -100,8 +100,9 @@ compounds into values you never chose. Define a fixed set in `px`/`rem`:
 
 ### Letter-spacing has exactly two jobs
 - **Tighten** display sizes. Type designed for body copy is too loose when scaled up.
-- **Loosen** uppercase. Caps were never spaced for setting in runs — this is why the mono
-  eyebrow in discipline 2 carries ~0.22em tracking.
+- **Loosen** uppercase. Caps were never spaced for setting in runs — this is why
+  the panel label carries ~0.08em tracking. Tracked caps are for data labels only
+  (panel heads, table heads, stat captions); see SKILL.md § Kickers.
 
 Otherwise leave it alone. Tracking body copy is a tell.
 

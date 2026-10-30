@@ -305,7 +305,7 @@ main{max-width:1600px;margin:0 auto;padding:32px 24px 64px} h1{font-size:26px;ma
 .cand{background:var(--card);border:1px solid var(--hair);border-radius:10px;padding:18px}
 .cand.rec{border:2px solid var(--rec)} .cand header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 .cand h2{font-size:19px;margin:0} .cand small{font-weight:500;color:var(--ink-2);font-size:13px}
-.badge{font:600 12px/1 ui-monospace,Menlo,monospace;color:var(--rec);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.badge{font:600 13px/1 system-ui,sans-serif;color:var(--rec);white-space:nowrap}
 .shots{display:grid;grid-template-columns:minmax(0,1fr) 26%;gap:10px;align-items:start;margin:14px 0}
 .shots img{width:100%;height:auto;border:1px solid var(--hair);border-radius:6px;display:block}
 .shots iframe{grid-column:1/-1;width:100%;height:560px;border:1px solid var(--hair);border-radius:6px;background:var(--card)}

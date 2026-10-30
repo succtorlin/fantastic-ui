@@ -122,10 +122,11 @@ Every page the skill builds or changes, in any project, has to pass `scripts/exa
 | Check | What fails it |
 | --- | --- |
 | axe-core, WCAG 2.0/2.1/2.2 A + AA, at 1440 and 390 px | any violation; `incomplete` nodes are listed for measuring by hand, never passed |
-| Reflow at 320, 375, 390, 768, 1024 and 1440 px | horizontal overflow, or content cut off under `overflow-x: clip` |
+| Reflow at 320, 375, 390, 768, 1024, 1440 and 1920 px | horizontal overflow, or content cut off under `overflow-x: clip` |
 | Targets and labels | a link or button under 24×24 px; a button label that wraps |
 | Keyboard and structure | no skip link first, a missing `header`/`nav`/`main`/`footer`, not exactly one `h1`, no `lang`, a focus ring under 2 px or 3:1 |
 | No-JS pass | text a visitor sees with JavaScript is in the page but hidden without it |
+| Composition | a prose line past ~100 characters at 1024+ (the uncapped container at 1920); text painted under another element at 1440 or 390; the hero `h1` or its first action below the fold at 1280×800 |
 | `--dialog <trigger>`, at 1440 and 390 | the trigger opens no dialog from the keyboard; the dialog has no name, is not modal, lacks a close button, lets Tab out, fails axe while open, ignores Escape or loses focus on close |
 | `--preset <A–L>` | any of that preset's gates in `verify-preset.mjs` (contrast, zero webfonts, asset weight, reduced motion, token roles, accent restraint, separation, its own traps) |
 | `--lint <path>` | any `lint-surface.mjs --strict` finding in the touched source |
@@ -213,14 +214,16 @@ The same five disciplines apply *inside* the product. The skill includes a dedic
 
 - **App-level brief and tokens** — one one-sentence direction and one token block on the app shell; page-local colors are forbidden, so every screen draws from the same ground scale and single accent.
 - **A six-step retrofit procedure** — audit (inventory + color-literal grep baseline) → brief → mechanical tokens-first commit → shared primitives → screen-by-screen migration (one PR each, highest-traffic first) → a cross-screen consistency gate.
-- **Panel anatomy and nesting rules** — a uniform panel skeleton (mono eyebrow head, hairline separation, actions right), depth encoded by ground-scale steps instead of shadows, maximum three nesting levels.
+- **Panel anatomy and nesting rules** — a uniform panel skeleton (panel-label head, hairline separation, actions right), depth encoded by ground-scale steps instead of shadows, maximum three nesting levels.
 - **States as first-class design** — skeleton loading on the ground scale, honest empty states, error red confined to actual errors, stale-data timestamps.
 - **Back-office or workbench** — one question decides density and character: does the surface revolve around a batch of business objects, or one thing the user does over and over?
 - **Agent consoles** — a run stream instead of a chart, nine run states each with its required action, a stop control that never leaves the screen, approval cards inside the stream, and cost as a one-line receipt ([agent-console.md](skills/fantastic-ui/references/agent-console.md)).
 - **Workflows, components, charts, phones** — wizards, settings, review queues and checkout ([workflow-surfaces.md](skills/fantastic-ui/references/workflow-surfaces.md)); a one-component route with eight states and a preview file ([component-states.md](skills/fantastic-ui/references/component-states.md)); charts picked by the question with accessibility grades and a chart-only colour ramp ([data-charts.md](skills/fantastic-ui/references/data-charts.md)); phone-only screens with safe areas, thumb zone and native furniture ([phone-surfaces.md](skills/fantastic-ui/references/phone-surfaces.md)).
 - **Motion by the cheapest route** — CSS, native scroll-driven animation, View Transitions and WAAPI before canvas; no GSAP or WebGL; content survives with JavaScript off ([motion-routes.md](skills/fantastic-ui/references/motion-routes.md)).
 - **Adopting someone else's component** — a catalog block, registry `add` or effect kit is checked against the skill's rules, its licence file (not the badge), its real source and its installer's writes before it goes in, then examined like your own code ([third-party-components.md](skills/fantastic-ui/references/third-party-components.md)).
-- **A static lint pass** — `scripts/lint-surface.mjs` catches dead local references, the `overflow-x: hidden` that silently kills a sticky nav, blocked zoom, missing reduced motion, opacity-dimmed text, colour literals outside tokens, AI-default palettes and copy tells, and prints what it cannot judge.
+- **A static lint pass** — `scripts/lint-surface.mjs` catches dead local references, the `overflow-x: hidden` that silently kills a sticky nav, blocked zoom, missing reduced motion, opacity-dimmed text, colour literals outside tokens, AI-default palettes and copy tells, the tracked-caps kicker, accent words below the hero, monospace as costume, placeholder testimonials, logo-wall claims and forms that pretend to send, and prints what it cannot judge.
+- **Fresh-context reviews** — the hero is built first and reviewed from screenshots by a subagent that did not build it, then the finished page gets a second fresh review; the first word of each is the verdict ([fresh-review.md](skills/fantastic-ui/references/fresh-review.md)).
+- **An edit-time hook** — `scripts/lint-hook.mjs` lints each file as it is written in a project marked with `.fantastic-ui`, so findings arrive at the edit instead of at the exam (opt-in; setup in the script's header).
 
 ## Whole-app recursive polish
 
@@ -318,7 +321,7 @@ skills/fantastic-ui/
 │   ├── verify-preset.mjs            # runnable checks against a live page (+ advisory imagery count)
 │   ├── direction-samples.mjs       # 2–3 candidate looks as sample pages + side-by-side sheet
 │   ├── exam.mjs                    # THE exam every page must pass: axe WCAG 2.2 AA, reflow, targets,
-│   │                               #   focus, landmarks, preset gates, lint, no-JS pass, --dialog
+│   │                               #   focus, landmarks, preset gates, lint, no-JS pass, fold/measure/cover, --dialog
 │   ├── exam.test.mjs               # browser tests for the no-JS pass and the dialog check
 │   ├── fixtures/exam/              # a page that passes the exam and its trap twin (hidden text, fake dialog)
 │   ├── direction-samples.test.mjs  # generator tests (no browser)
@@ -326,6 +329,7 @@ skills/fantastic-ui/
 │   ├── lint-surface.mjs            # static lint: dead refs, sticky-killing overflow, zoom, reduced motion,
 │   │                               #   text opacity, literals outside tokens, AI defaults, copy tells
 │   ├── lint-surface.test.mjs       # mutation tests, one per rule
+│   ├── lint-hook.mjs               # opt-in Claude Code PostToolUse hook: lint-surface at each edit
 │   ├── preset-gates.json           # universal and per-preset gate declarations
 │   ├── gen_atmosphere.py           # token plates, SVG texture, AI wrapper, compressor, slot scoring
 │   │                               #   (`score`), manifest builds (`batch`) — ≤30 KB, with a ledger
@@ -344,6 +348,7 @@ skills/fantastic-ui/
     │                               #   execution/evaluation gulfs, human error and case studies
     ├── ux-heuristics/              # seven references: Krug, Nielsen, audit template,
     │                               #   conflicts, cultural UX, dark patterns and accessibility
+    ├── fresh-review.md             # hero review + finish review by a fresh-context subagent
     ├── css-architecture.md         # full token system, scoped CSS-module rules, shared primitives
     ├── canvas-hero.md              # annotated live-canvas hero, sparklines, scroll reveals —
     │                               #   with the complete lifecycle contract (DPR / visibility / reduced-motion / cleanup)
@@ -398,3 +403,5 @@ A passing automated check does not establish design quality, actual user compreh
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+The two-stage fresh-context review, the composition checks (fold at 1280×800, the 1920 container, text under another element) and the honesty rules (invented proof, the fake send) are adapted from [Hallmark](https://github.com/Nutlope/hallmark) by Together AI (MIT). The wording, thresholds and code here are fantastic-ui's own.

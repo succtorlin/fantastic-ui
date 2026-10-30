@@ -66,7 +66,7 @@ node ~/.claude/skills/fantastic-ui/scripts/exam.mjs dist/
 ```
 
 It runs, per page: axe-core with the WCAG 2.0/2.1/2.2 A and AA tags at 1440
-and 390 px; reflow at 320–1440 with no overflow and no clipped content; every
+and 390 px; reflow at 320–1920 with no overflow and no clipped content; every
 link and button ≥24×24 px; no wrapping button labels; a skip link, landmarks,
 one `h1` and `lang`; a visible focus ring ≥2 px and ≥3:1 on every focusable;
 `verify-preset.mjs` when a preset is in use (contrast, zero webfonts, asset
@@ -76,7 +76,25 @@ preset's own traps); `lint-surface.mjs --strict` over the touched source; a
 off: content survives removal); and, for each `--dialog` trigger at 1440 and
 390, a keyboard-opened, named, modal dialog that takes focus, keeps Tab
 inside, has a close button, passes axe while open, closes on Escape and
-returns focus. Every overlay the work adds gets a `--dialog`.
+returns focus. Every overlay the work adds gets a `--dialog`. Composition:
+no prose line past ~100 characters at 1024 and wider (an uncapped container
+shows up at 1920), no text painted under another element at 1440 and 390
+(sticky and fixed chrome excepted), and at **1280×800** the hero `h1` and the
+first action after it sit above the fold.
+
+**Hero first, reviewed fresh.** On a web page, build the first screen and stop:
+it passes the exam on its own, then a subagent that did not build it reviews
+screenshots of it (1280×800, 1440, 1920, 390) against the brief line, and its
+first word is the verdict. Only then build the bands below. When the page
+passes the exam, a second fresh subagent runs the finish review. Prompts,
+inputs and what to do with `fix` / `rebuild`:
+[references/fresh-review.md](references/fresh-review.md).
+
+**At the edit, not only at the exam.** When a build starts, create an empty
+`.fantastic-ui` marker file at the project root. If the user has installed the
+hook (`scripts/lint-hook.mjs`, setup in its header), every file written there is
+linted as it is saved and the findings come back at once; never install the
+hook into the user's settings without their yes.
 
 The rules that make it an exam rather than a suggestion:
 
@@ -430,7 +448,7 @@ and a small set of **semantic** colors that are never used decoratively:
 - **Ink scale** — 3 steps of off-white text tinted the same direction
   (`--ink`, `--ink-2`, `--muted`). Pure `#fff` on near-black glares.
 - **One accent + one highlight** of it (`--sodium: #f2a83c`,
-  `--sodium-hi: #ffc164`). The accent marks *what matters*: eyebrows, CTAs,
+  `--sodium-hi: #ffc164`). The accent marks *what matters*: CTAs,
   focus rings, the brand mark, selection color. If it's everywhere, it's
   nowhere.
 - **Semantic colors stay semantic** — if the domain has meaning-colors (up
@@ -453,13 +471,30 @@ FOUT, no layout shift:
 - **Display serif** for headlines — a humanist serif stack
   (`"Iowan Old Style", "Palatino Linotype", Palatino, ui-serif, Georgia`)
   gives editorial gravity that default sans headlines can't. `text-wrap:
-  balance`, tight letter-spacing, `clamp()` sizing, an italic `<em>` in the
-  accent-highlight color for the one word that matters.
-- **Monospace** for data, eyebrows, buttons, microcopy — with
-  `font-variant-numeric: tabular-nums`. Mono is what makes numbers feel
-  *measured* rather than claimed. Eyebrow kickers: mono, uppercase, ~0.22em
-  tracking, accent color, a short rule-line before the text.
-- **System sans** for body prose.
+  balance`, tight letter-spacing, `clamp()` sizing. A heading is one weight,
+  one style and one colour. The single exception is the **accent word**: one
+  italic `<em>` in the accent-highlight colour, used **once per page, in the
+  hero `h1`**, and only when the direction names it as its signature. Never in
+  an `h2`–`h6`, never twice (`lint-surface` rule `accent-word`).
+- **Monospace for data only**: numbers, tickers, prices, tables of figures,
+  timestamps, code, with `font-variant-numeric: tabular-nums`. Mono is what
+  makes numbers feel *measured* rather than claimed, and it loses that meaning
+  when it dresses up buttons, nav links, kickers and microcopy. Those use the
+  body face (`lint-surface` rule `mono-as-costume`). A direction whose material
+  is mono (Blueprint Mono, a DESIGN.md that says so) waives it on the record
+  with a `/* fui: mono-material */` comment in its token CSS.
+- **System sans** for body prose, labels, buttons and microcopy.
+
+**Kickers (the small label above a heading).** Apply the deletion test: delete
+the label and read the section again. If nothing was lost but a name for what
+comes next, it was a kicker, so open the section another way: a stronger
+heading, a number, the first sentence. A label survives only when it carries a
+fact the reader would otherwise lack (a date, a version, a product name, a
+status). Uppercase tracked past 0.04em is kept for **data labels only**: panel
+heads, table heads, stat and figure captions, form labels on a dashboard, where
+it names the number beside it (`WEEKLY TURNOVER  0.22 → 0.19`). On landing and
+marketing pages it is not a section opener (`lint-surface` rule
+`tracked-caps`).
 
 The serif/mono contrast does the aesthetic work that webfonts usually get
 hired for, at zero performance cost.
@@ -469,13 +504,23 @@ Hand-pick the size scale rather than generating it from a ratio, and set line-he
 Scale, line-length and letter-spacing mechanics in
 [references/ui-mechanics.md](references/ui-mechanics.md) §3.
 
-### 3. Live proof over screenshots
+### 3. Real proof first, samples labelled
 
-The hero visual should be the product **actually running**, drawn on a
-`<canvas>` — not a screenshot, not a stock illustration. A screenshot says
-"trust us"; a live rendering says "look at it go". Simulated data is fine
-(random walks tuned to look plausible); the honesty is in the *mechanics*
-being real.
+The hero visual should be the product **actually running**, not a stock
+illustration and not a drawn mock of an interface. In order of preference:
+
+1. **The real product, real data.** If the product exists and runs (a URL, a
+   dev server, a project in the folder), feed the canvas its real data, or
+   capture the running product in a telling state and frame the captures.
+2. **The real mechanics, sample data.** When real data cannot be shown (not
+   built yet, private, licensed), a live `<canvas>` with simulated data is
+   allowed, and the values must **read as samples**: a visible `Sample data`
+   caption on the figure, round illustrative numbers, no claim that they are
+   live. Name every simulated figure in the handoff.
+3. **Geometry that is geometry.** A chart, a diagram, an animated line or an
+   orbit is a first-class medium and needs no label. Geometry pretending to be
+   a photograph or a product screen (styled-div dashboards with invented
+   figures standing as proof) is not.
 
 Non-negotiables for any canvas animation (full annotated pattern in
 [references/canvas-hero.md](references/canvas-hero.md)):
@@ -543,10 +588,10 @@ rules keep it from converging:
   centred statement, table, timeline, tabs. A page of eight bands uses at
   least four families and no family more than twice; the nine bands above
   already use six. Swap a band's family before adding a new band.
-- **Ration the eyebrows.** Mono accent eyebrows are a primitive, not a
-  default: on a marketing page at most `ceil(bands / 3)` of them, on the
-  bands that need a label to be found. (Product panels keep theirs; the
-  eyebrow is the panel head's anatomy.)
+- **Kickers fail the deletion test by default.** On a marketing page a band
+  opens with its heading, not a label above it; keep a label only where it
+  carries a fact (see Kickers, above). Product panels keep their head label,
+  because there it names the data.
 
 Other page kinds have their own skeleton:
 
@@ -567,7 +612,7 @@ Other page kinds have their own skeleton:
   run.
 
 Copywriting voice: numbers are the protagonists (`5,000+ tickers`, `±70 mints
-a call`); microcopy in monospace reads like terminal output; fine print is
+a call`); microcopy is plain and specific; fine print is
 honest ("Not investment advice · Track record is paper trading") — candor is
 a premium signal. Headlines state a thesis, not a feature list ("The market is
 always in rotation. See it turn first.").
@@ -643,7 +688,10 @@ that change the most outcomes:
 Generated UI converges on the same handful of defaults. Before shipping, check for:
 purple/violet gradients · `rounded-2xl` on everything · three identical feature cards ·
 `shadow-lg` everywhere · indigo accent by default · hero→features→testimonials→CTA on a
-product that isn't a landing page · uniform section spacing · an icon on every card.
+product that isn't a landing page · uniform section spacing · an icon on every card ·
+a tracked-caps label above every heading · an accent-coloured word in every heading ·
+monospace on buttons and labels · invented testimonials, logo walls and round-number
+metrics · a styled-div dashboard posing as the product.
 
 The gut check: **would a developer guess this was generated?** If yes, the most generic
 element is almost always the color scheme or the layout skeleton — fix that one first.
@@ -697,7 +745,7 @@ shared empty-state primitive —
 2. **Brief** — one sentence for the whole app, tested against real screens.
 3. **Tokens first** — install the shared token block and map old values to
    tokens *without* redesigning anything yet. This is the mechanical commit.
-4. **Primitives second** — build the shared panel/eyebrow/stat/table/state
+4. **Primitives second** — build the shared panel/panel-label/stat/table/state
    primitives once, from the tokens.
 5. **Migrate surface by surface** — highest-traffic screen first, one PR per
    screen, information identical, presentation rebuilt from primitives.
@@ -808,7 +856,7 @@ Use a CSS module (or equivalent scoping) with **every rule scoped under the
 page root class** — no bare element selectors that leak into the rest of the
 app. For a single marketing page, tokens live on `.page`; for product
 surfaces, tokens are promoted to the app shell and pages scope only their
-layout rules. Shared primitives (`.wrap`, `.eyebrow`, `.btn`, `.mono`,
+layout rules. Shared primitives (`.wrap`, `.panel-label`, `.btn`, `.mono`,
 `.focusable`, `.srOnly`, and for apps `.panel`, `.panelHead`, `.stat`)
 compose via multiple classes. Reveal-on-scroll is one `[data-reveal]`
 attribute + an `isIn` class toggled by a single IntersectionObserver. Full
@@ -821,6 +869,14 @@ Run through this before calling the page done:
 
 - [ ] **The exam passes** on every page built or changed
       (`scripts/exam.mjs`), and the pass count is in the closing message
+- [ ] **Fresh reviews**: the hero review before the second band (web pages)
+      and the finish review after the exam, each by a subagent that did not
+      build the page; verdicts and any rejected findings in the handoff
+      ([references/fresh-review.md](references/fresh-review.md))
+- [ ] **Honest proof**: every metric, quote, logo and customer is the owner's
+      own or a labelled text slot; simulated figures carry a `Sample data`
+      caption and are named in the handoff; no form shows success without a
+      request behind it
 - [ ] **Direction chosen by the user from rendered samples** that
       `check-samples.mjs` passed
       ([references/direction-samples.md](references/direction-samples.md)), or
@@ -880,7 +936,7 @@ Additional gates when the work touched product surfaces:
 
 - [ ] No hex/rgb literals outside the token file (grep proves it; token
       `color-mix(` scrims and tints pass)
-- [ ] Every panel uses the shared anatomy (eyebrow header, hairline
+- [ ] Every panel uses the shared anatomy (panel-label header, hairline
       separation, actions right) — no one-off panel styles
 - [ ] Subpanel nesting encoded by ground-scale steps, ≤ 3 levels, no
       stacked shadows
@@ -910,6 +966,9 @@ Additional gates when the work touched product surfaces:
   the direction is open: render the top two or three as sample pages with real
   content, compare at desktop and phone width, recommend one, build after the
   pick. Read at Step 0a, gate 3.
+- [references/fresh-review.md](references/fresh-review.md) — the hero review
+  and the finish review by a fresh-context subagent: inputs, prompts, verdicts.
+  Read before building the first band of a web page.
 - [references/design-md.md](references/design-md.md) — a project's DESIGN.md:
   find, read, drift (ask on every mismatch), create on a yes, replace only on
   an explicit request. Read at Step 0a, gate 0.

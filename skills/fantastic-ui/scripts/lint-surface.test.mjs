@@ -64,6 +64,17 @@ const MUTATIONS = [
   ["copy-buzzword", "P2", "card.tsx", '"Within limits"', '"Within limits, a powerful signal"'],
   ["copy-em-dash", "P2", "index.html", "at the close. Nothing", "at the close — nothing"],
   ["button-label-vague", "P2", "index.html", ">Add a ticker</button>", ">Submit</button>"],
+  ["tracked-caps", "P1", "styles.css", ".note { color: var(--muted); }", ".note { color: var(--muted); text-transform: uppercase; letter-spacing: .2em; }"],
+  ["tracked-caps", "P1", "styles.css", ".note { color: var(--muted); }", ".kicker { text-transform: uppercase; letter-spacing: 3px; }\n.note { color: var(--muted); }"],
+  ["tracked-caps", "P1", "card.tsx", 'className="text-[color:var(--muted)]"', 'className="text-[color:var(--muted)] uppercase tracking-widest"'],
+  ["accent-word", "P1", "card.tsx", "{ticker}</h3>", "{ticker} <em>now</em></h3>"],
+  ["accent-word", "P1", "index.html", "Track every position against the close", "Track <em>every</em> position against <i>the close</i>"],
+  ["placeholder-proof", "P1", "index.html", "Prices update at the close.", "Prices update at the close, says Jane Doe."],
+  ["placeholder-proof", "P1", "card.tsx", '"Within limits"', '"Lorem ipsum dolor"'],
+  ["form-goes-nowhere", "P1", "index.html", '<span class="live" data-reveal>', '<form><label>Email <input type=\"email\" name=\"email\"></label><button type=\"submit\">Join the list</button></form><script>document.querySelector(\"form\").addEventListener(\"submit\", (e) => { e.preventDefault(); e.target.textContent = \"Thanks\"; });</script><span class="live" data-reveal>'],
+  ["mono-as-costume", "P2", "styles.css", ".btn { background:", ".btn { font-family: var(--mono); background:"],
+  ["mono-as-costume", "P2", "card.tsx", 'className="rounded-sm px-3 py-2', 'className="font-mono rounded-sm px-3 py-2'],
+  ["logo-wall-claim", "P2", "index.html", "Nothing is delayed.", "Trusted by forty desks."],
 ];
 
 describe("each rule fires on a one-violation mutation of the clean fixture", () => {
@@ -181,6 +192,66 @@ describe("regressions", () => {
       assert.match(r.notCovered[0], /broken symlink/);
       assert.equal(cli([d]).status, 0);
     } finally { rmSync(d, { recursive: true, force: true }); }
+  });
+});
+
+describe("decided rules: what stays allowed", () => {
+  const clean = (file, from, to) => {
+    const d = copyClean();
+    try { mutate(d, file, from, to); const r = run(d); assert.deepEqual(r.findings, [], JSON.stringify(r.findings)); }
+    finally { rmSync(d, { recursive: true, force: true }); }
+  };
+  test("one accent word in the hero h1 is allowed", () => clean("index.html", "Track every position", "Track <em>every</em> position"));
+  test("tracked caps on a table head, a stat caption and a wordmark are data labels", () =>
+    clean("styles.css", ".note { color: var(--muted); }", ".note { color: var(--muted); }\n.table th, .stat-caption, .brand { text-transform: uppercase; letter-spacing: .14em; line-height: 1.2; }"));
+  test("tracking at 0.04em or less is not a kicker", () => clean("styles.css", ".note { color: var(--muted); }", ".note { color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }"));
+  test("mono on figures is data, and a mono-material direction may set it on buttons", () => {
+    clean("styles.css", ".note { color: var(--muted); }", ".note { color: var(--muted); }\n.stat-value, .ticker { font-family: var(--mono); }");
+    clean("styles.css", ".btn { background:", "/* fui: mono-material (Blueprint Mono) */\n.btn { font-family: var(--mono); background:");
+  });
+  test("a form that is sent, or marked pending, is not a fake send", () => {
+    const form = (attrs, js) => `<form${attrs}><label>Email <input type="email" name="email"></label><button type="submit">Join the list</button></form><script>document.querySelector("form").addEventListener("submit", (e) => { e.preventDefault(); ${js} });</script><span class="live" data-reveal>`;
+    clean("index.html", '<span class="live" data-reveal>', form("", 'fetch("/api/join", { method: "POST" });'));
+    clean("index.html", '<span class="live" data-reveal>', form(' data-endpoint=""', ""));
+    clean("index.html", '<span class="live" data-reveal>', form(' action="/join"', ""));
+  });
+});
+
+describe("review regressions", () => {
+  const lintDir = (files) => {
+    const d = mkdtempSync(join(tmpdir(), "lint-surface-rv-"));
+    try { for (const [n, t] of Object.entries(files)) writeFileSync(join(d, n), t); return lint([d], { cwd: d }); }
+    finally { rmSync(d, { recursive: true, force: true }); }
+  };
+  const rules = (files) => rulesOf(lintDir(files));
+  test("tracked-caps reads tokens and calc(), and tokens from another file", () => {
+    assert.deepEqual(rules({ "a.css": ".kicker { text-transform: uppercase; letter-spacing: var(--track); line-height: 1.2; }", "z-tokens.css": ":root { --track: .2em; }" }), ["tracked-caps"]);
+    assert.deepEqual(rules({ "a.css": ".kicker { text-transform: uppercase; letter-spacing: calc(0.2em); line-height: 1.2; }" }), ["tracked-caps"]);
+  });
+  test("exemptions match whole class words: .hero-status is a kicker, .update-link is not data", () => {
+    assert.deepEqual(rules({ "a.css": ".hero-status { text-transform: uppercase; letter-spacing: .2em; line-height: 1.2; }" }), ["tracked-caps"]);
+    assert.deepEqual(rules({ "a.css": ".update-link, .preview-link { font-family: var(--mono); }" }), ["mono-as-costume"]);
+    assert.equal(lintDir({ "a.css": ".update-link { font-family: var(--mono); }\n.update-link:hover { font-family: monospace; }" }).findings.length, 1);
+  });
+  test("Tailwind tracking-wide (0.025em) is under the threshold", () => {
+    assert.deepEqual(rules({ "a.html": '<p class="uppercase tracking-wide">Buy now today</p>' }), []);
+  });
+  test("an icon <i> in a heading is not an accent word", () => {
+    assert.deepEqual(rules({ "a.html": '<h3><i class="icon-star"></i> Pricing</h3><h2><i data-lucide="x"></i> Plans</h2>' }), []);
+  });
+  test("a Company name form label is not placeholder proof", () => {
+    assert.deepEqual(rules({ "a.html": "<label>Company name <input></label>" }), []);
+  });
+  const form = (open, js) => `<form${open}><label>Email <input name="e"></label><button type="submit">Join the list</button></form><script>document.querySelector("form").addEventListener("submit", (e) => { e.preventDefault(); ${js} });</script>`;
+  test("fake send: needs a printed success and no request; local, htmx and post forms are real", () => {
+    assert.deepEqual(rules({ "a.html": form("", 'out.textContent = String(a * b);') }), []);
+    assert.deepEqual(rules({ "a.html": form(' hx-post="/x"', 'out.textContent = "Thanks";') }), []);
+    assert.deepEqual(rules({ "a.html": form(' method="post"', 'out.textContent = "Thanks";') }), []);
+    assert.deepEqual(rules({ "a.html": form(' action="#"', 'out.textContent = "Thanks";') }), ["form-goes-nowhere"]);
+    assert.deepEqual(rules({ "a.html": form("", 'ky.post("/x"); out.textContent = "Thanks";') }), []);
+  });
+  test("fake send in JSX: onSubmit prevents default and sets sent", () => {
+    assert.deepEqual(rules({ "Contact.tsx": 'export function C() {\n  const [sent, setSent] = useState(false);\n  return <form onSubmit={(e) => { e.preventDefault(); setSent(true); }}><button type="submit">Join the list</button></form>;\n}\n' }), ["form-goes-nowhere"]);
   });
 });
 

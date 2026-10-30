@@ -397,7 +397,7 @@ A plate is a **decorative layer**. Removing it must lose no information.
 ```html
 <header class="plate-host plate-host--header">
   <div class="plate plate--header" aria-hidden="true"></div>
-  <div class="head-inner">…eyebrow, title, actions…</div>
+  <div class="head-inner">…title, actions…</div>
 </header>
 ```
 
