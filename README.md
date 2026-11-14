@@ -12,6 +12,9 @@
 copyable prompts, screenshots, and workflow diagrams for choosing a design,
 building a dashboard, auditing an interaction, and polishing an app.
 
+The [preset gallery](examples/presets/) shows all twelve design directions
+with screenshots, starter prompts, and runnable examples.
+
 ---
 
 ## Why this exists

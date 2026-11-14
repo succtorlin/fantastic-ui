@@ -29,7 +29,7 @@ settled, say “Build in Gallery White” or “Follow our DESIGN.md.”
 
 ![Gallery White sample showing the Lumen One lamp on a light studio stage, with the headline and product details as the focus](../assets/gallery-white.png)
 
-This is one completed direction. [Open the Gallery White example and its asset recipe](../examples/gallery-white/).
+This is one completed direction. [Browse all twelve preset examples](../examples/presets/) to see each style on a brief that suits it. [Open the Gallery White example and its asset recipe](../examples/gallery-white/).
 
 ## 2. Build a dashboard with an Astryx layout reference
 

@@ -1,0 +1,58 @@
+/* Preset-specific composition. Shared tokens and sample mechanics come from Fantastic UI. */
+.nav nav a { text-decoration: underline; text-underline-offset: .18em; }
+@media (max-width: 760px) {
+  .nav { gap: .75rem; flex-wrap: wrap; padding-block: .5rem; }
+  .nav nav { display: block; margin-left: 0; }
+  .nav .btn { display: none; }
+  .brand { white-space: normal; }
+}
+@media print {
+  .preset-c .nav, .preset-c .actions, .preset-c .skip, .preset-c .foot { display: none; }
+  .preset-c .page { background: var(--panel); print-color-adjust: exact; }
+  .preset-c .hero, .preset-c .section { break-inside: avoid; }
+}
+.preset-a .hero .slot img { object-position: center; }
+.preset-b .hero .proof { border-block: 2px solid var(--ink); }
+.preset-b .headline { letter-spacing: -.06em; }
+.preset-c .sheet { margin: 1.5rem auto; width: min(calc(100% - 2rem), var(--maxw)); background: var(--panel); }
+.preset-c .hero { padding-block: 3.5rem 2.5rem; }
+.preset-c .hero .proof { background: var(--accent); }
+.preset-c .hero .stat span { color: var(--ink); }
+.preset-c .hero .stat { border-color: var(--ink); }
+.preset-d .hero .band { max-width: 86%; margin-inline-start: auto; min-height: clamp(13rem, 34vw, 27rem); }
+.preset-d .band img { object-position: center; }
+.preset-e .section { background: var(--invert, var(--ink)); }
+.preset-e .section h2 { color: var(--panel); }
+.preset-f .headline { text-transform: uppercase; }
+.preset-f .hero .slot { border: 0; }
+.preset-g .hero .band { min-height: clamp(10rem, 21vw, 18rem); }
+.preset-g .cards .card { grid-column: auto; grid-row: auto; }
+.preset-g .cards { grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); }
+.preset-h .hero .band { min-height: clamp(8rem, 14vw, 13rem); }
+@media (min-width: 761px) {
+  .preset-h .cards .card { grid-column: span 2; grid-row: auto; }
+  .preset-h .cards .card:nth-child(2) { margin-top: 1.5rem; }
+  .preset-h .cards .card:nth-child(3) { margin-top: 3rem; }
+}
+.preset-i .section { background: var(--invert, var(--ink)); }
+.preset-i .section h2 { color: var(--panel); }
+.preset-j .btn--primary { background: var(--invert); color: var(--ink-on-invert); }
+.preset-j .hero .proof { border-inline-start: .3rem solid var(--accent); }
+.preset-j .section { background: var(--invert); }
+.preset-j .section h2 { color: var(--ink-on-invert); }
+.preset-k .hero { background: var(--accent); }
+.preset-k .hero .btn--primary { background: var(--ink); color: var(--accent); }
+.preset-k .hero .btn:focus-visible { outline-color: var(--ink); }
+.preset-k .section { border-block-start: .8rem solid var(--ink); }
+
+.preset-b .hero .slot { background: var(--panel); }
+.preset-h .band img, .preset-i .band img { object-fit: contain; }
+.preset-i .hero .band { min-height: clamp(12rem, 24vw, 20rem); }
+.preset-j .hero .slot { border-inline-start: .3rem solid var(--accent); }
+.preset-k .hero .band { display: none; }
+.preset-k .hero .stats { margin-top: 1.75rem; background: var(--panel); }
+.preset-k .section { border-block-start: .8rem dashed var(--ink); }
+@media print {
+  .preset-c .sheet { width: 100%; margin: 0; }
+  .preset-c .hero, .preset-c .section { padding-block: 1.75rem; }
+}
