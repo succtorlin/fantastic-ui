@@ -147,6 +147,6 @@ It writes the pages and this guide. The exam uses Playwright and axe-core. If
 they are installed elsewhere, pass `--modules /path/to/node_modules`.
 The existing [Gallery White example](../gallery-white/) is maintained separately.
 
-GitHub Pages checks the packaged gallery at 320, 390, and 1440 CSS pixels
-before deployment. All twelve examples must pass the button-size and
-block-alignment checks.
+The **Gallery geometry** check runs on pull requests targeting `main` and
+before GitHub Pages deployment. It measures button size and block alignment
+in all twelve packaged examples at 320, 390, and 1440 CSS pixels.
