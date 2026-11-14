@@ -40,6 +40,7 @@ const galleryWhite = {
   prompt: 'Build a device launch in Gallery White. Use my product photography and give each section one idea.',
 };
 const entries = [...examples, galleryWhite];
+const liveGallery = 'https://succtorlin.github.io/fantastic-ui/';
 const escape = (value) => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 const cards = entries.map(({ preset, id, brand, look }) => {
   const { name } = presetBlock(preset);
@@ -75,15 +76,16 @@ ${cards}
 const guide = entries.map(({ id, preset, brand, look, prompt }) => {
   const { name } = presetBlock(preset);
   const shot = preset === 'L' ? '../../assets/gallery-white.png' : `previews/${id}.webp`;
+  const demo = new URL(`examples/presets/${id}.html`, liveGallery).href;
   return `### ${preset} · ${name}
 
-[![${brand} preview in ${name}](${shot})](${id}.html)
+[![${brand} preview in ${name}](${shot})](${demo})
 
 ${look}
 
 > $fantastic-ui ${prompt}
 
-[Open example source](${id}.html)${preset === 'C' ? ' · [Download the A4 report (PDF)](marigold-report.pdf)' : ''}
+[Open live example](${demo}) · [View source](${id}.html)${preset === 'C' ? ` · [Download the A4 report (PDF)](${liveGallery}examples/presets/marigold-report.pdf)` : ''}
 `;
 }).join('\n');
 writeFileSync(new URL('README.md', here), `# Fantastic UI preset gallery
@@ -96,8 +98,9 @@ where the prompt calls for them.
 Use \`$fantastic-ui\` in Codex or replace it with \`/fantastic-ui\` in Claude Code.
 For the full design rules, see the [preset reference](../../skills/fantastic-ui/references/theme-presets.md).
 
-GitHub opens HTML source. To try the examples in a browser, run this from the
-repository root and open [the local gallery](http://127.0.0.1:8000/examples/presets/).
+**[Open the live gallery](${liveGallery}).** Every screenshot below opens
+its live example. For local development, run this from the repository root
+and open [the local gallery](http://127.0.0.1:8000/examples/presets/).
 
 \`\`\`bash
 python3 -m http.server 8000 --bind 127.0.0.1

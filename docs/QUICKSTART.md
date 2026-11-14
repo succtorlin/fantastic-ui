@@ -29,7 +29,8 @@ settled, say “Build in Gallery White” or “Follow our DESIGN.md.”
 
 ![Gallery White sample showing the Lumen One lamp on a light studio stage, with the headline and product details as the focus](../assets/gallery-white.png)
 
-This is one completed direction. [Browse all twelve preset examples](../examples/presets/) to see each style on a brief that suits it. [Open the Gallery White example and its asset recipe](../examples/gallery-white/).
+Try all twelve presets in the [live gallery](https://succtorlin.github.io/fantastic-ui/).
+For copyable prompts and screenshots, see the [preset guide](../examples/presets/).
 
 ## 2. Build a dashboard with an Astryx layout reference
 

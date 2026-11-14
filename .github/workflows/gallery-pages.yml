@@ -1,0 +1,52 @@
+name: Deploy preset gallery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gallery-pages.yml'
+      - 'examples/presets/**'
+      - 'examples/gallery-white/**'
+      - 'assets/gallery-white.png'
+  workflow_dispatch:
+
+concurrency:
+  group: gallery-pages
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Package gallery and its assets
+        run: |
+          mkdir -p _site/examples/presets _site/examples/gallery-white _site/assets
+          cp examples/presets/index.html _site/index.html
+          sed -i 's|href="index.css"|href="examples/presets/index.css"|; s|href="\([^"]*\.html\)"|href="examples/presets/\1"|g; s|src="previews/|src="examples/presets/previews/|g; s|src="../../assets/|src="assets/|g' _site/index.html
+          sed -i 's|href="examples/presets/../gallery-white/|href="examples/gallery-white/|g' _site/index.html
+          cp examples/presets/*.{html,css,pdf} _site/examples/presets/
+          cp -R examples/presets/art examples/presets/previews _site/examples/presets/
+          cp examples/gallery-white/*.{html,webp} _site/examples/gallery-white/
+          cp assets/gallery-white.png _site/assets/
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.publish.outputs.page_url }}
+    steps:
+      - name: Publish gallery
+        id: publish
+        uses: actions/deploy-pages@v4
