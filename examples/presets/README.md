@@ -146,3 +146,7 @@ The build reads `examples.json` and the skill’s own preset token definitions.
 It writes the pages and this guide. The exam uses Playwright and axe-core. If
 they are installed elsewhere, pass `--modules /path/to/node_modules`.
 The existing [Gallery White example](../gallery-white/) is maintained separately.
+
+GitHub Pages checks the packaged gallery at 320, 390, and 1440 CSS pixels
+before deployment. All twelve examples must pass the button-size and
+block-alignment checks.

@@ -8,6 +8,7 @@ on:
       - 'examples/presets/**'
       - 'examples/gallery-white/**'
       - 'assets/gallery-white.png'
+      - 'skills/fantastic-ui/scripts/exam.mjs'
   workflow_dispatch:
 
 concurrency:
@@ -33,6 +34,15 @@ jobs:
           cp -R examples/presets/art examples/presets/previews _site/examples/presets/
           cp examples/gallery-white/*.{html,webp} _site/examples/gallery-white/
           cp assets/gallery-white.png _site/assets/
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install Chromium for geometry checks
+        run: |
+          npm install --no-save --no-package-lock playwright@1.65.1
+          npx --no-install playwright install --with-deps --only-shell chromium
+      - name: Check all 12 examples on desktop and mobile
+        run: node examples/presets/check-geometry.mjs _site
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
