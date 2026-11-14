@@ -16,6 +16,9 @@
   --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --r-sheet: 0px; --r-panel: 18px; --r-card: 28px; --r-pill: 980px; --maxw: 980px; --nav-h: 48px;
+  --example-action-width: 12rem; --example-action-height: 44px;
+  --gutter: clamp(16px, 4vw, 22px);
+  --rail: min(calc(100% - 2 * var(--gutter)), var(--maxw));
   --stage-plate: url("stage.webp"); --ground-plate: url("ground.webp");
 }
 html, body { margin: 0; }
@@ -30,7 +33,7 @@ body { background: var(--ground); }
 .band--stage { background: var(--stage); color: var(--stage-ink); }
 .band--stage .sub { color: var(--stage-ink-2); }
 .band--stage a:not(.pill) { color: var(--stage-accent); }
-.band__col { max-width: var(--maxw); margin-inline: auto; padding-inline: 22px; text-align: center; }
+.band__col { width: var(--rail); margin-inline: auto; text-align: center; }
 
 /* §2 type */
 .eyebrow { font: 600 clamp(17px, 1.6vw, 21px)/1.2 var(--display); color: var(--accent); letter-spacing: -0.01em; margin: 0; }
@@ -39,10 +42,20 @@ body { background: var(--ground); }
 .sub { font: 400 clamp(19px, 1.9vw, 24px)/1.35 var(--sans); color: var(--ink-2); max-width: 34ch; margin: 14px auto 0; text-wrap: pretty; }
 
 /* §3 pill + chevron */
-.actions { display: flex; gap: 28px; justify-content: center; align-items: center; margin-top: 24px; flex-wrap: wrap; }
-.pill { font: 400 17px/1 var(--sans); padding: 12px 22px; border-radius: var(--r-pill); background: var(--accent-fill); color: var(--on-accent); text-decoration: none; }
+.actions { display: flex; gap: 12px; justify-content: center; align-items: center; margin-top: 24px; flex-wrap: wrap; }
+.pill, .chev {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: min(100%, var(--example-action-width));
+  block-size: var(--example-action-height);
+  padding-inline: 8px;
+  text-align: center;
+}
+.pill { font: 400 17px/1 var(--sans); border-radius: var(--r-pill); background: var(--accent-fill); color: var(--on-accent); text-decoration: none; }
 .pill:hover { background: color-mix(in oklab, var(--accent-fill) 88%, var(--ink)); }
-.chev { display: inline-flex; align-items: center; min-height: 24px; font: 400 17px/1 var(--sans); color: var(--accent); text-decoration: none; }
+.chev { font: 400 17px/1 var(--sans); color: var(--accent); text-decoration: none; gap: .25em; }
 .chev::after { content: " \203A"; }
 .chev:hover { text-decoration: underline; text-underline-offset: 3px; }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
@@ -58,12 +71,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .nav[data-over="stage"], .chapter[data-over="stage"] { color: var(--stage-ink); background: color-mix(in oklab, var(--stage) 80%, transparent); border-bottom-color: transparent; }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .nav, .chapter { background: var(--ground); } .nav[data-over="stage"], .chapter[data-over="stage"] { background: var(--stage); } }
-.chapter { position: sticky; top: var(--nav-h); z-index: 49; height: 52px; display: flex; align-items: center; justify-content: space-between;
-  padding-inline: max(22px, calc((100% - var(--maxw)) / 2)); color: var(--ink);
+.chapter { position: sticky; top: var(--nav-h); z-index: 49; height: 52px; color: var(--ink);
   background: color-mix(in oklab, var(--ground) 80%, transparent);
   backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--hair); }
-.chapter strong { font: 600 21px/1 var(--display); letter-spacing: -0.01em; }
-.chapter .pill { padding: 7px 14px; font-size: 12px; }
+.chapter__row { width: var(--rail); margin-inline: auto; height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.chapter strong { font: 600 clamp(14px, 3.8vw, 21px)/1 var(--display); letter-spacing: -0.01em; }
+.chapter .pill { flex: 0 0 min(100%, var(--example-action-width)); }
 
 /* §5 hero stage */
 .hero { padding-bottom: 0; overflow: hidden; }
@@ -73,7 +86,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .stage-product { display: block; width: min(760px, 88vw); height: auto; margin: 0 auto; }
 
 /* §6 tiles */
-.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 1260px; margin-inline: auto; padding-inline: 12px; }
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: var(--rail); margin: 48px auto 0; }
+.band__col.headline { margin-inline: auto; }
 .tile { position: relative; isolation: isolate; overflow: hidden; border-radius: var(--r-card); background: var(--ground-2); color: var(--ink); text-align: center; padding: 44px 32px 0; min-height: 520px; display: flex; flex-direction: column; }
 .band--alt .tile:not(.tile--stage) { background: var(--ground); }
 .tile--stage { background: var(--stage-2); color: var(--stage-ink); }
@@ -86,7 +100,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 @media (max-width: 767px) { .tiles { grid-template-columns: 1fr; } }
 
 /* §7 specs */
-.specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 40px 24px; max-width: var(--maxw); margin: 48px auto 0; text-align: center; }
+.specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 40px 24px; margin: 48px auto 0; text-align: center; scroll-margin-block-start: 7rem; }
+.band[id], #studio, #hero-h { scroll-margin-block-start: 6.25rem; }
 .spec b { display: block; font: 600 clamp(40px, 5vw, 64px)/1 var(--display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .spec span { display: block; margin-top: 8px; font: 400 15px/1.35 var(--sans); color: var(--ink-2); }
 .band--stage .spec span { color: var(--stage-ink-2); }
@@ -104,14 +119,14 @@ footer.band { padding-block: 40px; font-size: 12px; color: var(--muted); }
 <div class="page">
   <a class="skip" href="#main">Skip to content</a>
   <header class="nav"><nav aria-label="Site"><a href="#">Store</a><a href="#">Lumen</a><a href="#">Studio</a><a href="#">Support</a></nav></header>
-  <div class="chapter"><strong>Lumen One</strong><a class="pill" href="#buy">Buy</a></div>
+  <div class="chapter"><div class="chapter__row" data-fui-align-start="lumen" data-fui-align-end="lumen"><strong>Lumen One</strong><a class="pill" href="#buy">Buy</a></div></div>
   <main id="main">
     <section class="band hero" aria-labelledby="hero-h">
-      <div class="band__col">
+      <div class="band__col" data-fui-align-start="lumen" data-fui-align-end="lumen">
         <p class="eyebrow">Lumen One</p>
         <h1 class="headline" id="hero-h">Light, measured.</h1>
         <p class="sub">A desk lamp that reads the room and holds 4000 K all day.</p>
-        <div class="actions"><a class="pill" href="#buy">Buy</a><a class="chev" href="#more">How it holds 4000 K</a></div>
+        <div class="actions" data-fui-buttons="Lumen One actions"><a class="pill" href="#buy">Buy</a><a class="chev" href="#more">How it holds 4000 K</a></div>
       </div>
       <div class="stage">
         <div class="stage-light" aria-hidden="true"></div>
@@ -126,12 +141,12 @@ footer.band { padding-block: 40px; font-size: 12px; color: var(--muted); }
     </section>
 
     <section class="band band--stage" aria-labelledby="pro-h">
-      <div class="band__col" data-reveal>
+      <div class="band__col" id="studio" data-reveal data-fui-align-start="lumen" data-fui-align-end="lumen">
         <p class="eyebrow">Lumen One Studio</p>
         <h2 class="headline" id="pro-h">Made for the night shift.</h2>
         <p class="sub">Twice the output, half the glare, and a dimmer that goes to one lumen.</p>
-        <div class="actions"><a class="pill" href="#buy">Buy</a><a class="chev" href="#more">See the specs</a></div>
-        <div class="specs">
+        <div class="actions" data-fui-buttons="Studio actions"><a class="pill" href="#buy">Buy</a><a class="chev" href="#more">See the specs</a></div>
+        <div class="specs" id="more" data-fui-align-start="lumen" data-fui-align-end="lumen">
           <div class="spec"><b>1,200</b><span>lumens at full</span></div>
           <div class="spec"><b>2700–6500</b><span>kelvin, stepless</span></div>
           <div class="spec"><b>92</b><span>colour rendering index</span></div>
@@ -149,27 +164,27 @@ footer.band { padding-block: 40px; font-size: 12px; color: var(--muted); }
       </div>
     </section>
 
-    <section class="band band--alt" aria-labelledby="tiles-h">
-      <h2 id="tiles-h" class="band__col headline" style="font-size:clamp(32px,4vw,56px)">Which Lumen is yours?</h2>
-      <div class="tiles" style="margin-top:48px">
+    <section class="band band--alt" id="buy" aria-labelledby="tiles-h">
+      <h2 id="tiles-h" class="band__col headline" style="font-size:clamp(32px,4vw,56px)" data-fui-align-start="lumen" data-fui-align-end="lumen">Which Lumen is yours?</h2>
+      <div class="tiles" data-fui-align-start="lumen" data-fui-align-end="lumen">
         <article class="tile" data-reveal>
           <p class="eyebrow">Lumen One</p>
           <h3 class="headline">Light, measured.</h3>
           <p class="sub">From 129 · 18 months of light per charge.</p>
-          <div class="actions"><a class="pill" href="#buy">Buy</a><a class="chev" href="#more">See Lumen One</a></div>
+          <div class="actions" data-fui-buttons="Lumen One tile actions"><a class="pill" href="#buy">Buy</a><a class="chev" href="#hero-h">See Lumen One</a></div>
           <figure aria-hidden="true"><svg viewBox="0 0 560 260"><rect x="150" y="60" width="260" height="40" rx="20" fill="var(--ink)"/><rect x="272" y="98" width="16" height="140" rx="8" fill="var(--ink-2)"/><rect x="210" y="234" width="140" height="22" rx="11" fill="var(--ink-2)"/></svg></figure>
         </article>
         <article class="tile tile--stage" data-reveal>
           <p class="eyebrow">Lumen One Studio</p>
           <h3 class="headline">Made for the night shift.</h3>
           <p class="sub">From 249 · stepless 2700–6500 K.</p>
-          <div class="actions"><a class="pill" href="#buy">Buy</a><a class="chev" href="#more">See Lumen One Studio</a></div>
+          <div class="actions" data-fui-buttons="Studio tile actions"><a class="pill" href="#buy">Buy</a><a class="chev" href="#studio">See Lumen One Studio</a></div>
           <figure aria-hidden="true"><svg viewBox="0 0 560 260"><rect x="140" y="56" width="280" height="44" rx="22" fill="var(--stage-ink)"/><rect x="271" y="98" width="18" height="140" rx="9" fill="var(--stage-ink-2)"/><rect x="204" y="234" width="152" height="22" rx="11" fill="var(--stage-ink-2)"/></svg></figure>
         </article>
       </div>
     </section>
   </main>
-  <footer class="band"><div class="band__col">Demo page for fantastic-ui Preset L. Fictional product; no real brand.</div></footer>
+  <footer class="band"><div class="band__col" data-fui-align-start="lumen" data-fui-align-end="lumen">Demo page for fantastic-ui Preset L. Fictional product; no real brand.</div></footer>
 </div>
 <script>
 const nav = document.querySelector(".nav");

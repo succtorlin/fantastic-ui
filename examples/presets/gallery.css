@@ -1,4 +1,13 @@
 /* Preset-specific composition. Shared tokens and sample mechanics come from Fantastic UI. */
+.page {
+  --example-action-width: 12rem;
+  --example-action-height: 44px;
+}
+.actions .btn {
+  inline-size: min(100%, var(--example-action-width));
+  block-size: var(--example-action-height);
+  justify-content: center;
+}
 .nav nav a { text-decoration: underline; text-underline-offset: .18em; }
 @media (max-width: 760px) {
   .nav { gap: .75rem; flex-wrap: wrap; padding-block: .5rem; }

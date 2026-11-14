@@ -27,6 +27,8 @@ for (const example of examples) {
     .replace('Vector S:', 'Vector&nbsp;S:')
     .replaceAll('href="#"', 'href="#example-content"')
     .replace('<section class="section">', '<section class="section" id="example-content">')
+    .replaceAll('class="wrap', 'data-fui-align-start="preset" data-fui-align-end="preset" class="wrap')
+    .replace('<div class="actions">', '<div class="actions" data-fui-buttons="Example actions">')
     .replace(/<figure class="slot panel (.*?)" aria-hidden="true">[\s\S]*?<\/figure>/, (_match, layout) => {
       const art = plate ? `<img src="art/${plate}.webp" width="900" height="560" alt="">` : '';
       return `<figure class="slot panel ${layout}" aria-hidden="true">${art}</figure>`;
@@ -60,15 +62,15 @@ writeFileSync(new URL('index.html', here), `<!doctype html>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header><nav aria-label="Main"><a href="#styles">Browse styles</a></nav></header>
-<main id="main">
+<header data-fui-align-start="gallery" data-fui-align-end="gallery"><nav aria-label="Main"><a href="#styles">Browse styles</a></nav></header>
+<main id="main" data-fui-align-start="gallery" data-fui-align-end="gallery">
   <h1>Fantastic UI preset gallery</h1>
   <p class="intro">Explore twelve design directions. Each uses a fictional brief and the preset’s own tokens.</p>
   <section class="style-grid" id="styles" aria-label="The twelve presets">
 ${cards}
   </section>
 </main>
-<footer>Fantastic UI examples</footer>
+<footer data-fui-align-start="gallery" data-fui-align-end="gallery">Fantastic UI examples</footer>
 </body>
 </html>
 `);
