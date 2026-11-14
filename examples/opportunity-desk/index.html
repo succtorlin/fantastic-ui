@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Opportunity Desk · Fantastic UI example</title>
+  <link rel="stylesheet" href="desk.css">
+  <script src="desk.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="masthead">
+    <div class="frame masthead-inner">
+      <span>Opportunity Desk</span>
+      <nav aria-label="On this page"><a href="#feed-title">Bid notices</a></nav>
+      <span class="sample">Sample data</span>
+    </div>
+  </header>
+  <main class="frame" id="main">
+    <div class="intro">
+      <p class="label">University procurement</p>
+      <h1>Opportunity watchlist</h1>
+      <p>Find open solicitations and see how past bids were decided.</p>
+    </div>
+    <dl class="summary" aria-label="Sample feed summary">
+      <div><dt>Open solicitations</dt><dd>2</dd></div>
+      <div><dt>Published awards</dt><dd>1</dd></div>
+      <div><dt>Closed without an award notice</dt><dd>1</dd></div>
+    </dl>
+    <section class="feed" aria-labelledby="feed-title">
+      <header class="feed-head">
+        <div>
+          <h2 id="feed-title">Bid notices</h2>
+          <p id="result-count" role="status">4 notices</p>
+        </div>
+        <div class="filter" id="filters" hidden>
+          <label for="status">Status</label>
+          <select id="status">
+            <option value="all">All notices</option>
+            <option value="open">Open</option>
+            <option value="awarded">Awarded</option>
+            <option value="closed">Closed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      </header>
+      <ul class="notices">
+        <li data-status="open">
+          <div><span class="buyer">Northbank State University</span><h3>AI tutoring platform</h3></div>
+          <span class="status open">Open</span>
+          <div class="date"><span>Due</span><time datetime="2027-02-09">Feb 9, 2027</time></div>
+          <button type="button" data-notice="tutoring" aria-label="View notice: AI tutoring platform" hidden>View notice</button>
+        </li>
+        <li data-status="open">
+          <div><span class="buyer">Cedar Valley University</span><h3>Classroom response tools</h3></div>
+          <span class="status open">Open</span>
+          <div class="date"><span>Due</span><time datetime="2027-02-16">Feb 16, 2027</time></div>
+          <button type="button" data-notice="classroom" aria-label="View notice: Classroom response tools" hidden>View notice</button>
+        </li>
+        <li data-status="awarded">
+          <div><span class="buyer">Lakeway University System</span><h3>Digital assessment platform</h3></div>
+          <span class="status">Awarded</span>
+          <div class="date"><span>Awarded</span><time datetime="2026-12-08">Dec 8, 2026</time></div>
+          <button type="button" data-notice="assessment" aria-label="View notice: Digital assessment platform" hidden>View notice</button>
+        </li>
+        <li data-status="closed">
+          <div><span class="buyer">Northbank State University</span><h3>Learning analytics services</h3></div>
+          <span class="status">Closed</span>
+          <div class="date"><span>Closed</span><time datetime="2026-11-20">Nov 20, 2026</time></div>
+          <button type="button" data-notice="analytics" aria-label="View notice: Learning analytics services" hidden>View notice</button>
+        </li>
+      </ul>
+      <div class="empty" id="empty" hidden>
+        <h3>No notices match this status</h3>
+        <p>Clear the filter to see all sample notices.</p>
+        <button type="button" id="reset-filter">Clear filter</button>
+      </div>
+    </section>
+  </main>
+  <footer class="frame foot">All universities, notices, and vendors in this example are fictional.</footer>
+  <dialog aria-labelledby="notice-title" id="notice-detail">
+    <div class="dialog-head">
+      <div><p class="label" id="notice-ref"></p><h2 id="notice-title"></h2></div>
+      <form method="dialog"><button>Close</button></form>
+    </div>
+    <p id="notice-copy"></p>
+  </dialog>
+</body>
+</html>

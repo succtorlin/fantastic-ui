@@ -1,23 +1,14 @@
 ---
 name: fantastic-ui
 description: >-
-  Design and build instrument-grade marketing pages and in-product surfaces
-  (app pages, dashboards, panels, and subpanels) that feel like the product,
-  not a template. When the look is not decided yet, it renders the two or
-  three best-fitting directions as sample pages to choose from before
-  building. Use for landing, hero, homepage, portfolio, premium/polished
-  redesign, whole-app visual retrofit, data-heavy or technical UI, charts,
-  agent/AI consoles, wizards, settings and checkout flows, phone-only screens,
-  single components with all their states, motion that should not look
-  generic, and accessibility or
-  WCAG work, and for following, checking against the CSS, creating or
-  replacing a project's DESIGN.md design-system file. Also use for confusing or unintuitive interactions, affordance,
-  discoverability, mental-model, error-prevention, cognitive-walkthrough,
-  usability, navigation, form, heuristic, or dark-pattern analysis. Covers
-  editorial visual systems, live proof, generated token-driven decorative
-  imagery (palette plates, SVG texture, AI atmosphere, ≤30 KB), performance,
-  keyboard/screen-reader access, Norman's interaction foundations, Krug's
-  usability rules, and Nielsen heuristic audits.
+  Design, build, and audit marketing pages and product UI, including landing
+  pages, portfolios, dashboards, charts, AI consoles, checkout, mobile
+  screens, and individual components. Use for comparing visual directions,
+  whole-app redesigns, creating or checking DESIGN.md, Astryx layout and
+  component research, and WCAG accessibility work. Diagnose confusing
+  interactions, navigation, forms, and dark patterns with task walkthroughs
+  and severity-ranked findings. Covers token-driven imagery, live product
+  proof, motion, responsive states, and an exam for the implemented result.
 ---
 
 # Fantastic UI — instrument-grade marketing pages and product surfaces
@@ -432,6 +423,16 @@ When reference screenshots, typography, logos or mood images are supplied, or th
 
 Turn the analysis into shared tokens, responsive constraints and native components, with explicit invariants, allowed variation and exclusions. Preserve meaningful product behavior and accessible DOM text. A reference establishes visual intent, not evidence of working interactions or live data. Use the existing brief and design system; this step adds no confirmation gate when the user has already chosen a direction.
 
+### Step 0c — Choose how to use Astryx
+
+After settling the visual brief, use [the Astryx workflow](references/astryx.md)
+when the user names Astryx, the project already uses `@astryxdesign`, or a
+catalog pattern would help solve a layout or interaction problem. Inspect
+template skeletons and component behavior before choosing an implementation.
+Translate useful patterns into the project's existing primitives. Use Astryx
+components when the project already uses them or the user requests adoption.
+For adoption, follow the [third-party component procedure](references/third-party-components.md).
+
 ## The five disciplines
 
 ### 1. Single-accent color system
@@ -622,8 +623,9 @@ always in rotation. See it turn first.").
 These are pass/fail, checked before shipping:
 
 **Performance**
-- Zero webfonts, zero animation/UI libraries — the page needs only the
-  framework it lives in
+- Use system fonts and native animation. Reuse the project's UI library
+  when applicable. Measure JavaScript and CSS when adding Astryx within
+  a requested adoption.
 - Any raster asset ≤ 30 KB WebP (the generator enforces it); decorative
   imagery static and `aria-hidden`
 - Motion on compositor properties only (`transform`, `opacity`); scroll work
@@ -897,7 +899,8 @@ Run through this before calling the page done:
       remaining mismatch kept by the user's explicit choice; never rewritten
       without an explicit request and a shown diff
 - [ ] One accent color; semantic colors appear only with their meaning
-- [ ] No webfonts, no new dependencies, assets ≤ 30 KB each
+- [ ] System fonts and assets ≤ 30 KB each. Measure bundle impact when
+      adopting Astryx and review its diagnostics alongside the exam.
 - [ ] Imagery plan executed, or its absence justified in the brief line
 - [ ] Every raster ≤ 30 KB WebP, `aria-hidden`, explicit dimensions, static;
       every asset (`plate`, `ai`, `compress`, `svg`) has an imagery-ledger line
@@ -956,6 +959,9 @@ Additional gates when the work touched product surfaces:
       in their own reference file
 
 ## References
+
+- [references/astryx.md](references/astryx.md) — layout discovery, component
+  composition, theme mapping, and project diagnostics. Read at Step 0c.
 
 - [references/theme-presets.md](references/theme-presets.md) — twelve named
   directions (Coastal Editorial, Blueprint Mono, Marigold Report, Atelier Warm,

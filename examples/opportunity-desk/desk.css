@@ -1,0 +1,64 @@
+:root {
+  color-scheme: light;
+  --ground: #eef2f0;
+  --paper: #ffffff;
+  --ink: #152721;
+  --muted: #475d55;
+  --line: #c5d1cb;
+  --accent: #145b44;
+  --accent-wash: #dfede6;
+  --sans: system-ui, sans-serif;
+  --display: Georgia, serif;
+  --mono: ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 1rem/1.5 var(--sans); }
+h1, h2, h3, p, dl, dd { margin: 0; }
+.frame { width: min(100% - 2.5rem, 70rem); margin-inline: auto; }
+.masthead { border-bottom: 1px solid var(--line); background: var(--paper); }
+.masthead-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 4rem; font-weight: 700; }
+.masthead a { display: inline-flex; align-items: center; min-height: 2rem; color: var(--accent); font-size: .875rem; }
+.sample, .status { padding: .25rem .65rem; border-radius: .25rem; font-size: .8125rem; font-weight: 650; width: fit-content; }
+.sample, .status:not(.open) { background: var(--ground); color: var(--muted); }
+.status.open { background: var(--accent-wash); color: var(--accent); }
+.intro { margin-block: clamp(2rem, 5vw, 4.25rem) 1.75rem; }
+.intro p:last-child { color: var(--muted); margin-top: .55rem; max-width: 52ch; }
+.label, .buyer, .date span, #result-count { color: var(--muted); font-size: .875rem; }
+h1 { font: 400 clamp(2.15rem, 5.4vw, 4rem)/1.05 var(--display); letter-spacing: -.035em; margin-top: .4rem; }
+h2 { font-size: 1.25rem; line-height: 1.25; }
+h3 { font-size: 1rem; line-height: 1.35; margin-top: .18rem; }
+.summary { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--line); margin-bottom: 1.75rem; }
+.summary div { display: grid; grid-template-rows: auto 1fr; gap: .15rem; padding: .9rem 1.125rem; }
+.summary div + div { border-inline-start: 1px solid var(--line); }
+.summary dt { color: var(--muted); font-size: .875rem; }
+.summary dd { grid-row: 1; font: 500 1.9rem/1.2 var(--mono); font-variant-numeric: tabular-nums; }
+.feed { background: var(--paper); border: 1px solid var(--line); border-radius: .5rem; }
+.feed-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 1rem 1.125rem; gap: .75rem 1.5rem; }
+.filter { display: flex; align-items: center; gap: .5rem; }
+button, select { min-height: 2.5rem; font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--muted); border-radius: .25rem; padding: .375rem .65rem; }
+button { font-size: .875rem; white-space: nowrap; cursor: pointer; }
+button:hover { background: var(--accent-wash); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.skip { position: absolute; inset: .5rem auto auto .5rem; padding: .4rem .65rem; background: var(--paper); color: var(--accent); transform: translateY(-200%); }
+.skip:focus { transform: none; }
+.notices { list-style: none; margin: 0; padding: 0; }
+.notices li { display: grid; grid-template-columns: minmax(0, 45%) 6.5rem minmax(8rem, 1fr) auto; align-items: center; gap: .75rem 1rem; border-top: 1px solid var(--line); padding: .8rem 1.125rem; }
+.date { display: grid; }
+.date time { font: .9rem/1.5 var(--mono); }
+[data-status="open"] time { font-weight: 700; }
+.empty { padding: 1.5rem 1.125rem; border-top: 1px solid var(--line); }
+.empty p { margin-block: .25rem 1rem; color: var(--muted); }
+.foot { color: var(--muted); font-size: .8125rem; padding-block: 1.1rem 2rem; }
+dialog { width: min(30rem, 100% - 2rem); border: 1px solid var(--line); border-radius: .5rem; padding: 1.25rem; color: var(--ink); }
+dialog::backdrop { background: color-mix(in srgb, var(--ink) 55%, transparent); }
+.dialog-head { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
+.dialog-head h2 { margin-top: .25rem; }
+#notice-copy { margin-top: .85rem; max-width: 52ch; }
+@media (max-width: 41rem) {
+  .frame { width: calc(100% - 2rem); }
+  .masthead-inner { gap: .5rem; }
+  .summary div { padding-inline: .55rem; }
+  .notices li { grid-template-columns: minmax(0, 1fr) auto; }
+  .notices li button { justify-self: end; }
+}

@@ -8,6 +8,10 @@
 
 <p align="center"><em>Built with this skill: zero webfonts, zero UI libraries, one accent color, and a hero that is the product actually running on a &lt;canvas&gt;.</em></p>
 
+**Start with the [illustrated quickstart](docs/QUICKSTART.md).** It has
+copyable prompts, screenshots, and workflow diagrams for choosing a design,
+building a dashboard, auditing an interaction, and polishing an app.
+
 ---
 
 ## Why this exists
@@ -310,7 +314,9 @@ Once installed and available in your client's skill list, ask for things like:
 
 Invoke it explicitly with `$fantastic-ui` in Codex or `/fantastic-ui` in Claude Code. State whether you want analysis only or implementation; asking for an audit does not by itself request code changes.
 
-**Want to see how a session actually goes?** [docs/USE-CASES.md](docs/USE-CASES.md) walks through six scenarios end to end — what to say, what the skill does, what it asks you, and what you get.
+The [illustrated quickstart](docs/QUICKSTART.md) includes a runnable dashboard
+and a prompt for adapting an Astryx layout. The [detailed use cases](docs/USE-CASES.md)
+walk through what the skill does and what to expect from each workflow.
 
 ## What's inside
 
