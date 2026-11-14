@@ -5,7 +5,7 @@ import { test, describe, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadTools, serve, auditPage, exam, foldChecks } from "./exam.mjs";
+import { loadTools, serve, auditPage, exam, foldChecks, geometryChecks } from "./exam.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIX = join(HERE, "fixtures", "exam");
@@ -21,6 +21,34 @@ describe("exam: no-JS pass and dialog check", { skip }, () => {
     ({ srv, base } = await serve(FIX));
   });
   after(async () => { await browser?.close(); srv?.close(); });
+
+  test("measures both button dimensions and the intended block edges", async () => {
+    const page = await browser.newPage({ viewport: { width: 390, height: 800 } });
+    try {
+      await page.setContent(`
+        <style>
+          button { width: 112px; height: 44px; }
+          article { width: 220px; }
+        </style>
+        <div data-fui-buttons="Review">
+          <button>Back</button><button id="save">Save changes</button>
+          <button hidden style="width: 10px">Hidden</button>
+        </div>
+        <article data-fui-align-start="Content" data-fui-align-end="Content">Summary</article>
+        <article id="detail" data-fui-align-start="Content" data-fui-align-end="Content">Detail</article>
+      `);
+      assert.deepEqual(await geometryChecks(page, 390), []);
+      await page.addStyleTag({ content: "#save { width: 140px; height: 52px; } #detail { margin-inline-start: 6px; width: 210px; }" });
+      assert.deepEqual(await geometryChecks(page, 390), [
+        "geometry at 390px: Review button widths differ by 28.0px",
+        "geometry at 390px: Review button heights differ by 8.0px",
+        "geometry at 390px: Content start edges differ by 6.0px",
+        "geometry at 390px: Content end edges differ by 4.0px",
+      ]);
+    } finally {
+      await page.close();
+    }
+  });
 
   test("a page that follows the rules passes the whole exam, dialog included", async () => {
     const { results } = await exam({ dir: join(FIX, "good"), modules: process.env.PLAYWRIGHT_DIR || null, dialogs: ["#open-booking"] });

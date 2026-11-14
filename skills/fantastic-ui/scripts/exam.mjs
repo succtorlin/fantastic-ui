@@ -19,6 +19,7 @@
  *   2. reflow at 320/375/390/768/1024/1440/1920: no horizontal overflow and no
  *      content cut off (overflow-x: clip hides overflow from scrollWidth);
  *      every link and button ≥24×24 px (2.5.8); no button label wrapping (M3)
+ *      marked button groups and block edges match within 1 CSS pixel
  *   3. keyboard and structure: a skip link first, a visible :focus-visible
  *      ring ≥2 px and ≥3:1 on each focusable, header/nav/main/footer, one h1,
  *      lang on <html>
@@ -142,6 +143,50 @@ async function layoutChecks(page, width) {
     }
     return out;
   }, width);
+}
+
+// Compare explicit peers so icon buttons, full-width controls and intentional
+// grid spans can share a surface without being compared to unrelated elements.
+export async function geometryChecks(page, width, scope = "body") {
+  return page.evaluate(({ width, scope }) => {
+    const visible = (el) => el.checkVisibility({ visibilityProperty: true, opacityProperty: true });
+    const root = [...document.querySelectorAll(scope)].find(visible);
+    if (!root) return [];
+    const actions = 'button, a[href], [role="button"], input[type="button"], input[type="submit"], input[type="reset"]';
+    const issues = [];
+    const match = (values, label) => {
+      if (values.length < 2) return;
+      const range = Math.max(...values) - Math.min(...values);
+      if (range > 1) issues.push(`geometry at ${width}px: ${label} differ by ${range.toFixed(1)}px`);
+    };
+    const overlay = 'dialog, [role="dialog"], [role="alertdialog"]';
+    const checked = (selector) => [...root.querySelectorAll(selector)]
+      .filter((el) => visible(el) && el.closest(overlay) === root.closest(overlay));
+    for (const group of checked("[data-fui-buttons]")) {
+      const peers = [...group.querySelectorAll(actions)]
+        .filter((el) => el.closest("[data-fui-buttons]") === group && visible(el));
+      const rects = peers.map((el) => el.getBoundingClientRect());
+      const label = group.dataset.fuiButtons || group.getAttribute("aria-label") || "button group";
+      match(rects.map((r) => r.width), `${label} button widths`);
+      match(rects.map((r) => r.height), `${label} button heights`);
+    }
+    for (const edge of ["start", "end", "top", "bottom"]) {
+      const attr = `data-fui-align-${edge}`;
+      const rails = new Map();
+      for (const el of checked(`[${attr}]`)) {
+        const name = el.getAttribute(attr);
+        if (!name) continue;
+        const block = el.getBoundingClientRect();
+        const rtl = getComputedStyle(el).direction === "rtl";
+        const position = edge === "top" || edge === "bottom" ? block[edge]
+          : (edge === "start") !== rtl ? block.left : block.right;
+        if (!rails.has(name)) rails.set(name, []);
+        rails.get(name).push(position);
+      }
+      for (const [name, positions] of rails) match(positions, `${name} ${edge} edges`);
+    }
+    return issues;
+  }, { width, scope });
 }
 
 // Line length: characters per rendered line of each prose block. At 1920 an
@@ -360,6 +405,7 @@ export async function dialogChecks(page, AxeBuilder, selector, width) {
   if (!s.open) return [`${at}: Enter on the trigger opened no visible dialog (use <dialog> + showModal(), or role="dialog")`];
   const out = [];
   if (!s.label) out.push(`${at}: dialog has no accessible name (aria-labelledby its heading, or aria-label)`);
+  out.push(...(await geometryChecks(page, width, DLG)).map((issue) => `${at}: ${issue}`));
   if (!s.modal) out.push(`${at}: dialog is not modal (showModal(), or aria-modal="true" with a focus trap)`);
   if (!s.close) out.push(`${at}: no visible close button inside the dialog`);
   if (!s.inside) out.push(`${at}: focus did not move into the dialog`);
@@ -394,6 +440,7 @@ export async function auditPage(browser, AxeBuilder, url, { dialogs = [] } = {})
     // scroll-revealed content has arrived before anything is measured.
     await scrollThrough(page);
     problems.push(...await layoutChecks(page, width));
+    problems.push(...await geometryChecks(page, width));
     if (width >= 1024) problems.push(...await measureChecks(page, width));
     if (width === 1440 || width === 390) problems.push(...await coverChecks(page, width));
     if (width === 1440 || width === 390) {

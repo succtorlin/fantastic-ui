@@ -132,6 +132,7 @@ Every page the skill builds or changes, in any project, has to pass `scripts/exa
 | axe-core, WCAG 2.0/2.1/2.2 A + AA, at 1440 and 390 px | any violation; `incomplete` nodes are listed for measuring by hand, never passed |
 | Reflow at 320, 375, 390, 768, 1024, 1440 and 1920 px | horizontal overflow, or content cut off under `overflow-x: clip` |
 | Targets and labels | a link or button under 24×24 px; a button label that wraps |
+| [Button sizes and block edges](skills/fantastic-ui/references/control-geometry.md) | marked peer button widths or heights, or shared block edges, differ by more than 1 CSS pixel |
 | Keyboard and structure | no skip link first, a missing `header`/`nav`/`main`/`footer`, not exactly one `h1`, no `lang`, a focus ring under 2 px or 3:1 |
 | No-JS pass | text a visitor sees with JavaScript is in the page but hidden without it |
 | Composition | a prose line past ~100 characters at 1024+ (the uncapped container at 1920); text painted under another element at 1440 or 390; the hero `h1` or its first action below the fold at 1280×800 |
@@ -319,7 +320,8 @@ Once installed and available in your client's skill list, ask for things like:
 Invoke it explicitly with `$fantastic-ui` in Codex or `/fantastic-ui` in Claude Code. State whether you want analysis only or implementation; asking for an audit does not by itself request code changes.
 
 The [illustrated quickstart](docs/QUICKSTART.md) includes a runnable dashboard
-and a prompt for adapting an Astryx layout. The [detailed use cases](docs/USE-CASES.md)
+that uses the Astryx catalog as part of the standard workflow. The
+[detailed use cases](docs/USE-CASES.md)
 walk through what the skill does and what to expect from each workflow.
 
 ## What's inside

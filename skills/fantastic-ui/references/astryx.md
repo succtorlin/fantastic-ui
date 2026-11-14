@@ -1,13 +1,22 @@
-# Astryx workflow
+# Astryx in the Fantastic UI workflow
 
 Astryx is Meta's React design system. Its CLI exposes layout templates, blocks,
 component and hook documentation, semantic tokens, theme tooling, and
-diagnostics. Use the project's Astryx version when it has one. From a neutral
+diagnostics. Fantastic UI consults the catalog during layout and component
+design as part of Step 0c. The brief, tokens, accessibility checks and
+[geometry rules](control-geometry.md) guide what ships.
+Use the project's Astryx version when it has one. From a neutral
 directory, the global CLI can inspect the catalog for any project, including
-projects without React. If the global CLI is unavailable, use the official
-docs or the scoped package at the intended version
-(`npx @astryxdesign/cli@<version> ...`).
+projects without React. If the CLI is unavailable, use the public docs.
+When a scoped one-off CLI run is available, use the intended version
+(`npx @astryxdesign/cli@<version> ...`). Continue with local components if
+the catalog is unreachable.
 [GitHub repository](https://github.com/meta/astryx) · [CLI reference](https://astryx.atmeta.com/docs/cli) · [Global mode](https://astryx.atmeta.com/docs/global)
+
+Fantastic UI owns the implementation workflow when both agent guides are
+loaded. Follow the installed Astryx guide for command usage. Its generic
+setup and template-first instructions apply to Astryx adoption, while
+catalog lookup works without modifying the project.
 
 ## Find a pattern
 
@@ -86,7 +95,8 @@ scope and verify preserved behavior.
 
 ## Verify the implementation
 
-Run `astryx doctor` in the project. When supported for the build output, also
+On an Astryx implementation, run `astryx doctor` in the project. When
+supported for the build output, also
 run `astryx doctor --built <path>` after the project's production build. Review
 warnings in context, including intentional native markup and existing custom
 styles. Check the rendered workflow against the brief and

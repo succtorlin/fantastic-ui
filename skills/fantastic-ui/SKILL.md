@@ -58,7 +58,8 @@ node ~/.claude/skills/fantastic-ui/scripts/exam.mjs dist/
 
 It runs, per page: axe-core with the WCAG 2.0/2.1/2.2 A and AA tags at 1440
 and 390 px; reflow at 320–1920 with no overflow and no clipped content; every
-link and button ≥24×24 px; no wrapping button labels; a skip link, landmarks,
+link and button ≥24×24 px; no wrapping button labels; matching marked
+button sizes and block edges; a skip link, landmarks,
 one `h1` and `lang`; a visible focus ring ≥2 px and ≥3:1 on every focusable;
 `verify-preset.mjs` when a preset is in use (contrast, zero webfonts, asset
 weight, reduced-motion path, token roles, accent restraint, separation, the
@@ -423,15 +424,22 @@ When reference screenshots, typography, logos or mood images are supplied, or th
 
 Turn the analysis into shared tokens, responsive constraints and native components, with explicit invariants, allowed variation and exclusions. Preserve meaningful product behavior and accessible DOM text. A reference establishes visual intent, not evidence of working interactions or live data. Use the existing brief and design system; this step adds no confirmation gate when the user has already chosen a direction.
 
-### Step 0c — Choose how to use Astryx
+### Step 0c — Use Astryx during design and implementation
 
-After settling the visual brief, use [the Astryx workflow](references/astryx.md)
-when the user names Astryx, the project already uses `@astryxdesign`, or a
-catalog pattern would help solve a layout or interaction problem. Inspect
-template skeletons and component behavior before choosing an implementation.
-Translate useful patterns into the project's existing primitives. Use Astryx
-components when the project already uses them or the user requests adoption.
-For adoption, follow the [third-party component procedure](references/third-party-components.md).
+Invoking Fantastic UI also activates [Astryx discovery](references/astryx.md).
+After settling the visual brief and before laying out or changing a surface,
+look up its main layout or control pattern with `astryx search`. Inspect a
+template skeleton for page composition or the component docs for a single
+control. In an audit, inspect the rendered problem first and use the lookup
+when proposing a component or layout fix. If the CLI is unavailable, use the
+public catalog or proceed with the project's primitives when it is unreachable.
+If both skills are loaded, follow Fantastic UI for implementation and use
+the Astryx guide for commands.
+Use the selected preset or existing design system to choose the final layout,
+tokens and states. Use the project version of Astryx in projects that already
+use it. Treat Astryx setup and scaffolding as project adoption steps when
+the user requests adoption, and follow the
+[third-party component procedure](references/third-party-components.md).
 
 ## The five disciplines
 
@@ -669,6 +677,11 @@ that change the most outcomes:
 - **Pick a spacing scale and obey it.** `4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 96 · 128`.
   If two values need measuring to tell apart, one is surplus. **Ambiguous spacing** — a
   label equidistant from the field above and below — is a real bug, not a nitpick.
+- **Match button sizes and align block edges on every surface.** Peer actions
+  share the same rendered width and height, including across repeated rows and
+  state changes. Size the group for its longest label, then reflow together.
+  Put sections, panels and repeated blocks on shared grid lines. Use
+  [the geometry rules and exam markers](references/control-geometry.md).
 - **Start with too much white space and subtract.** The dense rhythm in discipline 4 is a
   destination reached by removal; nobody ever loosens a cramped layout later.
 - **Line-height is proportional to line length and size**, never one global value. Prose
@@ -899,6 +912,9 @@ Run through this before calling the page done:
       remaining mismatch kept by the user's explicit choice; never rewritten
       without an explicit request and a shown diff
 - [ ] One accent color; semantic colors appear only with their meaning
+- [ ] Peer button widths and heights match, and shared block edges align at
+      every breakpoint. Run the exam with geometry markers and verify long
+      labels and loading states in the rendered surface.
 - [ ] System fonts and assets ≤ 30 KB each. Measure bundle impact when
       adopting Astryx and review its diagnostics alongside the exam.
 - [ ] Imagery plan executed, or its absence justified in the brief line
@@ -962,6 +978,8 @@ Additional gates when the work touched product surfaces:
 
 - [references/astryx.md](references/astryx.md) — layout discovery, component
   composition, theme mapping, and project diagnostics. Read at Step 0c.
+- [references/control-geometry.md](references/control-geometry.md) — required
+  button sizing, block alignment, and exam markers for every surface.
 
 - [references/theme-presets.md](references/theme-presets.md) — twelve named
   directions (Coastal Editorial, Blueprint Mono, Marigold Report, Atelier Warm,

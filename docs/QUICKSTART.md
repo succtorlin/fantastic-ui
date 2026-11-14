@@ -32,18 +32,20 @@ settled, say “Build in Gallery White” or “Follow our DESIGN.md.”
 Try all twelve presets in the [live gallery](https://succtorlin.github.io/fantastic-ui/).
 For copyable prompts and screenshots, see the [preset guide](../examples/presets/).
 
-## 2. Build a dashboard with an Astryx layout reference
+## 2. Build a dashboard
 
 > $fantastic-ui Build an opportunity watchlist where I can filter open
-> university RFPs and inspect past award notices. Use Astryx for layout
-> research and implement with our existing components. Show what happens
+> university RFPs and inspect past award notices. Use our existing
+> components. Show what happens
 > when no results match. Label any sample data and run the exam.
 
-**What you get.** The sample adapts Astryx’s `table-filter` pattern into a
+Fantastic UI automatically consults the Astryx catalog for layout and
+component patterns. The sample adapts Astryx’s `table-filter` pattern into a
 bid list with status filters and a detail dialog. Open notices show a deadline.
 Awarded and closed notices show their own dates. A closed notice without a
 published award stays distinct from an awarded notice. The empty state offers
-a clear path back to the list.
+a clear path back to the list. Peer buttons share a width and height, and
+the header, summary, and feed use common alignment lines.
 
 ![Opportunity Desk with sample data, two open notices, one published award, one closed notice, and a status filter](../assets/opportunity-desk.webp)
 
