@@ -9,14 +9,17 @@ on:
       - 'examples/gallery-white/**'
       - 'assets/gallery-white.png'
       - 'skills/fantastic-ui/scripts/exam.mjs'
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
-  group: gallery-pages
+  group: gallery-pages-${{ github.event.pull_request.number || 'deploy' }}
   cancel-in-progress: false
 
 jobs:
   package:
+    name: Gallery geometry
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -44,10 +47,12 @@ jobs:
       - name: Check all 12 examples on desktop and mobile
         run: node examples/presets/check-geometry.mjs _site
       - uses: actions/upload-pages-artifact@v4
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         with:
           path: _site
 
   deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: package
     runs-on: ubuntu-latest
     permissions:
