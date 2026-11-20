@@ -285,6 +285,96 @@ procedure, tools and markup are there too.
   If a screen genuinely can't use a primitive, the primitive is wrong —
   fix it centrally, in its own commit.
 
+## Rules from the field
+
+These are rules, not suggestions. Each came from a whole-app retrofit of a
+light, dense back-office that the owner sent back until it was right.
+
+### 1. A status label is text, not a tinted pill
+
+On screen: a word like "Awaiting feedback" sitting in a pale blue rounded
+capsule. Owners read it as a halo and as machine-made. Twenty of them on a
+table turn the status column into decoration.
+
+```css
+/* no */  .status { padding: 3px 8px; border-radius: 999px; background: var(--info-tint); color: var(--info); }
+/* yes */ .status { color: var(--info); font-weight: 500; }
+```
+
+- The status colour must clear 4.5:1 on every ground the label sits on,
+  because there is no tint behind it any more.
+- Colour is never the only channel: the word itself says the status.
+- Neutral chips (a count, a tag, "Due today") lose the fill too and take the
+  second ink; separate them with a gap of 14 to 16 px.
+- Keep the tint for blocks a person reads (a notice, an error, a banner
+  that reports a state). Keep pill radius for controls and tracks (a toggle,
+  a segmented control, a progress bar, an avatar).
+- Fix the rule where it is written. `lint-surface` rule `tinted-pill` reads
+  the source, so an override further down the file does not clear it.
+
+### 2. Three grounds on a light surface
+
+| Layer | Token | Use |
+|---|---|---|
+| Page | `--ground-0`, a neutral grey near `#f4f4f5` | the canvas, never a panel |
+| Panel | `--ground-1`, white | what the person works in |
+| Subpanel | `--ground-2`, a grey lighter than the page | a panel inside a panel, a table head |
+
+One hairline, one radius and one shadow for every panel. Form fields are
+white on every ground. The top bar and the filter bar under it are white.
+A track or segmented control on the grey page takes the darkest ground step
+so it stays visible. When the grounds change, recompute the whole contrast
+matrix and record it in the token comment: muted text and the accent are the
+pairs that fall under 4.5:1 first.
+
+### 3. Nothing bare on the page
+
+A table, filter bar, form or empty state that sits straight on the page
+beside panelled siblings reads as unfinished. After any ground change, run a
+script over every route that reports (a) each table whose ancestors up to
+the main region are all transparent and (b) each text node whose left edge
+is within 6 px of the main region. Fix each hit with a shared rule. An empty
+table and its "nothing here" message are one panel, joined, not a header
+strip with grey text under it.
+
+### 4. The accent has three jobs
+
+Primary action, links, focus. Selection is neutral: a grey fill and a
+heavier weight, the same in the sidebar, tabs, menus and segmented controls.
+The selection tint and its border are tokens, so a retint moves them
+together. The accent does not colour data marks (score bars, rank numbers,
+progress rings, chart lines, step chips) and does not fill a banner; a
+full-colour hero inside the product reads as a different application.
+
+Decoration is not one of the three jobs either: eyebrows, icon tiles, side
+rules, spinners and resize handles are neutral. Give the moved colours a
+fixed map so the result reads as one system:
+
+```css
+.score i.on, .meter > span        { background: var(--ink-2); }          /* data mark */
+[aria-selected="true"], .selected { color: var(--ink); border-color: var(--ink); } /* selected */
+.step[aria-current="step"]        { background: var(--ground-inverse); color: var(--on-accent); } /* filled chip */
+```
+
+Procedure: print every rule that reads the accent token with its selector,
+sort each into keep or move, and edit the rule itself. Then search outside
+the stylesheet, because a token change does not reach these:
+
+- `stroke="var(--accent)"` and `fill` attributes in SVG that scripts write
+  (rings, sparklines). Point them at the data-mark token.
+- Image files with the accent baked in (loading art, empty-state art).
+  Recolour the hex values.
+- Tests that pin the old colour. They fail on the first full run; update
+  them only because the owner changed the spec, and say so in the report.
+
+### 5. A named look is a retint
+
+When the owner names a look for an app that already has tokens ("grey and
+white", "warmer", "less purple"), change token values. Keep the token names,
+the primitives and the accent unless the owner asks to drop it, and offer
+the accent as a named fork. Larger type and wider cards in the same round
+can push prose past the measure, so run the exam on every route afterwards.
+
 ## Cross-screen consistency gate (final pass)
 
 Run after the last screen migrates; these are pass/fail:

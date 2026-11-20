@@ -111,6 +111,24 @@ describe("exam: composition (measure, cover, fold)", { skip }, () => {
     assert.ok(!c.some((p) => p.includes("Half day plans")), c.join("\n"));
   });
 
+  test("a screen-reader-only label beside an opaque input is not reported as covered", async () => {
+    const { problems } = await audit("sr-only-label.html");
+    const c = problems.filter((p) => p.startsWith("text under another element"));
+    assert.ok(!c.some((p) => p.includes("Hidden search label")), c.join("\n"));
+  });
+
+  test("a label inside a closed <details> menu is not reported as covered", async () => {
+    const { problems } = await audit("closed-details.html");
+    const c = problems.filter((p) => p.startsWith("text under another element"));
+    assert.ok(!c.some((p) => p.includes("Closed menu option")), c.join("\n"));
+  });
+
+  test("a button inside a closed <details> menu at the right edge is not reported as cut off", async () => {
+    const { problems } = await audit("closed-details-wide.html");
+    const c = problems.filter((p) => p.startsWith("content cut off"));
+    assert.deepEqual(c, []);
+  });
+
   test("a headline pushed below 800px fails the fold", async () => {
     const { problems } = await audit("fold.html");
     assert.ok(problems.some((p) => /^hero headline ends at \d+px, below the 1280×800 fold/.test(p)), problems.join("\n"));
