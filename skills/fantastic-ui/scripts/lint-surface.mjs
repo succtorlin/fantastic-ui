@@ -32,6 +32,7 @@ export const RULES = [
   { id: "two-sticky-top0", severity: "P1", description: "more than one position: sticky + top: 0 in the run (offset the others by --nav-h)" },
   { id: "bare-1fr-image-grid", severity: "P1", description: "repeat(n, 1fr) columns in a file that styles images (use minmax(0, 1fr))" },
   { id: "tracked-caps", severity: "P1", description: "uppercase tracked past 0.04em outside a data label (panel head, table head, stat caption): the kicker" },
+  { id: "tinted-pill", severity: "P1", description: "a status label drawn as a filled pill (badge, chip, tag, status + pill radius + background): set it as coloured text" },
   { id: "accent-word", severity: "P1", description: "an <em>/<i>/<mark> accent word in an h2-h6, or a second one in an h1 (once per page, hero only)" },
   { id: "placeholder-proof", severity: "P1", description: "placeholder people, companies or lorem ipsum in visible copy (an invented testimonial or proof)" },
   { id: "form-goes-nowhere", severity: "P1", description: "a form with no action whose submit is prevented and nothing in the run sends it (the fake send)" },
@@ -405,6 +406,11 @@ export function lint(paths, opts = {}) {
       const ls = dval(bl, "letter-spacing");
       if (ls && !bl.kf && bl.sel !== "[style]" && trackingEm(ls.value, vars) > 0.04 && (/uppercase/.test(dval(bl, "text-transform")?.value ?? "") || /small-caps/.test(dval(bl, "font-variant-caps", "font-variant")?.value ?? "")) && !splitTop(bl.sel).every((part) => DATA_LABEL_RE.test(part)))
         add("tracked-caps", f, ls.off, `${bl.sel} sets uppercase tracked ${ls.value}: the kicker. Delete the label and reread the section; if nothing was lost, open it with the heading. Tracked caps are for data labels (panel heads, table heads, stat captions), so name the selector for one (.panel-label) if this labels a figure.`, bl.off);
+      // A status label drawn as a filled pill: the tinted halo. Controls, tracks and avatars keep their shape.
+      const pr = dval(bl, "border-radius"), pbg = dval(bl, "background", "background-color");
+      if (pr && pbg && !bl.kf && !bl.jsx && bl.sel !== "[style]" && /(^|\s)(9{3,}px|\d{3,}px|50rem|100vmax)\b/.test(pr.value) && !/^(none|transparent|inherit|initial|unset)\b/.test(pbg.value.trim())
+        && /badge|pill|chip|tag|status|label|health/i.test(bl.sel) && !/button|btn|toggle|switch|tab|track|progress|meter|bar|avatar|dot|input|thumb|segment|slider/i.test(bl.sel))
+        add("tinted-pill", f, pr.off, `${bl.sel} is a filled pill; a status label is text in its status colour, with no fill and no pill shape. Keep tints for message blocks (a notice, an error) and pill radius for controls and tracks.`, bl.off);
       const ff = dval(bl, "font-family", "font");
       if (ff && !bl.kf && bl.sel !== "[style]" && MONO_RE.test(ff.value)) {
         // a :hover/:focus restyle of the same selector is the same cause, reported once

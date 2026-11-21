@@ -705,7 +705,8 @@ purple/violet gradients · `rounded-2xl` on everything · three identical featur
 `shadow-lg` everywhere · indigo accent by default · hero→features→testimonials→CTA on a
 product that isn't a landing page · uniform section spacing · an icon on every card ·
 a tracked-caps label above every heading · an accent-coloured word in every heading ·
-monospace on buttons and labels · invented testimonials, logo walls and round-number
+monospace on buttons and labels · a tinted pill behind every status word (the halo) ·
+an accent-coloured banner inside the product · invented testimonials, logo walls and round-number
 metrics · a styled-div dashboard posing as the product.
 
 The gut check: **would a developer guess this was generated?** If yes, the most generic
@@ -746,6 +747,51 @@ or "工作台". When an agent does the work, the run-console layer in
 stream instead of a chart, nine run states each with its action, a stop
 control that never leaves the screen, approval cards inside the stream, and
 cost as a receipt. Charts follow [data-charts.md](references/data-charts.md).
+
+**Product-surface rules** (each one came from a real retrofit the owner sent
+back; detail and CSS in
+[product-surfaces.md](references/product-surfaces.md#rules-from-the-field)):
+
+1. **A status label is text, not a tinted pill.** The status colour stays on
+   the word; the fill, the padding and the pill shape go. Tints are for
+   message blocks (a notice, an error). Pill radius is for controls and
+   tracks (a toggle, a progress bar). `lint-surface` rule `tinted-pill`.
+2. **Three grounds, one meaning each.** On a light surface the page is grey,
+   what you work in is a white panel, and a panel inside a panel is grey
+   again. One card shadow, one panel radius, for the whole app.
+3. **Nothing sits bare on the page that its siblings put in a panel.** Every
+   table, filter bar and form goes in a panel; an empty table and its message
+   are one panel; no text touches the page edge or a panel edge.
+4. **The accent is for the primary action, links and focus.** Selection is
+   neutral (a grey fill, heavier weight): every selected, current, pressed
+   and open state, not only the sidebar. A selected tab never looks like a
+   primary button. The accent does not colour data marks (score bars, rank
+   numbers, progress rings, chart lines, step chips) or decoration (eyebrows,
+   icon tiles, side rules, spinners, resize handles), and never fills a
+   banner. To enforce it, list every rule that reads the accent token and
+   sort each into keep (action, link, focus) or move; do not stop at the
+   screens the owner named.
+5. **A named look on an existing token system is a retint.** "Make it grey
+   and white" changes the token values, recomputes the contrast matrix and
+   keeps the system. It is not a second design system and not a preset.
+6. **A shared rule is examined on every route.** After a token or primitive
+   changes, sweep every route with a script for bare tables and edge-touching
+   text, screenshot them, and run the exam on all of them, not only on the
+   pages named in the request.
+7. **Override nothing you can fix at the source.** A later rule that cancels
+   an earlier one leaves the defect in the file for the next person; edit the
+   first rule.
+8. **Check the exam can run before trusting it.** Exit code 2 means the tools
+   were not found and nothing was examined; report that as not examined.
+   A route that fails with no landmarks and no `h1` was caught on a loading
+   screen: run the exam with nothing else loading the server (not beside the
+   test suite) and rerun that route alone before reading it as a defect.
+9. **A retint reaches past the stylesheet.** Colour also lives in SVG
+   `stroke` and `fill` attributes written by scripts, in image files (loading
+   art, empty-state art) and in tests that pin a colour. After changing a
+   colour rule, search scripts, markup, assets and tests for the old token
+   and its hex values; point script-drawn marks at a token, recolour the
+   images, and update a pinning test only when the owner changed the spec.
 
 **Imagery in-product:** one plate per route at most, never behind data; every
 panel and subpanel inherits it in its empty and first-run states, through the
@@ -966,6 +1012,9 @@ Additional gates when the work touched product surfaces:
       filtered / failed states distinguished
 - [ ] AI-default sweep: no stray gradient, uniform radius, three-identical-cards row,
       blanket shadow, default indigo, or icon-per-card
+- [ ] No status label is a filled pill (`tinted-pill` clean); no table, filter bar
+      or text sits bare on the page beside panelled siblings; selection is
+      neutral and the accent marks only actions, links and focus
 - [ ] Cross-screen pass: accent means the same thing on every page; focus
       rings identical; density comparable between sibling panels
 - [ ] Before/after screenshots captured for each migrated screen

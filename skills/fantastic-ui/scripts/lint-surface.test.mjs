@@ -67,6 +67,7 @@ const MUTATIONS = [
   ["tracked-caps", "P1", "styles.css", ".note { color: var(--muted); }", ".note { color: var(--muted); text-transform: uppercase; letter-spacing: .2em; }"],
   ["tracked-caps", "P1", "styles.css", ".note { color: var(--muted); }", ".kicker { text-transform: uppercase; letter-spacing: 3px; }\n.note { color: var(--muted); }"],
   ["tracked-caps", "P1", "card.tsx", 'className="text-[color:var(--muted)]"', 'className="text-[color:var(--muted)] uppercase tracking-widest"'],
+  ["tinted-pill", "P1", "styles.css", ".note { color: var(--muted); }", ".status-badge { color: var(--muted); background: var(--ground); border-radius: 999px; }\n.note { color: var(--muted); }"],
   ["accent-word", "P1", "card.tsx", "{ticker}</h3>", "{ticker} <em>now</em></h3>"],
   ["accent-word", "P1", "index.html", "Track every position against the close", "Track <em>every</em> position against <i>the close</i>"],
   ["placeholder-proof", "P1", "index.html", "Prices update at the close.", "Prices update at the close, says Jane Doe."],
@@ -224,6 +225,11 @@ describe("review regressions", () => {
     finally { rmSync(d, { recursive: true, force: true }); }
   };
   const rules = (files) => rulesOf(lintDir(files));
+  test("tinted-pill leaves controls, tracks and unfilled labels alone", () => {
+    assert.deepEqual(rules({ "a.css": ".status { color: var(--ink); border-radius: 999px; background: none; }\n.progress-track { border-radius: 999px; background: var(--ground); }\n.toggle-label { border-radius: 999px; background: var(--ground); }\n.badge { background: var(--ground); border-radius: 4px; }" }), []);
+    assert.deepEqual(rules({ "a.css": ".row .chip { background: var(--ground); border-radius: 9999px; }" }), ["tinted-pill"]);
+  });
+
   test("tracked-caps reads tokens and calc(), and tokens from another file", () => {
     assert.deepEqual(rules({ "a.css": ".kicker { text-transform: uppercase; letter-spacing: var(--track); line-height: 1.2; }", "z-tokens.css": ":root { --track: .2em; }" }), ["tracked-caps"]);
     assert.deepEqual(rules({ "a.css": ".kicker { text-transform: uppercase; letter-spacing: calc(0.2em); line-height: 1.2; }" }), ["tracked-caps"]);

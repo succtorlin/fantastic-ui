@@ -125,6 +125,8 @@ async function layoutChecks(page, width) {
       if (el.classList.contains("skip") || el.closest(".table-wrap")) continue;
       const r = el.getBoundingClientRect();
       if (!r.width || !r.height) continue;
+      // Content of a closed <details> has a box but is not rendered.
+      if (el.checkVisibility && !el.checkVisibility()) continue;
       const hasContent = el.matches("img, svg, input, button, a, h1, h2, h3, p, td, th, li, b, span, figcaption") && (el.textContent.trim() || el.matches("img, svg"));
       if (hasContent && (r.right > width + 1 || r.left < -1)) {
         out.push(`content cut off at ${width}: <${el.tagName.toLowerCase()}> spans ${Math.round(r.left)}–${Math.round(r.right)}px`);
@@ -233,8 +235,13 @@ async function coverChecks(page, width) {
     };
     for (const el of document.querySelectorAll("h1, h2, h3, h4, p, li, a, button, label, figcaption, td, th, dt, dd, blockquote")) {
       if (el.closest("[aria-hidden=true], dialog:not([open]), [hidden]") || chrome(el)) continue;
+      // content of a closed <details> (content-visibility: hidden) still reports rects but paints nothing
+      if (el.checkVisibility && !el.checkVisibility()) continue;
       // clamped or ellipsised text reports rects for lines it never paints
       const ecs = getComputedStyle(el);
+      // a screen-reader-only label (clipped to a 1px box) paints nothing, so nothing can cover it
+      const ebox = el.getBoundingClientRect();
+      if (ecs.position === "absolute" && ecs.overflow !== "visible" && ebox.width <= 1 && ebox.height <= 1) continue;
       if (ecs.textOverflow === "ellipsis" || (ecs.webkitLineClamp && ecs.webkitLineClamp !== "none")) continue;
       const text = el.textContent.replace(/\s+/g, " ").trim();
       if (!text) continue;
