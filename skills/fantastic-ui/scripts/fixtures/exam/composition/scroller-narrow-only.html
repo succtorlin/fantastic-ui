@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Row that scrolls only on small screens</title>
+<style>
+  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: #111; background: #fff; }
+  main { padding: 16px; }
+  h1 { font-size: 28px; margin: 0 0 16px; }
+  .row { display: flex; gap: 12px; margin: 0; padding: 0; list-style: none; }
+  .row li { flex: 0 0 240px; padding: 16px; background: #eee; }
+  :focus-visible { outline: 2px solid #111; outline-offset: 2px; }
+  .row { flex-wrap: wrap; }
+  @media (max-width: 1023px) { .row { flex-wrap: nowrap; overflow-x: auto; } }
+</style>
+</head>
+<body>
+<main>
+<h1>Row that scrolls only on small screens</h1>
+<ul class="row" data-fui-scroll="Lanterns" tabindex="0" role="region" aria-label="Lanterns"><li>Lantern number 1</li><li>Lantern number 2</li><li>Lantern number 3</li><li>Lantern number 4</li><li>Lantern number 5</li><li>Lantern number 6</li><li>Lantern number 7</li><li>Lantern number 8</li></ul>
+</main>
+</body>
+</html>

@@ -19,12 +19,19 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SCRIPT = HERE / "design_md.py"
-EXAMPLE = HERE.parent.parent.parent / "examples" / "gallery-white" / "index.html"
+# The Gallery White example page, shipped inside the skill so the tests run
+# from an installed copy (~/.claude/skills/fantastic-ui) as well as a checkout.
+EXAMPLE = HERE / "fixtures" / "design-md" / "gallery-white.html"
+# The published page it is a copy of. Only a repository checkout has it: it
+# lives beside skills/, outside the folder an install copies.
+PUBLISHED_EXAMPLE = HERE.parent.parent.parent / "examples" / "gallery-white" / "index.html"
 sys.path.insert(0, str(HERE))
 
 import design_md as D  # noqa: E402
 
-PRESETS = "ABCDEFGHIJKL"
+PRESETS = "ABCDEFGHIJKLMNOPQR"
+# What the front matter's `spacing` group can hold: one length, nothing fluid.
+PLAIN_LENGTH = re.compile(r"-?[\d.]+(px|rem|em)")
 
 MINIMAL = """---
 version: alpha
@@ -285,6 +292,13 @@ def test_drift_reads_style_blocks_and_the_example_page_matches_its_preset():
     assert rep["summary"]["match"] >= 25
 
 
+def test_the_shipped_example_page_is_the_published_one():
+    if not PUBLISHED_EXAMPLE.is_file():
+        return  # an installed skill: the published page is not on this machine
+    assert EXAMPLE.read_bytes() == PUBLISHED_EXAMPLE.read_bytes(), (
+        f"{EXAMPLE} is stale: copy {PUBLISHED_EXAMPLE} over it")
+
+
 # ---------------------------------------------------------------- review regressions
 
 
@@ -400,15 +414,53 @@ def test_translucent_or_unmeasurable_text_is_not_a_passing_component():      # L
     assert {f for f, _, _ in failing} == {"ink", "ink-2"}
 
 
+def _export_parts(letter):
+    """What a preset declares, what its export's front matter holds, and the
+    export's written sections by heading."""
+    front, body = D.split_front_matter(D.export(letter, None))
+    tok = D._yaml().safe_load(front)
+    _, section = D._preset_section(letter)
+    block = re.search(r"```css\n(.*?)```", section, flags=re.S).group(1)
+    declared = {n: v for n, v, _ in D._token_lines(block)}
+    # an independent read of the names, so a parser fault cannot hide a token
+    assert set(re.findall(r"^\s*--([\w-]+)\s*:", block, flags=re.M)) <= set(declared), letter
+    in_front = set(tok["colors"]) | {"r-" + k for k in tok.get("rounded", {})} \
+        | set(tok.get("spacing", {})) | ({"sans", "display", "mono"} & set(declared))
+    parts = re.split(r"^## (.+)\n", body, flags=re.M)
+    return declared, in_front, dict(zip(parts[1::2], parts[2::2]))
+
+
+def test_the_export_tests_cover_every_preset():
+    gates = json.loads((HERE / "preset-gates.json").read_text(encoding="utf-8"))["presets"]
+    assert set(PRESETS) == set(gates), set(PRESETS) ^ set(gates)
+
+
 def test_export_output_is_unchanged_by_the_token_parser_rewrite():
     for letter in PRESETS:
-        tok = D._yaml().safe_load(D.split_front_matter(D.export(letter, None))[0])
-        title, section = D._preset_section(letter)
-        block = re.search(r"```css\n(.*?)```", section, flags=re.S).group(1)
-        declared = set(re.findall(r"^\s*--([\w-]+)\s*:", block, flags=re.M))
-        exported = set(tok["colors"]) | {"r-" + k for k in tok.get("rounded", {})} \
-            | set(tok.get("spacing", {})) | {"sans", "display", "mono"}
-        assert declared - exported <= {"lift", "lift-1", "lift-2"}, (letter, declared - exported)
+        declared, in_front, _ = _export_parts(letter)
+        for name in set(declared) - in_front:      # outside the front matter only when
+            value = declared[name]                 # the front matter has no group for it
+            assert not D.is_color(value) and not PLAIN_LENGTH.fullmatch(value), (letter, name)
+
+
+def test_export_names_every_token_the_front_matter_cannot_hold():
+    for letter in PRESETS:
+        declared, in_front, sections = _export_parts(letter)
+        body = "\n".join(sections.values())
+        dropped = sorted(n for n in set(declared) - in_front if f"**{n}:** " not in body)
+        assert not dropped, (letter, dropped)
+
+
+def test_export_files_a_token_without_a_group_under_the_section_it_belongs_to():
+    _, _, m = _export_parts("M")
+    assert "- **gutter:** clamp(16px, 2.9vw, 34px)\n" in m["Layout"]
+    assert "- **tile-ratio:** 14 / 15 (slightly taller than wide)\n" in m["Layout"]
+    assert ("- **nav-shadow:** `0 6px 24px color-mix(in oklab, var(--ink) 9%, transparent)`\n"
+            in m["Elevation & Depth"])
+    _, _, p = _export_parts("P")
+    assert "- **display-stretch:** 125%\n" in p["Typography"]
+    _, _, e = _export_parts("E")                   # a `lift` shadow stays where it was
+    assert "- **lift" in e["Elevation & Depth"] and "- **lift" not in e["Layout"]
 
 
 # ---------------------------------------------------------------- runner

@@ -214,6 +214,14 @@ pattern: it removes the user's recorded decision without asking.
 - A fantastic-ui token `--x` exports as `colors.x` (and radius `--r-x` as
   `rounded.x`), so a preset's DESIGN.md and its stylesheet drift-check with no
   `--map` at all.
+- A token the front matter has no group for is written out under the section
+  it belongs to, so no declared token leaves the file: a shadow (`--lift`,
+  `--nav-shadow`) under Elevation & Depth, a font setting
+  (`--display-stretch`) under Typography, and anything else (a fluid
+  `clamp()` length, a ratio) under Layout. `spacing` holds single lengths
+  only, so `drift` does not compare these; check them by eye. The lint
+  result above was measured on presets A to L; M to R have not been run
+  through the official linter.
 - `typography` in the export carries the three family stacks only
   (`headline-display`, `body-md`, `label-mono`). Sizes and weights per element
   live in the Components prose, as they do in the preset. Add explicit levels

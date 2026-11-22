@@ -2,13 +2,16 @@
 name: fantastic-ui
 description: >-
   Design, build, and audit marketing pages and product UI, including landing
-  pages, portfolios, dashboards, charts, AI consoles, checkout, mobile
-  screens, and individual components. Use for comparing visual directions,
-  whole-app redesigns, creating or checking DESIGN.md, Astryx layout and
-  component research, and WCAG accessibility work. Diagnose confusing
-  interactions, navigation, forms, and dark patterns with task walkthroughs
-  and severity-ranked findings. Covers token-driven imagery, live product
-  proof, motion, responsive states, and an exam for the implemented result.
+  pages, online shops, product and launch pages, marketplaces, portfolios,
+  case-study indexes, split-tile galleries of the user's own work shown as
+  large, sharp, high-resolution images, dashboards, charts,
+  AI consoles, checkout, mobile screens, and individual components. Use for
+  comparing visual directions, whole-app redesigns, creating or checking
+  DESIGN.md, Astryx layout and component research, and WCAG accessibility
+  work. Diagnose confusing interactions, navigation, forms, and dark patterns
+  with task walkthroughs and severity-ranked findings. Covers token-driven
+  imagery, live product proof, motion, responsive states, and an exam for the
+  implemented result.
 ---
 
 # Fantastic UI — instrument-grade marketing pages and product surfaces
@@ -57,13 +60,16 @@ node ~/.claude/skills/fantastic-ui/scripts/exam.mjs dist/
 ```
 
 It runs, per page: axe-core with the WCAG 2.0/2.1/2.2 A and AA tags at 1440
-and 390 px; reflow at 320–1920 with no overflow and no clipped content; every
+and 390 px; reflow at 320–1920 with no overflow and no clipped content (a row
+meant to scroll sideways is marked `data-fui-scroll` and checked for that); every
 link and button ≥24×24 px; no wrapping button labels; matching marked
 button sizes and block edges; a skip link, landmarks,
 one `h1` and `lang`; a visible focus ring ≥2 px and ≥3:1 on every focusable;
 `verify-preset.mjs` when a preset is in use (contrast, zero webfonts, asset
 weight, reduced-motion path, token roles, accent restraint, separation, the
-preset's own traps); `lint-surface.mjs --strict` over the touched source; a
+preset's own traps, and for a preset with the showcase lane (M, and N to R)
+its showcase images: markup, no upscaling at 1440 px @2× and 390 px @3×,
+weight); `lint-surface.mjs --strict` over the touched source; a
 **no-JS pass** (text a visitor sees must not be hidden when JavaScript is
 off: content survives removal); and, for each `--dialog` trigger at 1440 and
 390, a keyboard-opened, named, modal dialog that takes focus, keeps Tab
@@ -282,7 +288,7 @@ reference to it means this sentence. Example from the worked case:
 
 ### Step 0a — Run the preset check FIRST (do not skip, do not skip silently)
 
-Before writing a brief, decide whether one of the twelve presets in
+Before writing a brief, decide whether one of the eighteen presets in
 [references/theme-presets.md](references/theme-presets.md) already is the brief.
 Work the gates in order and stop at the first that answers:
 
@@ -380,7 +386,7 @@ Every path needs the clause: preset, fresh brief, and recovered brief alike.
 would sit behind numbers"). Slots, tools and limits:
 [references/ai-atmosphere.md](references/ai-atmosphere.md).
 
-**Known gap, state it rather than forcing a fit:** all twelve presets are
+**Known gap, state it rather than forcing a fit:** all eighteen presets are
 content- or product-led. **Data-heavy analytics, developer tools, dashboards
 and trading/finance surfaces are still not covered.** Two presets are dark, but
 Midnight Showroom sells objects and has no data grammar at all — no monospace
@@ -563,6 +569,21 @@ number** — each slot's visibility and worst text ratio from
 `scripts/plate-check.js` on the composited page — never "reads correctly"
 from the raw file.
 
+**The one exception is the showcase lane.** Where the page's subject *is*
+pictures of the user's own work (a portfolio, a case-study index, a gallery
+of product screens: Preset M), those pictures are proof, not atmosphere.
+Marked `data-showcase`, they leave the 30 KB cap and must instead carry real
+`alt` text, explicit dimensions and a `srcset`, never be upscaled by the
+browser at 1440 px @2× or 390 px @3×, and stay inside a weight budget. They
+are captures or photographs of real things, never stock and never generated.
+A tilted frame is allowed there because what is in it is real. Only a preset
+that declares the lane has it:
+[references/folio-modules.md](references/folio-modules.md#6-the-showcase-lane).
+The five shop presets (N to R) allow the same lane for their large product
+photographs and renders without requiring it, so a page whose photographs
+have not arrived still passes:
+[references/storefront-modules.md](references/storefront-modules.md).
+
 ### 4. Page rhythm — dense, alternating, specific
 
 Structure the page as alternating **texture bands** rather than uniform
@@ -635,7 +656,8 @@ These are pass/fail, checked before shipping:
   when applicable. Measure JavaScript and CSS when adding Astryx within
   a requested adoption.
 - Any raster asset ≤ 30 KB WebP (the generator enforces it); decorative
-  imagery static and `aria-hidden`
+  imagery static and `aria-hidden`. Showcase images under Preset M are the
+  only exception, with their own sharpness and weight gates
 - Motion on compositor properties only (`transform`, `opacity`); scroll work
   via IntersectionObserver or native scroll-driven CSS, never scroll handlers
   doing layout reads
@@ -961,11 +983,14 @@ Run through this before calling the page done:
 - [ ] Peer button widths and heights match, and shared block edges align at
       every breakpoint. Run the exam with geometry markers and verify long
       labels and loading states in the rendered surface.
-- [ ] System fonts and assets ≤ 30 KB each. Measure bundle impact when
-      adopting Astryx and review its diagnostics alongside the exam.
+- [ ] System fonts and assets ≤ 30 KB each (showcase images excepted).
+      Measure bundle impact when adopting Astryx and review its diagnostics
+      alongside the exam.
 - [ ] Imagery plan executed, or its absence justified in the brief line
 - [ ] Every raster ≤ 30 KB WebP, `aria-hidden`, explicit dimensions, static;
       every asset (`plate`, `ai`, `compress`, `svg`) has an imagery-ledger line
+- [ ] Preset M only: every showcase image is real work, has `alt`, dimensions
+      and a `srcset`, and `showcase-markup`, `-sharpness` and `-weight` pass
 - [ ] Every plate slot measured with `scripts/plate-check.js` at 1440 and
       375 px behind a stale-CSS sentinel (`expect`): ≥8% ≥1.1:1 and ≥1%
       ≥1.3:1 against the page, raw and after the structure blur (grain is
@@ -1030,10 +1055,11 @@ Additional gates when the work touched product surfaces:
 - [references/control-geometry.md](references/control-geometry.md) — required
   button sizing, block alignment, and exam markers for every surface.
 
-- [references/theme-presets.md](references/theme-presets.md) — twelve named
+- [references/theme-presets.md](references/theme-presets.md) — eighteen named
   directions (Coastal Editorial, Blueprint Mono, Marigold Report, Atelier Warm,
   Terracotta Commerce, Midnight Showroom, Broadcast Light, Studio Kinetic,
-  Campus Bright, Charter Navy, Dispatch Yellow, Gallery White): contrast-validated
+  Campus Bright, Charter Navy, Dispatch Yellow, Gallery White, Folio Split,
+  Sprint Stage, Olive Outfitter, Chamfer Spec, Market Shelf, Mono Catalogue): contrast-validated
   tokens, grammar, imagery, signal table. Read at Step 0a, before writing a brief.
 - [references/direction-samples.md](references/direction-samples.md) — when
   the direction is open: render the top two or three as sample pages with real
@@ -1047,6 +1073,14 @@ Additional gates when the work touched product surfaces:
   an explicit request. Read at Step 0a, gate 0.
 - [references/gallery-modules.md](references/gallery-modules.md) — Preset L's
   kit: tone bands, glass nav, studio-lit product stage, bento tiles. Read with L.
+- [references/folio-modules.md](references/folio-modules.md) — Preset M's kit:
+  pill nav, split grid of equal tiles, four picture compositions, and the
+  showcase lane for large content images (capture, export, gates). Read with M.
+- [references/storefront-modules.md](references/storefront-modules.md) — the
+  kit for the five shop presets N to R: black stage hero and reflection,
+  photo panel with a masked edge, cut corners that keep the focus ring, spec
+  strip, scrolling shelf, staggered greyscale tiles, product-photo markup.
+  Read with N, O, P, Q or R.
 - [references/visual-reference-analysis.md](references/visual-reference-analysis.md)
   — image/typography analysis, observed vs. inferred. Read at Step 0b.
 - [references/ai-atmosphere.md](references/ai-atmosphere.md) — the canonical
@@ -1096,7 +1130,7 @@ Additional gates when the work touched product surfaces:
   passes, text over imagery, fix patterns, guards. Read when entering the
   accessibility phase or on any a11y/WCAG request.
 - `scripts/verify-preset.mjs` + `scripts/preset-gates.json` — runnable gates for
-  all twelve presets; not density or "reads as the direction". Read "Verifying
+  all eighteen presets; not density or "reads as the direction". Read "Verifying
   an applied preset" in theme-presets.md before running it.
 - `scripts/gen_atmosphere.py` — `tokens`, `plate`, `svg`, `ai`, `compress`,
   `score`, `batch`; ≤30 KB, a ledger line per asset; `plate --page` exits 1

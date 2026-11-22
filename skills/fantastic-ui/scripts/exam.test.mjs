@@ -129,6 +129,39 @@ describe("exam: composition (measure, cover, fold)", { skip }, () => {
     assert.deepEqual(c, []);
   });
 
+  test("a marked row that scrolls by itself and can be reached is not cut-off content", async () => {
+    const { problems } = await audit("scroller.html");
+    assert.deepEqual(problems.filter((p) => /^(content cut off|scroller)/.test(p)), []);
+  });
+
+  test("a marked row that only scrolls on small screens is quiet at the widths where it wraps", async () => {
+    const { problems } = await audit("scroller-narrow-only.html");
+    assert.deepEqual(problems.filter((p) => /^(content cut off|scroller)/.test(p)), []);
+  });
+
+  test("the same row without the marker is still reported: the exemption is asked for, not assumed", async () => {
+    const { problems } = await audit("scroller-unmarked.html");
+    assert.ok(problems.some((p) => p.startsWith("content cut off at 320")), problems.join("\n"));
+  });
+
+  test("a marked row that does not scroll is reported, and its content still counts as cut off", async () => {
+    const { problems } = await audit("scroller-hidden.html");
+    assert.ok(problems.some((p) => /^scroller "Lanterns" at 320: overflow-x is hidden/.test(p)), problems.join("\n"));
+    assert.ok(problems.some((p) => p.startsWith("content cut off at 320")), problems.join("\n"));
+  });
+
+  test("a marked row the keyboard cannot reach is reported", async () => {
+    const { problems } = await audit("scroller-unreachable.html");
+    assert.ok(problems.some((p) => /^scroller "Lanterns" at 320: cannot be reached from the keyboard/.test(p)), problems.join("\n"));
+  });
+
+  test("an item wider than the screen is reported only at the widths it does not fit", async () => {
+    const { problems } = await audit("scroller-wide-item.html");
+    const wide = problems.filter((p) => /^scroller "Lanterns" at \d+: an item is wider than the screen/.test(p));
+    assert.ok(wide.some((p) => p.includes(" at 320:")) && wide.some((p) => p.includes(" at 390:")), problems.join("\n"));
+    assert.ok(!wide.some((p) => p.includes(" at 1440:")), wide.join("\n"));
+  });
+
   test("a headline pushed below 800px fails the fold", async () => {
     const { problems } = await audit("fold.html");
     assert.ok(problems.some((p) => /^hero headline ends at \d+px, below the 1280×800 fold/.test(p)), problems.join("\n"));
