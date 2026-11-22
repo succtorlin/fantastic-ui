@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" role="img"><title>A walker climbing pale concrete steps</title>
+<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9e6dc"/><stop offset="1" stop-color="#f5f2ea"/></linearGradient></defs><rect width="900" height="640" fill="url(#s)"/>
+<circle cx="560" cy="170" r="150" fill="#faf8f2"/>
+<path d="M430 640V360L900 96v544z" fill="#e3ded2"/>
+<path d="M430 360L900 96v40L430 392z" fill="#eeeae0"/>
+<path d="M660 640V420q0-150 240-190v410z" fill="#d6d0c2"/>
+<path d="M660 420q0-150 240-190v26q-214 40-214 170v214h-26z" fill="#c8c1b1"/>
+<path d="M40 590.9H900V640H40z" fill="#ded8cb"/>
+<path d="M40 590.9h860v10h-860z" fill="#f0ece3"/>
+<path d="M40 600.9v36" stroke="#c4bdad" stroke-width="3"/>
+<path d="M172 544.9H900V640H172z" fill="#ded8cb"/>
+<path d="M172 544.9h728v10h-728z" fill="#f0ece3"/>
+<path d="M172 554.9v36" stroke="#c4bdad" stroke-width="3"/>
+<path d="M304 498.9H900V640H304z" fill="#ded8cb"/>
+<path d="M304 498.9h596v10h-596z" fill="#f0ece3"/>
+<path d="M304 508.9v36" stroke="#c4bdad" stroke-width="3"/>
+<path d="M436 452.9H900V640H436z" fill="#ded8cb"/>
+<path d="M436 452.9h464v10h-464z" fill="#f0ece3"/>
+<path d="M436 462.9v36" stroke="#c4bdad" stroke-width="3"/>
+<path d="M568 406.9H900V640H568z" fill="#ded8cb"/>
+<path d="M568 406.9h332v10h-332z" fill="#f0ece3"/>
+<path d="M568 416.9v36" stroke="#c4bdad" stroke-width="3"/>
+<path d="M700 360.9H900V640H700z" fill="#ded8cb"/>
+<path d="M700 360.9h200v10h-200z" fill="#f0ece3"/>
+<path d="M700 370.9v36" stroke="#c4bdad" stroke-width="3"/>
+<path d="M832 314.9H900V640H832z" fill="#ded8cb"/>
+<path d="M832 314.9h68v10h-68z" fill="#f0ece3"/>
+<path d="M832 324.9v36" stroke="#c4bdad" stroke-width="3"/>
+<path d="M0 640V590.9H40V640z" fill="#e6e1d5"/>
+<ellipse cx="504" cy="457.9" rx="62" ry="7" fill="#a9a292" opacity=".45"/>
+<g transform="translate(430 318) scale(1.4)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="18.2,-67.3 43.9,-36.7 81.7,-40.7" stroke="#ddd7c8" stroke-width="15"/>
+<circle cx="81.7" cy="-40.7" r="8" fill="#b08060"/>
+<polyline points="0,0 -16.5,57.7 -49,105.8" stroke="#a39373" stroke-width="23"/>
+<g transform="translate(-49 105.8) rotate(30)"><path d="M-10-3V7q0 4 4 4h29q6 0 3-6-6-5-17-10l-13-3z" fill="#e6e1d5"/><path d="M-9 10.500h34" stroke="#8b8f77" stroke-width="4" stroke-linecap="round"/></g>
+<polyline points="0,0 53.9,26.3 47.9,84" stroke="#b9a988" stroke-width="24"/>
+<g transform="translate(47.9 84) rotate(0)"><path d="M-10-3V7q0 4 4 4h29q6 0 3-6-6-5-17-10l-13-3z" fill="#f6f3ec"/><path d="M-9 10.500h34" stroke="#8b8f77" stroke-width="4" stroke-linecap="round"/></g>
+<polyline points="0,-8 20.2,-63.3" stroke="#f1ede3" stroke-width="40"/>
+<polyline points="20.2,-69.3 30.9,-103.3" stroke="#c4926f" stroke-width="11"/>
+<circle cx="30.9" cy="-103.3" r="16" fill="#c4926f"/>
+<path d="M14.4 -106.3a16.500 16.500 0 0 1 32.500-3l11 3q2 3-2 3l-41.500 0z" fill="#565b3a"/>
+<polyline points="18.2,-67.3 -7.5,-36.7 -15.4,0.5" stroke="#f1ede3" stroke-width="15"/>
+<circle cx="-15.4" cy="0.5" r="8" fill="#c4926f"/>
+</g>
+<g stroke="#8a9070" stroke-width="4" stroke-linecap="round" fill="none"><path d="M96 590.9q-6-40-22-56M108 590.9q2-46 14-70M120 590.9q10-34 30-48M84 590.9q-12-22-34-30"/></g>
+</svg>

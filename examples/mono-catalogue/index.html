@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="fui-preset" content="R">
+<title>Plain Goods: well-made objects for the desk and the bag</title>
+<meta name="description" content="Forty-two products for the desk and the bag, each chosen because it does one job properly and can be repaired.">
+<link rel="stylesheet" href="mono-catalogue.css">
+</head>
+<body class="page" id="top">
+<a class="skip" href="#main">Skip to main content</a>
+
+<header class="wrap">
+  <nav class="nav" aria-label="Main">
+    <ul class="nav__list">
+      <li><a href="#top" aria-current="page">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#products">Products</a></li>
+    </ul>
+    <a class="wordmark" href="#top" aria-label="Plain Goods, home">Plain Goods</a>
+    <ul class="nav__list nav__list--end">
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#bag">Bag (0)</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="hero__in">
+      <div class="hero__text">
+        <h1 id="hero-h">Well-made objects for the desk and the bag</h1>
+        <p class="hero__lede">Forty-two products, each chosen because it does one job properly and can be repaired.</p>
+        <div class="actions" data-fui-buttons="Hero actions">
+          <a class="btn btn--ink" href="#products">Browse products</a>
+          <a class="btn btn--line" href="#about">About us</a>
+        </div>
+      </div>
+      <svg class="hero__flutes" aria-hidden="true" focusable="false">
+        <defs>
+          <pattern id="flute" width="26" height="8" patternUnits="userSpaceOnUse">
+            <rect class="f-lit" width="9" height="8"/>
+            <rect class="f-hair" x="9" width="2" height="8"/>
+            <rect class="f-hair" x="15" width="1" height="8"/>
+            <rect class="f-lit" x="18" width="3" height="8"/>
+            <rect class="f-hair" x="21" width="1" height="8"/>
+          </pattern>
+        </defs>
+        <rect class="f-sheet" width="100%" height="100%"/>
+        <rect width="100%" height="100%" fill="url(#flute)"/>
+      </svg>
+      <div class="hero__art">
+        <svg role="img" aria-label="Drawing of a matte water bottle with a screw cap"><use href="#art-bottle" width="100%" height="100%"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap cats" aria-labelledby="cats-h">
+    <h2 class="vh" id="cats-h">Categories</h2>
+    <ul class="tiles">
+      <li><div class="tile">
+        <div class="tile__text">
+          <h3>Technology</h3>
+          <p>Chargers, cables and a small drone.</p>
+          <a class="tile__link" href="?category=technology#products" aria-label="Explore category: Technology">Explore category <svg class="icon" width="16" height="16" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a>
+        </div>
+        <div class="tile__art">
+          <svg role="img" aria-label="Drawing of a small four-rotor drone seen from above"><use href="#art-drone" width="100%" height="100%"/></svg>
+        </div>
+      </div></li>
+
+      <li><div class="tile">
+        <div class="tile__text">
+          <h3>Audio</h3>
+          <p>Headphones and speakers that can be re-padded.</p>
+          <a class="tile__link" href="?category=audio#products" aria-label="Explore category: Audio">Explore category <svg class="icon" width="16" height="16" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a>
+        </div>
+        <div class="tile__art">
+          <svg role="img" aria-label="Drawing of over-ear headphones"><use href="#art-headphones" width="100%" height="100%"/></svg>
+        </div>
+      </div></li>
+
+      <li><div class="tile">
+        <div class="tile__text">
+          <h3>Gear</h3>
+          <p>Cases, straps and bottles.</p>
+          <a class="tile__link" href="?category=gear#products" aria-label="Explore category: Gear">Explore category <svg class="icon" width="16" height="16" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a>
+        </div>
+        <div class="tile__art">
+          <svg role="img" aria-label="Drawing of the back of a phone in a dark case with a wrist strap"><use href="#art-phone" width="100%" height="100%"/></svg>
+        </div>
+      </div></li>
+
+      <li><div class="tile">
+        <div class="tile__text">
+          <h3>Computers</h3>
+          <p>Laptops, keyboards and mice.</p>
+          <a class="tile__link" href="?category=computers#products" aria-label="Explore category: Computers">Explore category <svg class="icon" width="16" height="16" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a>
+        </div>
+        <div class="tile__art">
+          <svg role="img" aria-label="Drawing of an open laptop"><use href="#art-laptop" width="100%" height="100%"/></svg>
+        </div>
+      </div></li>
+    </ul>
+  </section>
+
+  <section class="wrap shop" id="products" aria-labelledby="shop-h">
+    <h2 class="vh" id="shop-h">Products</h2>
+    <div class="filters">
+      <nav aria-label="Filter products by category">
+        <ul class="filters__list">
+          <li><a href="index.html#products" aria-current="true">All</a></li>
+          <li><a href="?category=technology#products">Technology</a></li>
+          <li><a href="?category=gear#products">Gear</a></li>
+          <li><a href="?category=audio#products">Audio</a></li>
+        </ul>
+      </nav>
+      <form class="search" role="search" action="index.html#products" method="get">
+        <label class="search__label" for="q">Search products</label>
+        <input class="search__input" id="q" name="q" type="search" autocomplete="off">
+        <button class="search__go" type="submit" aria-label="Search"><svg class="icon" width="20" height="20" aria-hidden="true" focusable="false"><use href="#i-search"/></svg></button>
+      </form>
+    </div>
+
+    <ul class="products">
+      <li><article class="product">
+        <div class="product__art"><svg role="img" aria-label="Drawing of a wireless mouse seen from above"><use href="#art-mouse" width="100%" height="100%"/></svg></div>
+        <p class="data-label">Technology</p>
+        <h3 class="product__name"><a href="?product=wireless-mouse#products">Wireless mouse</a></h3>
+        <p class="product__price">$49.99</p>
+      </article></li>
+      <li><article class="product">
+        <div class="product__art"><svg role="img" aria-label="Drawing of a matte water bottle with a screw cap"><use href="#art-bottle" width="100%" height="100%"/></svg></div>
+        <p class="data-label">Gear</p>
+        <h3 class="product__name"><a href="?product=water-bottle#products">Water bottle</a></h3>
+        <p class="product__price">$12.99</p>
+      </article></li>
+      <li><article class="product">
+        <div class="product__art"><svg role="img" aria-label="Drawing of a short cylindrical smart speaker wrapped in fabric"><use href="#art-speaker" width="100%" height="100%"/></svg></div>
+        <p class="data-label">Audio</p>
+        <h3 class="product__name"><a href="?product=smart-speaker#products">Smart speaker</a></h3>
+        <p class="product__price">$69.99</p>
+      </article></li>
+      <li><article class="product">
+        <div class="product__art"><svg role="img" aria-label="Drawing of a jointed desk lamp with a round base"><use href="#art-lamp" width="100%" height="100%"/></svg></div>
+        <p class="data-label">Technology</p>
+        <h3 class="product__name"><a href="?product=desk-lamp#products">Desk lamp</a></h3>
+        <p class="product__price">$89.00</p>
+      </article></li>
+      <li><article class="product">
+        <div class="product__art"><svg role="img" aria-label="Drawing of a weighted cable organiser holding three cables"><use href="#art-organiser" width="100%" height="100%"/></svg></div>
+        <p class="data-label">Gear</p>
+        <h3 class="product__name"><a href="?product=cable-organiser#products">Cable organiser</a></h3>
+        <p class="product__price">$14.50</p>
+      </article></li>
+      <li><article class="product">
+        <div class="product__art"><svg role="img" aria-label="Drawing of an open earbuds case with two earbuds inside"><use href="#art-case" width="100%" height="100%"/></svg></div>
+        <p class="data-label">Audio</p>
+        <h3 class="product__name"><a href="?product=earbuds-case#products">Earbuds case</a></h3>
+        <p class="product__price"><span class="product__sale">Sale</span> <span><span class="vh">Now </span>$24.00</span> <s><span class="vh">Was </span>$32.00</s></p>
+      </article></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="wrap">
+  <div class="foot">
+    <p class="foot__statement" id="about">Repairs and spare parts for everything we sell.</p>
+    <div class="foot__cols">
+      <div>
+        <h2>Shop</h2>
+        <ul>
+          <li><a href="?category=technology#products">Technology</a></li>
+          <li><a href="?category=audio#products">Audio</a></li>
+          <li><a href="?category=gear#products">Gear</a></li>
+          <li><a href="?category=computers#products">Computers</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Repairs</h2>
+        <ul>
+          <li><a href="?page=book-a-repair#about">Book a repair</a></li>
+          <li><a href="?page=spare-parts#about">Spare parts</a></li>
+          <li><a href="?page=repair-guides#about">Repair guides</a></li>
+        </ul>
+      </div>
+      <div id="contact">
+        <h2>Contact</h2>
+        <ul>
+          <li><a href="mailto:hello@plaingoods.example">hello@plaingoods.example</a></li>
+          <li><a href="?page=returns#contact">Returns</a></li>
+          <li><a href="?page=delivery#contact">Delivery</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot__base">
+      <p>Drawings stand in for product photographs.</p>
+      <p id="bag">Your bag is empty.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- The drawings and icons, defined once and reused. Greys come from the --art tokens. -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-arrow" viewBox="0 0 16 16"><path d="M2.5 8h11M9 3.5 13.5 8 9 12.5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 20 20"><circle cx="9" cy="9" r="5.5"/><path d="m13.2 13.2 3.8 3.8"/></symbol>
+
+  <!-- Category drawings: each runs off the right and bottom of its box. The cut is in the
+       geometry (shapes that cross the box are written as cut paths), not left to clipping. -->
+  <symbol id="art-drone" viewBox="40 30 360 290" preserveAspectRatio="xMaxYMax meet">
+    <path class="l3" transform="translate(250 198) rotate(-20)" stroke-width="16" d="M-46 -22L-125 -78"/>
+    <path class="l3" transform="translate(250 198) rotate(-20)" stroke-width="16" d="M46 -22L125 -78"/>
+    <path class="a3" d="M207.7 229.9L152.6 309.5L151.2 313.4L152 317.5L154.1 320L164.1 320L165.8 318.6L220.9 239L222.3 235.1L221.5 231L218.8 227.8L214.9 226.4L210.9 227.2ZM298.6 210.7L392 236.3L396.2 236.3L399.8 234.2L400 233.8L400 223.2L399.8 222.9L396.3 220.8L302.9 195.2L298.7 195.2L295.1 197.3L293 200.8L293 205L295.1 208.6Z"/>
+    <rect class="a2" transform="translate(250 198) rotate(-20)" x="-76" y="-40" width="152" height="80" rx="30"/>
+    <rect class="a3" transform="translate(250 198) rotate(-20)" x="-44" y="-26" width="96" height="34" rx="17"/>
+    <path class="l1" transform="translate(250 198) rotate(-20)" stroke-width="3" d="M-30 22L14 22"/>
+    <path class="l1" transform="translate(250 198) rotate(-20)" stroke-width="3" d="M-30 30L-2 30"/>
+    <circle class="a5" transform="translate(250 198) rotate(-20)" cx="40" cy="-9" r="4"/>
+    <rect class="a1" transform="translate(250 198) rotate(-20)" x="-96" y="-17" width="30" height="34" rx="9"/>
+    <circle class="a3" transform="translate(250 198) rotate(-20)" cx="-88" cy="0" r="9"/>
+    <circle class="a5" transform="translate(250 198) rotate(-20)" cx="-91" cy="-3" r="3"/>
+    <circle class="a2" transform="translate(250 198) rotate(-20)" cx="-125" cy="-78" r="19"/>
+    <circle class="a2" transform="translate(250 198) rotate(-20)" cx="125" cy="-78" r="19"/>
+    <path class="a2" d="M177.1 307.6L178.1 311.7L178.1 315.9L177.2 320L141.2 320L140.4 316.4L140.3 312.2L141.2 308L143 304.1L145.6 300.8L148.9 298.1L152.7 296.2L156.9 295.2L161.1 295.1L165.3 296L169.1 297.8L172.5 300.4L175.2 303.7ZM400 246.6L396.5 247.4L392.2 247.4L388.1 246.6L384.2 244.8L380.9 242.1L378.2 238.9L376.3 235L375.3 230.9L375.2 226.7L376.1 222.5L377.9 218.6L380.5 215.3L383.8 212.6L387.6 210.7L391.8 209.7L396 209.6L400 210.5Z"/>
+    <path class="a1" d="M168 182.9L166.7 183.8L163.7 184.2L158.9 184L152.4 183.4L144.6 182.2L135.5 180.7L125.6 178.7L115.1 176.4L104.3 173.8L93.5 171L83.1 168.1L73.4 165.2L64.7 162.3L57.3 159.6L51.3 157.2L47 155.1L44.4 153.3L43.8 152L45 151.1L48 150.8L52.9 150.9L59.3 151.5L67.1 152.7L76.2 154.3L86.1 156.2L96.6 158.6L107.4 161.1L118.2 163.9L128.6 166.8L138.3 169.7L147 172.6L154.4 175.3L160.4 177.7L164.8 179.8L167.3 181.6ZM381.9 32.9L382.2 34.4L381.1 37.3L378.9 41.6L375.5 47.1L371 53.6L365.7 61.1L359.5 69.1L352.8 77.6L345.8 86.1L338.5 94.6L331.4 102.6L324.5 110.1L318.2 116.7L312.5 122.2L307.6 126.5L303.8 129.5L301.1 131L299.6 131L299.4 129.5L300.4 126.6L302.7 122.3L306.1 116.8L310.5 110.3L315.9 102.8L322 94.8L328.7 86.4L335.8 77.8L343 69.3L350.2 61.3L357 53.8L363.4 47.2L369.1 41.7L373.9 37.4L377.7 34.5L380.4 32.9ZM156.5 320L155.8 319.6L146.4 313.6L137.4 307.6L129.1 301.9L121.7 296.5L115.4 291.6L110.5 287.4L107 284.1L105.2 281.6L104.9 280.1L106.4 279.7L109.4 280.3L113.9 281.9L119.9 284.5L127 288L135.1 292.3L143.9 297.3L153.2 302.7L162.7 308.5L172 314.5L180.3 320ZM400 232.5L397.6 234.1L388.1 239.9L378.8 245.3L370 250.3L361.9 254.6L354.8 258.1L348.9 260.7L344.3 262.3L341.3 262.9L339.9 262.5L340.1 261L342 258.5L345.4 255.2L350.3 251L356.6 246.1L364 240.7L372.3 235L381.3 229L390.7 223L400 217.3Z"/>
+    <circle class="a4" transform="translate(250 198) rotate(-20)" cx="-125" cy="-78" r="6"/>
+    <circle class="a4" transform="translate(250 198) rotate(-20)" cx="125" cy="-78" r="6"/>
+    <path class="a4" d="M164.9 312L165.2 313.3L165.2 314.6L164.9 316L164.3 317.2L163.5 318.2L162.5 319.1L161.3 319.7L160 320L158.5 320L157.3 319.7L156.1 319.2L155 318.3L154.2 317.3L153.6 316.1L153.3 314.8L153.2 313.5L153.5 312.1L154.1 310.9L154.9 309.9L156 309L157.2 308.4L158.5 308.1L159.8 308.1L161.1 308.4L162.3 308.9L163.4 309.8L164.3 310.8ZM399.8 226.5L400 227.4L400 229.6L399.8 230.5L399.3 231.7L398.4 232.7L397.4 233.6L396.2 234.2L394.9 234.5L393.5 234.5L392.2 234.2L391 233.7L389.9 232.8L389.1 231.8L388.5 230.6L388.2 229.3L388.2 227.9L388.5 226.6L389 225.4L389.8 224.4L390.9 223.5L392.1 222.9L393.4 222.6L394.7 222.6L396.1 222.9L397.3 223.4L398.3 224.2L399.2 225.3Z"/>
+  </symbol>
+
+  <symbol id="art-headphones" viewBox="0 0 300 240" preserveAspectRatio="xMaxYMax meet">
+    <path class="l2" transform="translate(12 6) rotate(-5 170 140)" stroke-width="18" d="M70 150C70 10 270 10 270 150"/>
+    <path class="l4" transform="translate(12 6) rotate(-5 170 140)" stroke-width="4" d="M86 118C98 44 242 44 254 118"/>
+    <rect class="a3" transform="translate(12 6) rotate(-5 170 140)" x="60" y="134" width="20" height="44" rx="8"/>
+    <rect class="a3" transform="translate(12 6) rotate(-5 170 140)" x="260" y="134" width="20" height="44" rx="8"/>
+    <path class="a1" d="M132.7 225.6L133 236.4L132.5 240L38.1 240L37.1 234L36.9 223.2L38.2 212.6L40.8 202.5L44.8 193.3L50.1 185.2L56.3 178.4L63.5 173.2L71.3 169.7L79.5 168L87.9 168.2L96.2 170.3L104.2 174.2L111.5 179.8L118.1 186.9L123.6 195.3L128 204.7L131.1 214.9Z"/>
+    <path class="a2" d="M138.7 225.1L139.1 234.5L138.7 240L76.3 240L76.3 239.9L75 230.7L74.6 221.3L75.3 212.1L76.9 203.4L79.4 195.4L82.8 188.4L86.8 182.7L91.5 178.3L96.7 175.4L102.1 174.1L107.7 174.4L113.3 176.4L118.7 179.9L123.7 184.9L128.2 191.1L132.1 198.5L135.2 206.8L137.4 215.8Z"/>
+    <path class="a1" d="M300 240L250.6 240L249.1 236.7L246 226.5L244.3 215.8L244.1 205L245.4 194.5L248 184.4L252 175.2L257.3 167L263.6 160.3L270.7 155L278.5 151.6L286.7 149.9L295.1 150.1L300 151.3Z"/>
+    <path class="a2" d="M300 238.6L299.6 240L243.9 240L241.9 234.6L239.6 225.7L238.3 216.4L238 207L238.7 197.8L240.3 189.1L242.8 181.1L246.1 174.2L250.2 168.4L254.9 164L260.1 161.1L265.5 159.8L271.1 160.1L276.7 162.1L282.1 165.6L287.1 170.6L291.6 176.9L295.5 184.3L298.6 192.5L300 198.3Z"/>
+    <path class="a4" d="M45.4 207.6L45 209.2L44.7 210.8L44.4 212.4L44.1 214L43.8 215.6L43.6 217.2L43.4 218.9L43.2 220.5L43.1 222.2L43 223.8L42.9 225.4L42.9 227.1L42.9 228.7L43 230.4L43 232L43.1 233.6L43.3 235.3L43.5 236.9L43.7 238.5L43.9 240L47 240L46.9 239.6L46.7 238.1L46.5 236.5L46.3 235L46.1 233.4L46 231.8L45.9 230.3L45.9 228.7L45.9 227.1L45.9 225.5L46 223.9L46.1 222.4L46.2 220.8L46.4 219.2L46.5 217.6L46.8 216.1L47 214.5L47.3 213L47.6 211.4L48 209.9L48.3 208.4L48.3 207.6L47.9 206.9L47.3 206.6L46.5 206.6L45.8 207Z"/>
+  </symbol>
+
+  <symbol id="art-phone" viewBox="140 8 252 252" preserveAspectRatio="xMaxYMax meet">
+    <path class="a3" d="M196.3 218.5L193.6 217.9L190.8 217.5L188 217.4L185.2 217.7L182.5 218.3L179.8 219.2L177.2 220.5L174.8 222.1L172.4 224L170.2 226.2L168.1 228.8L166.1 231.6L164.2 234.7L162.4 238.2L160.8 242L159.3 246L157.9 250.5L156.6 255.2L155.5 260L162.7 260L163.4 256.9L164.6 252.4L165.9 248.3L167.3 244.6L168.8 241.2L170.3 238.1L171.9 235.4L173.6 233L175.3 230.9L177.1 229.2L178.9 227.7L180.7 226.6L182.5 225.7L184.4 225L186.3 224.6L188.2 224.4L190.3 224.5L192.3 224.8L194.6 225.3L196.5 225.3L198 224.4L198.9 222.8L198.8 221L197.9 219.4Z"/>
+    <path class="a1" d="M357.6 34.3L364.1 35.9L370.1 38.8L375.3 43.1L379.5 48.4L382.3 54.4L383.7 61L383.7 67.7L360.1 260L186.8 260L213 46.8L214.5 40.2L217.5 34.2L221.7 29L227 24.9L233.1 22L239.7 20.6L246.4 20.6Z"/>
+    <path class="a2" d="M354.6 42L359.8 43.2L364.6 45.6L368.8 49L372.1 53.2L374.4 58.1L375.5 63.4L375.5 68.7L352 260L194.8 260L220.7 49.7L221.9 44.5L224.3 39.7L227.7 35.5L231.9 32.2L236.8 29.9L242 28.8L247.4 28.8Z"/>
+    <path class="a3" d="M362.3 69.1L363 69.3L363.6 69.6L364.1 70L364.5 70.5L364.8 71.1L365 71.8L365 72.5L341.9 260L335.9 260L359 71.7L359.2 71.1L359.5 70.5L359.9 70L360.4 69.6L361 69.3L361.7 69.1L362.3 69.1Z" opacity=".45"/>
+    <rect class="a1" transform="rotate(7 280 190)" x="218" y="48" width="76" height="76" rx="20"/>
+    <circle class="a3" transform="rotate(7 280 190)" cx="241" cy="71" r="15"/>
+    <circle class="a1" transform="rotate(7 280 190)" cx="241" cy="71" r="9"/>
+    <circle class="a4" transform="rotate(7 280 190)" cx="238" cy="68" r="2.5"/>
+    <circle class="a3" transform="rotate(7 280 190)" cx="271" cy="101" r="15"/>
+    <circle class="a1" transform="rotate(7 280 190)" cx="271" cy="101" r="9"/>
+    <circle class="a4" transform="rotate(7 280 190)" cx="268" cy="98" r="2.5"/>
+    <circle class="a5" transform="rotate(7 280 190)" cx="274" cy="66" r="5"/>
+    <rect class="a3" transform="rotate(7 280 190)" x="368" y="112" width="5" height="48" rx="2.5"/>
+    <path class="l3" transform="rotate(7 280 190)" stroke-width="3" d="M226 220L296 220"/>
+    <path class="l3" transform="rotate(7 280 190)" stroke-width="3" d="M226 234L296 234"/>
+    <path class="l3" transform="rotate(7 280 190)" stroke-width="3" d="M226 248L296 248"/>
+  </symbol>
+
+  <symbol id="art-laptop" viewBox="80 28 320 292" preserveAspectRatio="xMaxYMax meet">
+    <path class="a2" d="M120 60L392 34L394.8 34L397.3 34.3L399.5 35.1L400 35.4L400 222.4L136 232Z"/>
+    <path class="a1" d="M132 70L396 46L400 158L400 214.1L146 222Z"/>
+    <path class="a3" transform="translate(24 0)" d="M246 58L328 50L252 218L172 220Z" opacity=".22"/>
+    <path class="a5" d="M136 232L400 222.4L400 294.9L84 308Z"/>
+    <path class="a2" d="M136 232L400 222.4L400 227.5L135 237Z"/>
+    <path class="a3" d="M152 241L400 231.2L400 271.4L124 282Z"/>
+    <path class="a4" transform="translate(24 0)" d="M208 286L302 282L312 302L204 306Z"/>
+    <path class="a4" d="M84 308L400 294.9L400 306.9L84 320Z"/>
+  </symbol>
+
+  <!-- Product drawings: centred in a 200 x 200 box. -->
+  <symbol id="art-mouse" viewBox="0 0 200 200">
+    <g transform="rotate(-14 100 100)">
+      <rect class="a2" x="58" y="34" width="84" height="132" rx="42"/>
+      <path class="a1" d="M118 38q24 10 24 38v48q0 30-26 40 14-18 14-44V78q0-22-12-40Z"/>
+      <path class="l1" stroke-width="2" d="M100 35v58M59 88q41 14 82 0"/>
+      <rect class="a4" x="95" y="54" width="10" height="24" rx="5"/>
+      <path class="l4" stroke-width="3" d="M67 104q-1 24 9 42" opacity=".7"/>
+    </g>
+  </symbol>
+
+  <symbol id="art-bottle" viewBox="0 0 200 200">
+    <ellipse class="a1" cx="100" cy="186" rx="42" ry="4" opacity=".12"/>
+    <path class="a2" d="M86 36h28v10c0 10 16 12 16 30v98q0 12-12 12H82q-12 0-12-12V76c0-18 16-20 16-30Z"/>
+    <path class="a1" d="M116 62c8 3 14 7 14 14v98q0 12-12 12h-2Z"/>
+    <rect class="a4" x="78" y="80" width="5" height="84" rx="2.5" opacity=".7"/>
+    <rect class="a3" x="83" y="14" width="34" height="24" rx="5"/>
+    <rect class="a1" x="83" y="31" width="34" height="5"/>
+    <rect class="a5" x="89" y="18" width="4" height="10" rx="2" opacity=".6"/>
+  </symbol>
+
+  <symbol id="art-speaker" viewBox="0 0 200 200">
+    <ellipse class="a1" cx="100" cy="170" rx="58" ry="6" opacity=".1"/>
+    <rect class="a3" x="50" y="58" width="100" height="112" rx="26"/>
+    <path class="a2" d="M124 58q26 0 26 26v60q0 26-26 26Z" opacity=".6"/>
+    <path class="l2" stroke-width="1.5" d="M68 86v62M84 88v70M100 89v72M116 88v70" opacity=".5"/>
+    <ellipse class="a4" cx="100" cy="66" rx="42" ry="13"/>
+    <ellipse class="a5" cx="100" cy="65" rx="25" ry="7"/>
+    <g class="a2"><circle cx="88" cy="65" r="1.8"/><circle cx="100" cy="65" r="1.8"/><circle cx="112" cy="65" r="1.8"/></g>
+  </symbol>
+
+  <symbol id="art-lamp" viewBox="0 0 200 200">
+    <ellipse class="a1" cx="96" cy="178" rx="70" ry="6" opacity=".1"/>
+    <path class="a5" d="M112 88l60-8 16 92H98Z" opacity=".3"/>
+    <ellipse class="a1" cx="74" cy="174" rx="40" ry="8"/>
+    <ellipse class="a2" cx="74" cy="170" rx="40" ry="8"/>
+    <path class="l2" stroke-width="6" d="M74 168 60 100l68-48"/>
+    <circle class="a1" cx="60" cy="100" r="8"/>
+    <circle class="a1" cx="128" cy="52" r="7"/>
+    <path class="a1" d="M118 38l28-5 26 47q-28 16-60 8Z"/>
+    <ellipse class="a5" cx="142" cy="85" rx="30" ry="7" transform="rotate(-8 142 85)"/>
+  </symbol>
+
+  <symbol id="art-organiser" viewBox="0 0 200 200">
+    <ellipse class="a1" cx="100" cy="148" rx="74" ry="6" opacity=".1"/>
+    <path class="l4" stroke-width="6" d="M63 104C63 70 36 62 42 30M100 104C100 74 112 58 104 26M137 104c0-32 30-36 26-70"/>
+    <rect class="a1" x="34" y="20" width="16" height="22" rx="4"/>
+    <rect class="a1" x="96" y="14" width="16" height="22" rx="4"/>
+    <rect class="a1" x="155" y="22" width="16" height="22" rx="4"/>
+    <rect class="a2" x="36" y="100" width="128" height="48" rx="14"/>
+    <rect class="a3" x="36" y="94" width="128" height="26" rx="13"/>
+    <g class="a1"><rect x="57" y="92" width="12" height="22" rx="6"/><rect x="94" y="92" width="12" height="22" rx="6"/><rect x="131" y="92" width="12" height="22" rx="6"/></g>
+    <g class="a4"><rect x="60" y="92" width="6" height="14" rx="3"/><rect x="97" y="92" width="6" height="14" rx="3"/><rect x="134" y="92" width="6" height="14" rx="3"/></g>
+  </symbol>
+
+  <symbol id="art-case" viewBox="0 0 200 200">
+    <ellipse class="a1" cx="100" cy="166" rx="62" ry="6" opacity=".1"/>
+    <rect class="a4" x="50" y="34" width="100" height="52" rx="24" transform="rotate(-10 100 86)"/>
+    <ellipse class="a2" cx="96" cy="72" rx="38" ry="9" transform="rotate(-10 100 86)"/>
+    <rect class="a3" x="48" y="96" width="104" height="68" rx="28"/>
+    <path class="a2" d="M128 96q24 4 24 28v12q0 28-28 28Z" opacity=".5"/>
+    <ellipse class="a1" cx="100" cy="102" rx="46" ry="11"/>
+    <circle class="a5" cx="81" cy="96" r="12"/><circle class="a4" cx="81" cy="96" r="5"/>
+    <circle class="a5" cx="119" cy="96" r="12"/><circle class="a4" cx="119" cy="96" r="5"/>
+    <circle class="a5" cx="100" cy="138" r="3"/>
+  </symbol>
+</svg>
+</body>
+</html>

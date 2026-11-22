@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="fui-preset" content="Q">
+<title>Corner Market: computers, home and deals ending today</title>
+<meta name="description" content="Corner Market, a general shop laid out with the Market Shelf preset: shelves of product cards, a hero with its neighbours showing and one band of deals.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="market-shelf.css">
+</head>
+<body class="page">
+<a class="skip" href="#main">Skip to the products</a>
+
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="pad">
+      <rect class="f-base" width="60" height="24" rx="12"/>
+      <rect class="f-base" y="8" width="18" height="28" rx="9"/>
+      <rect class="f-base" x="42" y="8" width="18" height="28" rx="9"/>
+      <circle class="f-ink" cx="17" cy="12" r="4.5"/>
+      <circle class="f-ink" cx="41" cy="13" r="2.4"/>
+      <circle class="f-ink" cx="48" cy="9" r="2.4"/>
+    </g>
+  </defs>
+  <symbol id="chev" viewBox="0 0 16 16"><path class="i-line" d="M6 3l5 5-5 5"/></symbol>
+  <symbol id="mag" viewBox="0 0 18 18"><circle class="i-line" cx="8" cy="8" r="5.2"/><path class="i-line" d="M12 12l4 4"/></symbol>
+  <symbol id="stars" viewBox="0 0 60 12">
+    <path id="star" d="M6 .8l1.6 3.4 3.7.5-2.7 2.6.7 3.7L6 9.2l-3.3 1.8.7-3.7L.7 4.7l3.7-.5z"/>
+    <use href="#star" x="12"/><use href="#star" x="24"/><use href="#star" x="36"/><use href="#star" x="48"/>
+  </symbol>
+  <symbol id="laptop" viewBox="0 0 160 120">
+    <rect class="f-body" x="30" y="20" width="100" height="66" rx="5"/>
+    <rect class="f-screen" x="34" y="24" width="92" height="56" rx="2"/>
+    <path class="f-screen2" d="M34 80V64l20-14 16 10 24-22 32 26v16z"/>
+    <circle class="f-white" cx="112" cy="36" r="5"/>
+    <path class="f-base" d="M16 86h128l-6 9a3 3 0 0 1-2 1H24a3 3 0 0 1-2-1z"/>
+    <rect class="f-steel" x="68" y="86" width="24" height="3" rx="1.5"/>
+  </symbol>
+  <symbol id="flip" viewBox="0 0 160 120">
+    <rect class="f-body" x="32" y="18" width="92" height="66" rx="6"/>
+    <rect class="f-screen" x="37" y="23" width="82" height="56" rx="2"/>
+    <path class="f-screen2" d="M37 79V65l18-13 15 9 21-20 28 23v15z"/>
+    <circle class="f-white" cx="104" cy="35" r="5"/>
+    <rect class="f-steel" x="58" y="84" width="40" height="5" rx="2"/>
+    <path class="f-base" d="M30 89h96l12 12H18z"/>
+    <rect class="f-steel" x="140" y="28" width="5" height="52" rx="2.5"/>
+  </symbol>
+  <symbol id="tablet" viewBox="0 0 160 120">
+    <rect class="f-body" x="26" y="16" width="108" height="82" rx="8"/>
+    <rect class="f-screen" x="32" y="22" width="96" height="70" rx="3"/>
+    <path class="f-screen2" d="M32 92V74l22-16 18 12 24-24 32 28v18z"/>
+    <circle class="f-white" cx="112" cy="38" r="6"/>
+  </symbol>
+  <symbol id="watch" viewBox="0 0 160 120">
+    <rect class="f-steel" x="64" y="4" width="32" height="112" rx="7"/>
+    <path class="s-white" d="M66 20h28M66 100h28"/>
+    <rect class="f-base" x="110" y="55" width="9" height="10" rx="2"/>
+    <circle class="f-base" cx="80" cy="60" r="33"/>
+    <circle class="f-body" cx="80" cy="60" r="26"/>
+    <circle class="f-screen" cx="80" cy="72" r="6"/>
+    <path class="s-white" d="M80 38v3M80 79v3M58 60h3M99 60h3M80 60V45M80 60l11 6"/>
+    <circle class="f-sand" cx="80" cy="60" r="2.6"/>
+  </symbol>
+  <symbol id="tv" viewBox="0 0 160 120">
+    <rect class="f-body" x="14" y="16" width="132" height="78" rx="4"/>
+    <rect class="f-screen" x="17" y="19" width="126" height="72" rx="2"/>
+    <path class="f-screen2" d="M17 91V70l26-18 22 14 30-28 48 36v17z"/>
+    <circle class="f-sand" cx="120" cy="36" r="7"/>
+    <path class="f-steel" d="M44 94h8l-4 10h-8zM108 94h8l4 10h-8z"/>
+  </symbol>
+  <symbol id="sofa" viewBox="0 0 160 120">
+    <rect class="f-body" x="24" y="32" width="112" height="50" rx="10"/>
+    <rect class="f-sand" x="40" y="44" width="19" height="19" rx="4" transform="rotate(-8 49 53)"/>
+    <rect class="f-red" x="101" y="44" width="19" height="19" rx="4" transform="rotate(8 111 53)"/>
+    <rect class="f-body" x="12" y="52" width="24" height="42" rx="9"/>
+    <rect class="f-body" x="124" y="52" width="24" height="42" rx="9"/>
+    <rect class="f-body" x="30" y="84" width="100" height="10" rx="3"/>
+    <rect class="f-base" x="37" y="62" width="27" height="24" rx="5"/>
+    <rect class="f-base" x="66.5" y="62" width="27" height="24" rx="5"/>
+    <rect class="f-base" x="96" y="62" width="27" height="24" rx="5"/>
+    <path class="f-wood" d="M22 94h8l-2 9h-4zM130 94h8l-2 9h-4z"/>
+  </symbol>
+  <symbol id="printer" viewBox="0 0 160 120">
+    <rect class="f-paper" x="56" y="12" width="48" height="40" rx="1"/>
+    <path class="f-base" d="M48 30h64l4 24H44z"/>
+    <rect class="f-body" x="26" y="50" width="108" height="40" rx="7"/>
+    <rect class="f-steel" x="38" y="58" width="26" height="6" rx="3"/>
+    <circle class="f-green" cx="120" cy="61" r="3"/>
+    <rect class="f-ink" x="40" y="76" width="80" height="6" rx="3"/>
+    <path class="f-paper" d="M47 80h66l6 26H41z"/>
+    <rect class="f-blue" x="52" y="87" width="24" height="4" rx="2"/>
+    <rect class="f-red" x="52" y="95" width="38" height="4" rx="2"/>
+    <rect class="f-sand" x="82" y="87" width="22" height="4" rx="2"/>
+  </symbol>
+  <symbol id="table" viewBox="0 0 160 120">
+    <path class="s-steel" d="M106 34V20"/>
+    <circle class="f-red" cx="106" cy="18" r="5"/>
+    <rect class="f-steel" x="100" y="32" width="12" height="18" rx="3"/>
+    <rect class="f-sand" x="38" y="44" width="32" height="6" rx="1.5"/>
+    <rect class="f-screen2" x="14" y="50" width="132" height="7" rx="3"/>
+    <rect class="f-wood" x="22" y="57" width="7" height="46" rx="2"/>
+    <rect class="f-wood" x="131" y="57" width="7" height="46" rx="2"/>
+    <rect class="f-wood" x="29" y="82" width="102" height="6" rx="2"/>
+    <rect class="f-blue" x="42" y="74" width="28" height="4" rx="1"/>
+    <rect class="f-red" x="45" y="78" width="23" height="4" rx="1"/>
+  </symbol>
+  <symbol id="aio" viewBox="0 0 320 240">
+    <rect class="f-ink" x="40" y="14" width="240" height="154" rx="8"/>
+    <rect class="f-screen" x="46" y="20" width="228" height="130" rx="3"/>
+    <circle class="f-white" cx="224" cy="54" r="15"/>
+    <path class="f-screen2" d="M46 150v-38l44-30 36 22 52-46 96 64v28z"/>
+    <path class="f-green" d="M46 150v-14l58-22 72 20 98-16v32z"/>
+    <path class="f-base" d="M140 168h40l6 34h-52z"/>
+    <rect class="f-steel" x="112" y="200" width="96" height="8" rx="4"/>
+    <rect class="f-base" x="56" y="220" width="136" height="10" rx="4"/>
+    <rect class="f-base" x="218" y="216" width="24" height="14" rx="7"/>
+  </symbol>
+  <symbol id="console" viewBox="0 0 200 120">
+    <rect class="f-body" x="14" y="28" width="104" height="62" rx="6"/>
+    <rect class="f-ink" x="14" y="54" width="104" height="5"/>
+    <rect class="f-ink" x="26" y="40" width="36" height="5" rx="2.5"/>
+    <circle class="f-green" cx="104" cy="42" r="3.5"/>
+    <use href="#pad" x="134" y="54" class="v-pad2"/>
+    <use href="#pad" x="92" y="74"/>
+  </symbol>
+  <symbol id="shoe" viewBox="0 0 200 120">
+    <path class="f-red" d="M22 88C19 70 23 52 34 40l18 3c5 11 14 17 26 15l16-18c12 18 32 29 56 34 18 4 30 7 32 14z"/>
+    <path class="f-ink" d="M22 88C19 70 23 52 34 40l8 1.3C36 54 35 70 38 88z"/>
+    <path class="f-sand" d="M150 74c18 4 30 7 32 14h-44z"/>
+    <path class="s-white" d="M104 58l-7 8M116 65l-7 8M128 70l-7 8"/>
+    <rect class="f-white" x="18" y="86" width="170" height="18" rx="9"/>
+    <rect class="f-sand" x="19" y="93" width="168" height="3"/>
+  </symbol>
+  <symbol id="phone" viewBox="0 0 120 160">
+    <rect class="f-sand" x="56" y="12" width="52" height="110" rx="9"/>
+    <circle class="f-ink" cx="82" cy="32" r="6.5"/>
+    <circle class="f-steel" cx="82" cy="48" r="2.6"/>
+    <rect class="f-body" x="12" y="26" width="58" height="122" rx="10"/>
+    <rect class="f-screen" x="16" y="31" width="50" height="112" rx="7"/>
+    <path class="f-screen2" d="M16 136v-26l15-13 12 8 23-21v52a7 7 0 0 1-7 7H23a7 7 0 0 1-7-7z"/>
+    <circle class="f-white" cx="52" cy="58" r="5"/>
+    <rect class="f-body" x="33" y="35" width="16" height="5" rx="2.5"/>
+  </symbol>
+</svg>
+
+<header id="top">
+  <div class="wrap bar" data-fui-align-start="content" data-fui-align-end="content">
+    <a class="mark" href="#top" aria-label="Corner Market, top of page">Corner Market</a>
+    <form class="search" role="search" action="#popular">
+      <label class="vh" for="q">Search products</label>
+      <input id="q" name="q" type="search" placeholder="Search 4,200 products" autocomplete="off">
+      <button class="search__go" type="submit" aria-label="Search"><svg aria-hidden="true" viewBox="0 0 18 18"><use href="#mag"/></svg></button>
+    </form>
+    <nav class="acct" aria-label="Account">
+      <a href="#subscribe">Get the app</a>
+      <a href="#top">Sign in</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="hero__stage">
+      <div class="peek peek--prev" inert aria-hidden="true">
+        <svg class="v-watch" viewBox="92 0 68 120" preserveAspectRatio="xMinYMid slice" focusable="false"><use href="#watch" width="160" height="120"/></svg>
+      </div>
+      <a class="ring ring--back hero__ring hero__ring--prev" href="#popular" aria-label="Previous slide"><svg aria-hidden="true" viewBox="0 0 16 16"><use href="#chev"/></svg></a>
+      <div class="slide">
+        <div class="slide__copy">
+          <p class="slide__kind">New in computers</p>
+          <h1 id="hero-h">Atelier 27 all-in-one</h1>
+          <p class="slide__lede">A 27-inch 5K screen and the computer behind it, £1,899 with free delivery.</p>
+          <a class="btn" href="#popular">See the Atelier 27</a>
+        </div>
+        <div class="slide__pic">
+          <svg class="v-atelier" role="img" aria-label="Drawing of the Atelier 27: a thin screen on a metal stand showing blue and green hills, with a keyboard and a mouse in front." viewBox="0 0 320 240"><use href="#aio"/></svg>
+        </div>
+      </div>
+      <a class="ring hero__ring hero__ring--next" href="#popular" aria-label="Next slide"><svg aria-hidden="true" viewBox="0 0 16 16"><use href="#chev"/></svg></a>
+      <div class="peek peek--next" inert aria-hidden="true">
+        <svg class="v-canvas" viewBox="14 0 80 120" preserveAspectRatio="xMinYMid slice" focusable="false"><use href="#tablet" width="160" height="120"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="shelf wrap" id="popular" data-fui-align-start="content" data-fui-align-end="content">
+    <div class="shelf__head">
+      <h2 id="popular-h">Popular this week</h2>
+      <div class="shelf__nav" data-fui-buttons="Popular this week paging">
+        <a class="ring ring--back" href="#popular-1" aria-label="Scroll Popular this week back to the first product"><svg aria-hidden="true" viewBox="0 0 16 16"><use href="#chev"/></svg></a>
+        <a class="ring" href="#popular-5" aria-label="Scroll Popular this week on to the last product"><svg aria-hidden="true" viewBox="0 0 16 16"><use href="#chev"/></svg></a>
+      </div>
+    </div>
+    <ul class="shelf__track" data-fui-scroll="Popular this week" tabindex="0" aria-labelledby="popular-h">
+      <li class="shelf__cell" id="popular-1" data-fui-align-top="popular" data-fui-align-bottom="popular"><article class="card">
+        <svg class="item__art" role="img" aria-label="Drawing of a dark grey laptop, open, with a blue screen." viewBox="0 0 160 120"><use href="#laptop"/></svg>
+        <h3 class="item__name"><a href="#popular-1">Slate 14 laptop</a></h3>
+        <p class="item__spec">14-inch, 16 GB memory, 512 GB storage</p>
+        <div class="item__foot">
+          <p class="rating"><span class="stars s48" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.8</span> <span class="vh">out of 5</span></p>
+          <p class="item__price"><span class="vh">Price</span> <span>£1,049</span></p>
+        </div>
+      </article></li>
+      <li class="shelf__cell" id="popular-2" data-fui-align-top="popular" data-fui-align-bottom="popular"><article class="card">
+        <svg class="item__art v-aria" role="img" aria-label="Drawing of a silver convertible laptop standing on its folded keyboard, with a pen beside it." viewBox="0 0 160 120"><use href="#flip"/></svg>
+        <h3 class="item__name"><a href="#popular-2">Aria 13 convertible</a></h3>
+        <p class="item__spec">13-inch touch screen, folds flat, pen included</p>
+        <div class="item__foot">
+          <p class="rating"><span class="stars s44" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.4</span> <span class="vh">out of 5</span></p>
+          <p class="item__price"><span class="vh">Price</span> <span>£629</span></p>
+        </div>
+      </article></li>
+      <li class="shelf__cell" id="popular-3" data-fui-align-top="popular" data-fui-align-bottom="popular"><article class="card">
+        <svg class="item__art v-canvas" role="img" aria-label="Drawing of a black tablet with a green screen." viewBox="0 0 160 120"><use href="#tablet"/></svg>
+        <h3 class="item__name"><a href="#popular-3">Canvas 11 tablet</a></h3>
+        <p class="item__spec">11-inch, 128 GB, Wi-Fi</p>
+        <div class="item__foot">
+          <p class="rating"><span class="stars s41" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.1</span> <span class="vh">out of 5</span></p>
+          <p class="item__price"><span class="vh">Price</span> <span>£349</span></p>
+        </div>
+      </article></li>
+      <li class="shelf__cell" id="popular-4" data-fui-align-top="popular" data-fui-align-bottom="popular"><article class="card">
+        <svg class="item__art v-onyx" role="img" aria-label="Drawing of a black laptop, open, with a dark screen and red hills." viewBox="0 0 160 120"><use href="#laptop"/></svg>
+        <h3 class="item__name"><a href="#popular-4">Onyx 15 laptop</a></h3>
+        <p class="item__spec">15.6-inch, 16 GB memory, 1 TB storage</p>
+        <div class="item__foot">
+          <p class="rating"><span class="stars s45" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.5</span> <span class="vh">out of 5</span></p>
+          <p class="item__price"><span class="vh">Price</span> <span>£799</span></p>
+        </div>
+      </article></li>
+      <li class="shelf__cell" id="popular-5" data-fui-align-top="popular" data-fui-align-bottom="popular"><article class="card">
+        <svg class="item__art v-meadow" role="img" aria-label="Drawing of a grey laptop, open, with a pale blue screen and green hills." viewBox="0 0 160 120"><use href="#laptop"/></svg>
+        <h3 class="item__name"><a href="#popular-5">Meadow 15 laptop</a></h3>
+        <p class="item__spec">15.6-inch, 8 GB memory, 256 GB storage</p>
+        <div class="item__foot">
+          <p class="rating"><span class="stars s42" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.2</span> <span class="vh">out of 5</span></p>
+          <p class="item__price"><span class="vh">Price</span> <span>£459</span></p>
+        </div>
+      </article></li>
+    </ul>
+  </section>
+
+  <section class="shelf wrap" id="featured" data-fui-align-start="content" data-fui-align-end="content">
+    <div class="shelf__head">
+      <h2 id="featured-h">Featured</h2>
+      <div class="shelf__nav" data-fui-buttons="Featured paging">
+        <a class="ring ring--back" href="#featured-1" aria-label="Scroll Featured back to the first product"><svg aria-hidden="true" viewBox="0 0 16 16"><use href="#chev"/></svg></a>
+        <a class="ring" href="#featured-5" aria-label="Scroll Featured on to the last product"><svg aria-hidden="true" viewBox="0 0 16 16"><use href="#chev"/></svg></a>
+      </div>
+    </div>
+    <ul class="shelf__track" data-fui-scroll="Featured" tabindex="0" aria-labelledby="featured-h">
+      <li class="shelf__cell" id="featured-1" data-fui-align-top="featured" data-fui-align-bottom="featured"><article class="card">
+        <svg class="item__art v-watch" role="img" aria-label="Drawing of a steel watch with a dark dial on a steel bracelet." viewBox="0 0 160 120"><use href="#watch"/></svg>
+        <h3 class="item__name"><a href="#featured-1">Tide automatic watch</a></h3>
+        <p class="item__spec">40 mm steel case, sapphire glass</p>
+        <div class="item__foot">
+          <p class="rating"><span class="stars s47" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.7</span> <span class="vh">out of 5</span></p>
+          <p class="item__price"><span class="vh">Price</span> <span>£189</span></p>
+        </div>
+      </article></li>
+      <li class="shelf__cell" id="featured-2" data-fui-align-top="featured" data-fui-align-bottom="featured"><article class="card">
+        <svg class="item__art v-vista" role="img" aria-label="Drawing of a flat television on two feet, showing dark hills against a blue sky." viewBox="0 0 160 120"><use href="#tv"/></svg>
+        <h3 class="item__name"><a href="#featured-2">Vista 43-inch television</a></h3>
+        <p class="item__spec">4K, three HDMI ports, wall mount included</p>
+        <div class="item__foot">
+          <p class="rating"><span class="stars s45" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.5</span> <span class="vh">out of 5</span></p>
+          <p class="item__price"><span class="vh">Price</span> <span>£329</span></p>
+        </div>
+      </article></li>
+      <li class="shelf__cell" id="featured-3" data-fui-align-top="featured" data-fui-align-bottom="featured"><article class="card">
+        <svg class="item__art v-sofa" role="img" aria-label="Drawing of a grey three-seat sofa with two cushions, one sand and one red." viewBox="0 0 160 120"><use href="#sofa"/></svg>
+        <h3 class="item__name"><a href="#featured-3">Harbour three-seat sofa</a></h3>
+        <p class="item__spec">Grey weave, oak legs, delivered assembled</p>
+        <div class="item__foot">
+          <p class="rating"><span class="stars s43" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.3</span> <span class="vh">out of 5</span></p>
+          <p class="item__price"><span class="vh">Price</span> <span>£749</span></p>
+        </div>
+      </article></li>
+      <li class="shelf__cell" id="featured-4" data-fui-align-top="featured" data-fui-align-bottom="featured"><article class="card">
+        <svg class="item__art" role="img" aria-label="Drawing of a dark grey printer with a printed sheet coming out of the front." viewBox="0 0 160 120"><use href="#printer"/></svg>
+        <h3 class="item__name"><a href="#featured-4">Inkwell wireless printer</a></h3>
+        <p class="item__spec">Prints, scans and copies; refillable tanks</p>
+        <div class="item__foot">
+          <p class="rating"><span class="stars s40" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.0</span> <span class="vh">out of 5</span></p>
+          <p class="item__price"><span class="vh">Price</span> <span>£119</span></p>
+        </div>
+      </article></li>
+      <li class="shelf__cell" id="featured-5" data-fui-align-top="featured" data-fui-align-bottom="featured"><article class="card">
+        <svg class="item__art" role="img" aria-label="Drawing of a low table with a glass top, a wooden frame, books on the shelf and a vase with a red flower." viewBox="0 0 160 120"><use href="#table"/></svg>
+        <h3 class="item__name"><a href="#featured-5">Glasshouse coffee table</a></h3>
+        <p class="item__spec">Tempered glass top, walnut frame</p>
+        <div class="item__foot">
+          <p class="rating"><span class="stars s46" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.6</span> <span class="vh">out of 5</span></p>
+          <p class="item__price"><span class="vh">Price</span> <span>£159</span></p>
+        </div>
+      </article></li>
+    </ul>
+  </section>
+
+  <section class="band" id="deals">
+    <div class="wrap band__in" data-fui-align-start="content" data-fui-align-end="content">
+      <div class="band__info">
+        <h2 id="deals-h">Deals ending today</h2>
+        <div class="shelf__nav" data-fui-buttons="Deals paging">
+          <a class="ring ring--back" href="#deal-1" aria-label="Scroll the deals back to the first product"><svg aria-hidden="true" viewBox="0 0 16 16"><use href="#chev"/></svg></a>
+          <a class="ring" href="#deal-4" aria-label="Scroll the deals on to the last product"><svg aria-hidden="true" viewBox="0 0 16 16"><use href="#chev"/></svg></a>
+        </div>
+        <p class="band__time"><span class="vh">Time left: 8 hours, 32 minutes and 29 seconds.</span> <time datetime="PT8H32M29S" aria-hidden="true">08:32:29</time></p>
+        <p class="band__ends">Ends today at <time datetime="18:00">18:00</time></p>
+        <p class="band__rated"><svg aria-hidden="true" viewBox="0 0 12 12"><use href="#star"/></svg><span><b>4.4</b> average rating across the four</span></p>
+      </div>
+      <ul class="shelf__track" data-fui-scroll="Deals ending today" tabindex="0" aria-labelledby="deals-h">
+        <li class="shelf__cell" id="deal-1" data-fui-align-top="deals" data-fui-align-bottom="deals"><article class="card">
+          <svg class="item__art v-watch" role="img" aria-label="Drawing of a steel watch with a dark dial on a steel bracelet." viewBox="0 0 160 120"><use href="#watch"/></svg>
+          <h3 class="item__name"><a href="#deal-1">Tide automatic watch</a></h3>
+          <p class="item__spec">40 mm steel case, sapphire glass</p>
+          <div class="item__foot">
+            <p class="rating"><span class="stars s47" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.7</span> <span class="vh">out of 5</span></p>
+            <p class="item__price"><s class="item__was"><span class="vh">Was</span> <span>£189</span></s> <span class="vh">now</span> <span>£149</span></p>
+          </div>
+        </article></li>
+        <li class="shelf__cell" id="deal-2" data-fui-align-top="deals" data-fui-align-bottom="deals"><article class="card">
+          <svg class="item__art v-vista" role="img" aria-label="Drawing of a flat television on two feet, showing dark hills against a blue sky." viewBox="0 0 160 120"><use href="#tv"/></svg>
+          <h3 class="item__name"><a href="#deal-2">Vista 43-inch television</a></h3>
+          <p class="item__spec">4K, three HDMI ports, wall mount included</p>
+          <div class="item__foot">
+            <p class="rating"><span class="stars s45" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.5</span> <span class="vh">out of 5</span></p>
+            <p class="item__price"><s class="item__was"><span class="vh">Was</span> <span>£329</span></s> <span class="vh">now</span> <span>£279</span></p>
+          </div>
+        </article></li>
+        <li class="shelf__cell" id="deal-3" data-fui-align-top="deals" data-fui-align-bottom="deals"><article class="card">
+          <svg class="item__art v-sofa" role="img" aria-label="Drawing of a grey three-seat sofa with two cushions, one sand and one red." viewBox="0 0 160 120"><use href="#sofa"/></svg>
+          <h3 class="item__name"><a href="#deal-3">Harbour three-seat sofa</a></h3>
+          <p class="item__spec">Grey weave, oak legs, delivered assembled</p>
+          <div class="item__foot">
+            <p class="rating"><span class="stars s43" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.3</span> <span class="vh">out of 5</span></p>
+            <p class="item__price"><s class="item__was"><span class="vh">Was</span> <span>£749</span></s> <span class="vh">now</span> <span>£599</span></p>
+          </div>
+        </article></li>
+        <li class="shelf__cell" id="deal-4" data-fui-align-top="deals" data-fui-align-bottom="deals"><article class="card">
+          <svg class="item__art" role="img" aria-label="Drawing of a dark grey printer with a printed sheet coming out of the front." viewBox="0 0 160 120"><use href="#printer"/></svg>
+          <h3 class="item__name"><a href="#deal-4">Inkwell wireless printer</a></h3>
+          <p class="item__spec">Prints, scans and copies; refillable tanks</p>
+          <div class="item__foot">
+            <p class="rating"><span class="stars s40" aria-hidden="true"><svg class="stars__one" viewBox="0 0 12 12"><use href="#star"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg><svg class="stars__row" viewBox="0 0 60 12"><use href="#stars"/></svg></span><span class="vh">Rated</span> <span>4.0</span> <span class="vh">out of 5</span></p>
+            <p class="item__price"><s class="item__was"><span class="vh">Was</span> <span>£119</span></s> <span class="vh">now</span> <span>£89</span></p>
+          </div>
+        </article></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="promo-row" aria-labelledby="promo-h">
+    <h2 class="vh" id="promo-h">Three more offers</h2>
+    <ul class="wrap promos" data-fui-align-start="content" data-fui-align-end="content">
+      <li><article class="promo" id="console-offer">
+        <div>
+          <p class="promo__kind">Gaming</p>
+          <h3 class="promo__name"><a href="#console-offer">Console and two controllers</a></h3>
+          <p class="promo__price"><span class="vh">Price</span> <span>£399</span></p>
+        </div>
+        <svg class="promo__art" role="img" aria-label="Drawing of a dark grey games console with two controllers, one silver and one blue." viewBox="0 0 200 120"><use href="#console"/></svg>
+      </article></li>
+      <li><article class="promo promo--tint" id="shoe-offer">
+        <div>
+          <p class="promo__kind">Running</p>
+          <h3 class="promo__name"><a href="#shoe-offer">Road running shoe</a></h3>
+          <p class="promo__price"><span class="vh">Price</span> <span>£79</span></p>
+        </div>
+        <svg class="promo__art" role="img" aria-label="Drawing of a red running shoe with a white sole, seen from the side." viewBox="0 0 200 120"><use href="#shoe"/></svg>
+      </article></li>
+      <li><article class="promo promo--wide" id="halo-offer">
+        <div>
+          <p class="promo__kind">Best seller</p>
+          <h3 class="promo__name">Halo 5 phone, 64 GB</h3>
+          <p class="promo__price"><span class="vh">Price</span> <span>£299</span></p>
+          <a class="btn" href="#halo-offer">Buy now</a>
+        </div>
+        <svg class="promo__art" role="img" aria-label="Drawing of two phones: the front of one with a blue screen, and the sand-coloured back of another." viewBox="0 0 120 160"><use href="#phone"/></svg>
+      </article></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot__in" data-fui-align-start="content" data-fui-align-end="content">
+    <div class="foot__brand">
+      <p class="foot__mark">Corner Market</p>
+      <p>A general shop for the desk, the front room and the weekend. Free delivery on orders over £40.</p>
+      <p>Drawings stand in for product photographs.</p>
+    </div>
+    <nav class="foot__links" aria-labelledby="foot-policy">
+      <h2 id="foot-policy">Policy</h2>
+      <ul>
+        <li><a href="#top">Privacy</a></li>
+        <li><a href="#top">Terms of sale</a></li>
+        <li><a href="#top">Returns</a></li>
+        <li><a href="#top">Report a listing</a></li>
+      </ul>
+    </nav>
+    <nav class="foot__links" aria-labelledby="foot-company">
+      <h2 id="foot-company">Company</h2>
+      <ul>
+        <li><a href="#top">About us</a></li>
+        <li><a href="#top">Journal</a></li>
+        <li><a href="#top">Careers</a></li>
+        <li><a href="#top">Help centre</a></li>
+      </ul>
+    </nav>
+    <nav class="foot__links" aria-labelledby="foot-business">
+      <h2 id="foot-business">Business</h2>
+      <ul>
+        <li><a href="#top">Sell with us</a></li>
+        <li><a href="#top">Advertise</a></li>
+        <li><a href="#top">Press</a></li>
+        <li><a href="#top">Affiliates</a></li>
+      </ul>
+    </nav>
+    <form class="foot__sub" id="subscribe" action="#subscribe" method="get">
+      <h2>Subscribe</h2>
+      <label for="email">Email address, for one letter a week</label>
+      <div class="foot__field">
+        <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        <button class="btn" type="submit">Subscribe</button>
+      </div>
+      <p>The week's new arrivals and the deals before they open. Leave whenever you like.</p>
+    </form>
+  </div>
+  <div class="foot__base">
+    <p class="wrap">© 2026 Corner Market Ltd. Prices include VAT.</p>
+  </div>
+</footer>
+</body>
+</html>

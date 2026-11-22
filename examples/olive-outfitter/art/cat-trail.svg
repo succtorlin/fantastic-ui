@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 360" role="img"><title>A hiker with a pack and pole on a rocky trail</title>
+<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8e5db"/><stop offset="1" stop-color="#f4f1e8"/></linearGradient></defs><rect width="520" height="360" fill="url(#s)"/>
+<path d="M0 220L90 120l60 54 84-110 96 120 70-60 120 96v140H0z" fill="#e2ded3"/>
+<path d="M234 64l30 38-22-8-16 22-10-26z" fill="#f6f4ee"/>
+<path d="M0 262l120-70 90 44 110-80 200 104v100H0z" fill="#d1ccbd"/>
+<path d="M0 360V341.4L252.8 293.4L400.3 274L520 214V360z" fill="#b9b3a2"/>
+<path d="M0 360V381.4L370.3 324L520 286V360z" fill="#a8a190" opacity=".55"/>
+<g fill="#8f8877"><rect x="96" y="323.4" width="30" height="14" rx="6"/><rect x="102" y="312.4" width="20" height="12" rx="5"/><rect x="106" y="303.4" width="12" height="10" rx="4"/></g>
+<g transform="translate(322 196) scale(0.8)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="18.2,-67.3 43.9,-36.7 81.7,-40.7" stroke="#c4b28e" stroke-width="15"/>
+<circle cx="81.7" cy="-40.7" r="8" fill="#bb8f6d"/>
+<rect x="-9.8" y="-71.3" width="34" height="58" rx="13" fill="#565b3a" transform="rotate(-15 7.2 -42.3)"/>
+<polyline points="0,0 -16.5,57.7 -49,105.8" stroke="#5e6358" stroke-width="23"/>
+<g transform="translate(-49 105.8) rotate(30)"><path d="M-10-3V7q0 4 4 4h29q6 0 3-6-6-5-17-10l-13-3z" fill="#23241e"/><path d="M-9 10.500h34" stroke="#f4f1e8" stroke-width="4" stroke-linecap="round"/></g>
+<polyline points="0,0 53.9,26.3 47.9,84" stroke="#6f7468" stroke-width="24"/>
+<g transform="translate(47.9 84) rotate(0)"><path d="M-10-3V7q0 4 4 4h29q6 0 3-6-6-5-17-10l-13-3z" fill="#2c2d27"/><path d="M-9 10.500h34" stroke="#f4f1e8" stroke-width="4" stroke-linecap="round"/></g>
+<polyline points="0,-8 20.2,-63.3" stroke="#d9c7a3" stroke-width="40"/>
+<polyline points="20.2,-69.3 30.9,-103.3" stroke="#d0a481" stroke-width="11"/>
+<circle cx="30.9" cy="-103.3" r="16" fill="#d0a481"/>
+<path d="M14.4 -103.3a16.500 16.500 0 0 1 31-8q-10 0-14 6-8 0-10 12-6-3-7-10z" fill="#3b2f26"/>
+<polyline points="18.2,-67.3 -7.5,-36.7 -15.4,0.5" stroke="#d9c7a3" stroke-width="15"/>
+<circle cx="-15.4" cy="0.5" r="8" fill="#d0a481"/>
+<path d="M-18.4 -11.5L6.6 128" stroke="#3b2f26" stroke-width="3.500"/>
+</g>
+</svg>

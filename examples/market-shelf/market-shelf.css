@@ -1,0 +1,376 @@
+/* Market Shelf (fantastic-ui, Preset Q). Tokens first; every rule below uses
+   only these. The first part of the block is the preset's own, verbatim. */
+
+.page {
+  /* ink 14.57 / ink-2 7.56 / muted 5.15 on --ground (the aisle);
+     16.17 / 8.39 / 5.72 on --panel (a card)                                */
+  --ground:    #f1f3f8;   /* the aisle: pale blue-grey                       */
+  --ground-2:  #e7eaf2;   /* picture plates, pressed states (muted 4.75)     */
+  --panel:     #ffffff;   /* product cards, the search field: 1.11:1 on the aisle — tone */
+  --panel-2:   #f7f8fb;
+  --hair:      #dfe3ec;   /* 1.29:1 on a card — the rule inside a card, footer rules */
+  --hair-lit:  #c8cedc;
+
+  --ink:       #1c2030;
+  --ink-2:     #474d61;
+  --muted:     #5f667b;
+  --control:   #77809a;   /* 3.54 on the aisle, 3.93 on a card — input outlines and arrow rings */
+
+  /* No accent. One midnight band per page, and the same midnight for buttons. */
+  --invert:           #0d1030;
+  --invert-2:         #171b45;   /* a raised surface on the band             */
+  --ink-on-invert:    #ffffff;   /* 18.52 / 16.42                            */
+  --ink-2-on-invert:  #b3b8d0;   /* 9.42 / 8.35                              */
+
+  --rating:           #a86500;   /* star marks on light: 4.64 on a card, 4.18 on the aisle */
+  --rating-on-invert: #f5b400;   /* 10.06 on the band — and 1.84 on a card: band only */
+
+  --up:   #17703d;   /* 6.14 on a card, 5.53 on the aisle                    */
+  --down: #bd2f28;   /* 5.83 / 5.25                                          */
+
+  --sans:    "Avenir Next", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", sans-serif;
+  --display: "Avenir Next", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", sans-serif;
+  --mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --r-sheet: 0px;
+  --r-panel: 8px;    /* the hero slide, promo tiles                          */
+  --r-card:  6px;    /* product cards, buttons                               */
+  --r-pill:  999px;  /* arrow rings only                                     */
+  --maxw:    1320px;
+  --gap:     16px;
+
+  /* Added for this page. Product colours: the drawings that stand in for
+     photographs use these and nothing else. No type is set in them. */
+  --product-ink:      #171a28;
+  --product-graphite: #394058;
+  --product-steel:    #8a93a9;
+  --product-silver:   #ccd2de;
+  --product-mist:     #d6deee;   /* the hero slide's picture half */
+  --product-blue:     #3a78e0;
+  --product-sky:      #a9c7f3;
+  --product-red:      #d44a40;
+  --product-blush:    #f7e3df;   /* the tinted promo tile: ink 13.2, ink-2 6.9 on it */
+  --product-sand:     #e6c697;
+  --product-wood:     #96683f;
+  --product-green:    #3c9270;
+
+  /* Layout and control sizes */
+  --gutter:    clamp(16px, 4vw, 60px);
+  --peek:      clamp(14px, 5.56vw, 80px);   /* how much of a neighbouring slide shows */
+  --hero-gap:  clamp(8px, 1.2vw, 16px);
+  --shelf-gap: clamp(10px, 1.2vw, var(--gap));
+  --pad-item:  clamp(8px, 2.6vw, 14px);
+  --ring:      44px;
+  --btn-h:     40px;
+  --fast:      160ms;
+  --ease:      cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* ---------- base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+.page {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+.page :where(a) { color: inherit; }
+.page :where(h1, h2, h3, p, ul) { margin: 0; }
+.page :where(ul) { padding: 0; list-style: none; }
+.wrap { inline-size: min(var(--maxw), 100% - 2 * var(--gutter)); margin-inline: auto; }
+.vh {
+  position: absolute; inline-size: 1px; block-size: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+.sprite { position: absolute; inline-size: 0; block-size: 0; overflow: hidden; }
+
+/* Focus: an ink ring on light grounds, a white ring on the midnight band. */
+.page a:focus-visible, .page button:focus-visible, .page input:focus-visible, .page [tabindex]:focus-visible {
+  outline: 2px solid var(--ink); outline-offset: 2px;
+}
+.band a:focus-visible, .band [tabindex]:focus-visible { outline-color: var(--ink-on-invert); }
+.band .card a:focus-visible { outline-color: var(--ink); }
+
+.skip {
+  position: absolute; inset-inline-start: var(--gutter); inset-block-start: -80px; z-index: 10;
+  display: inline-flex; align-items: center; block-size: var(--btn-h); padding-inline: 16px;
+  border-radius: var(--r-card); background: var(--invert); color: var(--ink-on-invert);
+  font: 600 14px/1 var(--sans); text-decoration: none;
+}
+.skip:focus { inset-block-start: 12px; }
+
+/* ---------- drawings: fills come from the product tokens ---------- */
+.f-body    { fill: var(--body, var(--product-graphite)); }
+.f-base    { fill: var(--base, var(--product-silver)); }
+.f-screen  { fill: var(--screen, var(--product-blue)); }
+.f-screen2 { fill: var(--screen-2, var(--product-sky)); }
+.f-ink     { fill: var(--product-ink); }
+.f-steel   { fill: var(--product-steel); }
+.f-silver  { fill: var(--product-silver); }
+.f-blue    { fill: var(--product-blue); }
+.f-red     { fill: var(--product-red); }
+.f-sand    { fill: var(--product-sand); }
+.f-wood    { fill: var(--product-wood); }
+.f-green   { fill: var(--product-green); }
+.f-white   { fill: var(--panel); }
+.f-paper   { fill: var(--panel-2); stroke: var(--hair-lit); stroke-width: 1.5; }
+.s-white   { fill: none; stroke: var(--panel); stroke-width: 2.5; stroke-linecap: round; }
+.s-steel   { fill: none; stroke: var(--product-steel); stroke-width: 2.5; stroke-linecap: round; }
+.i-line    { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* one drawing, several products: a variant only re-points the fills */
+.v-onyx   { --body: var(--product-ink); --base: var(--product-graphite); --screen: var(--product-graphite); --screen-2: var(--product-red); }
+.v-meadow { --body: var(--product-steel); --screen: var(--product-sky); --screen-2: var(--product-green); }
+.v-aria   { --body: var(--product-silver); --base: var(--product-steel); --screen: var(--product-sand); --screen-2: var(--product-red); }
+.v-canvas { --body: var(--product-ink); --screen: var(--product-green); --screen-2: var(--product-sand); }
+.v-vista  { --body: var(--product-ink); --screen-2: var(--product-ink); }
+.v-sofa   { --body: var(--product-steel); }
+.v-watch  { --body: var(--product-ink); }
+.v-atelier { --screen: var(--product-sky); --screen-2: var(--product-blue); }
+.v-pad2   { --base: var(--product-blue); }
+
+/* ---------- buttons and rings ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  block-size: var(--btn-h); padding-inline: 20px; border: 0; border-radius: var(--r-card);
+  background: var(--invert); color: var(--ink-on-invert);
+  font: 600 14px/1 var(--sans); text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition: background-color var(--fast) var(--ease), transform var(--fast) var(--ease);
+}
+.btn:hover { background: var(--invert-2); }
+.btn:active { transform: translateY(1px); }
+
+.ring {
+  display: grid; place-items: center; flex: none; inline-size: var(--ring); block-size: var(--ring);
+  border: 1px solid var(--control); border-radius: var(--r-pill);
+  background: var(--panel); color: var(--ink);
+  transition: background-color var(--fast) var(--ease), color var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+.ring svg { display: block; inline-size: 16px; block-size: 16px; }
+.ring--back svg { transform: scaleX(-1); }
+.ring:hover { background: var(--invert); border-color: var(--invert); color: var(--ink-on-invert); }
+.ring:active { background: var(--invert-2); }
+
+/* ---------- search-first bar ---------- */
+.bar {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+  gap: 6px 16px; padding-block: 10px 14px;
+}
+.mark {
+  justify-self: start; display: inline-flex; align-items: center; min-block-size: 44px;
+  font: 700 20px/1 var(--display); letter-spacing: -0.02em; text-decoration: none;
+}
+.acct { grid-column: 2; grid-row: 1; display: flex; gap: 4px 18px; }
+.acct a {
+  display: inline-flex; align-items: center; min-block-size: 40px;
+  font: 500 14px/1.2 var(--sans); color: var(--ink-2); text-decoration: none; white-space: nowrap;
+}
+.acct a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.search { position: relative; grid-column: 1 / -1; grid-row: 2; }
+.search input {
+  display: block; inline-size: 100%; block-size: 46px; padding: 0 52px 0 16px;
+  border: 1px solid var(--control); border-radius: var(--r-card);
+  background: var(--panel); color: var(--ink); font: 400 16px/1.2 var(--sans);
+  -webkit-appearance: none; appearance: none;
+}
+.search input::placeholder { color: var(--muted); opacity: 1; }
+.search input:hover { border-color: var(--ink-2); }
+.search__go {
+  position: absolute; inset-block-start: 3px; inset-inline-end: 3px;
+  display: grid; place-items: center; inline-size: 40px; block-size: 40px;
+  border: 0; border-radius: 4px; background: transparent; color: var(--ink); cursor: pointer;
+  transition: background-color var(--fast) var(--ease);
+}
+.search__go:hover { background: var(--ground-2); }
+.search__go svg { display: block; inline-size: 18px; block-size: 18px; }
+
+/* ---------- hero: one slide, its neighbours showing ---------- */
+.hero__stage {
+  display: grid; column-gap: var(--hero-gap);
+  max-inline-size: calc(var(--maxw) + 2 * (var(--peek) + var(--hero-gap))); margin-inline: auto;   /* never more than --peek of a neighbour */
+  grid-template-columns: minmax(var(--peek), 1fr) minmax(0, var(--maxw)) minmax(var(--peek), 1fr);
+}
+.peek { position: relative; grid-row: 1; }
+.peek--prev { grid-column: 1; border-radius: 0 var(--r-panel) var(--r-panel) 0; background: var(--product-blue); }
+.peek--next { grid-column: 3; border-radius: var(--r-panel) 0 0 var(--r-panel); background: var(--product-sand); }
+.peek svg { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; }
+
+.slide { grid-column: 2; grid-row: 1; display: grid; grid-template-rows: auto 220px; }
+.slide__copy {
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  padding: 28px clamp(20px, 5vw, 72px) 30px;
+  border-radius: var(--r-panel) var(--r-panel) 0 0; background: var(--panel);
+}
+.slide__kind { font: 600 13px/1.3 var(--sans); color: var(--muted); }
+.slide__copy h1 {
+  margin-block-start: 8px; text-wrap: balance;
+  font: 600 clamp(30px, 3.5vw, 46px)/1.08 var(--display); letter-spacing: -0.02em;
+}
+.slide__lede { margin-block-start: 12px; max-inline-size: 34ch; font: 400 clamp(15px, 1.25vw, 17px)/1.5 var(--sans); color: var(--ink-2); text-wrap: pretty; }
+.slide__copy .btn { margin-block-start: 22px; }
+.slide__pic {
+  display: grid; place-items: center; min-block-size: 0; padding: 16px 28px;
+  border-radius: 0 0 var(--r-panel) var(--r-panel); background: var(--product-mist);
+}
+.slide__pic svg { display: block; inline-size: auto; block-size: 100%; max-inline-size: 100%; aspect-ratio: 4 / 3; }
+
+.hero__ring { grid-column: 2; grid-row: 1; align-self: end; z-index: 1; margin-block-end: 88px; }
+.hero__ring--prev { justify-self: start; margin-inline-start: calc(var(--ring) / -2); }
+.hero__ring--next { justify-self: end; margin-inline-end: calc(var(--ring) / -2); }
+
+/* ---------- shelves ---------- */
+.shelf { margin-block-start: clamp(28px, 3vw, 40px); }
+.shelf__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-block-end: 10px; }
+.shelf__head h2 { font: 600 clamp(18px, 1.6vw, 22px)/1.2 var(--display); letter-spacing: -0.01em; text-wrap: balance; }
+.shelf__nav { display: flex; gap: 8px; }
+
+/* The track is the list itself and scrolls by itself: touch, wheel, keyboard.
+   The rings only jump it. */
+.shelf__track {
+  --per: 2.3333; --gaps: 2;
+  display: flex; gap: var(--shelf-gap);
+  overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
+  scrollbar-width: thin; scrollbar-color: var(--hair-lit) transparent;
+  border-radius: var(--r-card);
+}
+.shelf__cell {
+  display: flex; flex: 0 0 calc((100% - var(--gaps) * var(--shelf-gap)) / var(--per)); min-inline-size: 0;
+  scroll-snap-align: start; scroll-margin-block-start: 96px;
+}
+
+/* The card is a price tag: tone only, no border, no shadow. */
+.card {
+  position: relative; display: flex; flex-direction: column; inline-size: 100%;
+  padding: var(--pad-item); border-radius: var(--r-card); background: var(--panel);
+}
+.item__art { display: block; inline-size: 100%; block-size: auto; aspect-ratio: 4 / 3; transition: transform var(--fast) var(--ease); }
+.card:hover .item__art { transform: translateY(-3px); }
+.item__name { margin-block-start: 6px; font: 500 14px/1.4 var(--sans); }
+.item__name a { display: block; min-block-size: 24px; padding-block: 2px; text-decoration: none; }
+.item__name a::after { content: ""; position: absolute; inset: 0; border-radius: var(--r-card); }   /* the whole card is the link */
+.card:hover .item__name a { text-decoration: underline; text-underline-offset: 3px; }
+.item__spec {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+  min-block-size: 2.9em; margin-block-end: 10px; font: 400 12px/1.45 var(--sans); color: var(--muted);
+}
+.item__foot {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 4px 6px;
+  margin-block-start: auto; padding-block-start: 9px; border-block-start: 1px solid var(--hair);
+}
+.item__price { display: flex; flex-direction: column; align-items: flex-end; margin-inline-start: auto; font: 700 15px/1.2 var(--sans); font-variant-numeric: tabular-nums; }
+.item__was { font: 400 12px/1.3 var(--sans); color: var(--muted); text-decoration: line-through; }
+
+.rating { display: inline-flex; align-items: center; gap: 5px; min-block-size: 18px; font: 600 12px/1 var(--sans); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.stars { position: relative; display: block; flex: none; inline-size: 12px; block-size: 12px; }   /* a phone shows one star and the number */
+.stars__one { display: block; inline-size: 100%; block-size: 100%; fill: var(--rating); }
+.stars__row { display: none; position: absolute; inset: 0; inline-size: 100%; block-size: 100%; fill: var(--hair-lit); }
+.stars__row + .stars__row { fill: var(--rating); clip-path: inset(0 calc(100% - var(--fill, 100%)) 0 0); }
+.s40 { --fill: 80%; } .s41 { --fill: 82%; } .s42 { --fill: 84%; } .s43 { --fill: 86%; } .s44 { --fill: 88%; }
+.s45 { --fill: 90%; } .s46 { --fill: 92%; } .s47 { --fill: 94%; } .s48 { --fill: 96%; }
+
+/* ---------- the midnight band ---------- */
+.band { margin-block-start: clamp(32px, 3.6vw, 48px); padding-block: clamp(24px, 3vw, 40px); background: var(--invert); color: var(--ink-on-invert); }
+.band__in { display: grid; gap: 18px; }
+.band__info { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0 16px; }
+.band__info h2 { font: 600 clamp(22px, 2.3vw, 30px)/1.12 var(--display); letter-spacing: -0.015em; text-wrap: balance; }
+.band__time { grid-column: 1 / -1; margin-block-start: 10px; font: 500 clamp(28px, 2.7vw, 36px)/1 var(--mono); letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.band__ends { grid-column: 1 / -1; margin-block-start: 8px; font: 400 14px/1.4 var(--sans); color: var(--ink-2-on-invert); }
+.band__rated { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; margin-block-start: 4px; font: 400 13px/1.4 var(--sans); color: var(--ink-2-on-invert); }
+.band__rated svg { flex: none; inline-size: 13px; block-size: 13px; fill: var(--rating-on-invert); }
+.band__rated b { font-weight: 700; color: var(--rating-on-invert); }
+.band .ring { background: transparent; border-color: var(--ink-2-on-invert); color: var(--ink-on-invert); }
+.band .ring:hover { background: var(--ink-on-invert); border-color: var(--ink-on-invert); color: var(--invert); }
+.band .card { color: var(--ink); }
+
+/* ---------- promo trio ---------- */
+.promos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--shelf-gap); margin-block-start: clamp(28px, 3vw, 40px); }
+.promos > li { display: grid; }
+.promos > li:last-child { grid-column: 1 / -1; }
+.promo {
+  position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 10px;
+  padding: clamp(14px, 1.8vw, 24px); border-radius: var(--r-panel); background: var(--panel);
+}
+.promo--tint { background: var(--product-blush); }
+.promo__kind { font: 600 12px/1.3 var(--sans); color: var(--ink-2); }
+.promo__name { margin-block-start: 2px; font: 600 clamp(15px, 1.4vw, 19px)/1.25 var(--display); letter-spacing: -0.01em; text-wrap: balance; }
+.promo__name a { display: block; min-block-size: 24px; text-decoration: none; }
+.promo__name a::after { content: ""; position: absolute; inset: 0; border-radius: var(--r-panel); }
+.promo:hover .promo__name a { text-decoration: underline; text-underline-offset: 3px; }
+.promo__price { margin-block-start: 4px; font: 700 clamp(18px, 1.7vw, 24px)/1.15 var(--sans); font-variant-numeric: tabular-nums; }
+.promo__art { display: block; align-self: end; justify-self: center; inline-size: min(100%, 320px); block-size: auto; aspect-ratio: 5 / 3; transition: transform var(--fast) var(--ease); }
+.promo:hover .promo__art { transform: translateY(-3px); }
+.promo--wide { grid-template-rows: none; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); align-items: center; }
+.promo--wide .promo__art { align-self: center; inline-size: auto; block-size: min(100%, 230px); max-inline-size: 100%; aspect-ratio: 3 / 4; }
+.promo--wide .btn { margin-block-start: 16px; }
+
+/* ---------- footer ---------- */
+.foot { margin-block-start: clamp(36px, 4vw, 56px); background: var(--panel); }
+.foot__in { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 20px; padding-block: 36px 30px; }
+.foot__brand, .foot__sub { grid-column: 1 / -1; }
+.foot__mark { font: 700 20px/1.2 var(--display); letter-spacing: -0.02em; }
+.foot__brand p + p { margin-block-start: 8px; max-inline-size: 36ch; font: 400 13px/1.5 var(--sans); color: var(--muted); }
+.foot h2 { margin-block-end: 6px; font: 600 14px/1.3 var(--sans); }
+.foot__links a { display: flex; align-items: center; min-block-size: 30px; font: 400 13px/1.3 var(--sans); color: var(--ink-2); text-decoration: none; }
+.foot__links a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.foot__sub label { display: block; margin-block-end: 6px; font: 400 13px/1.4 var(--sans); color: var(--ink-2); }
+.foot__field { display: flex; gap: 8px; max-inline-size: 420px; }
+.foot__field input {
+  flex: 1 1 auto; min-inline-size: 0; block-size: var(--btn-h); padding-inline: 12px;
+  border: 1px solid var(--control); border-radius: var(--r-card);
+  background: var(--panel); color: var(--ink); font: 400 16px/1.2 var(--sans);
+}
+.foot__field input::placeholder { color: var(--muted); opacity: 1; }
+.foot__sub p { margin-block-start: 8px; font: 400 12px/1.5 var(--sans); color: var(--muted); }
+.foot__base { border-block-start: 1px solid var(--hair); }
+.foot__base p { padding-block: 16px; font: 400 12px/1.5 var(--sans); color: var(--muted); }
+
+/* ---------- from 720: the bar on one line, the slide in two halves, five stars ---------- */
+@media (min-width: 720px) {
+  .bar { grid-template-columns: auto minmax(0, 1fr) auto; gap: 24px; padding-block: 14px; }
+  .search { grid-column: 2; grid-row: 1; justify-self: center; inline-size: min(100%, 680px); }
+  .acct { grid-column: 3; }
+  .slide { grid-template-rows: none; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-block-size: clamp(320px, 29vw, 410px); }
+  .slide__copy { padding-block: 36px; border-radius: var(--r-panel) 0 0 var(--r-panel); }
+  .slide__pic { padding: 28px; border-radius: 0 var(--r-panel) var(--r-panel) 0; }
+  .slide__pic svg { inline-size: min(100%, 470px); block-size: auto; }
+  .hero__ring { align-self: center; margin-block-end: 0; }
+  .shelf__track { --per: 3.3333; --gaps: 3; }
+  .stars { inline-size: 60px; }
+  .stars__one { display: none; }
+  .stars__row { display: block; }
+  .item__foot { align-items: center; }
+  .band .item__foot { align-items: flex-end; }
+  .promo { min-block-size: 250px; }
+  .foot__in { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.6fr); }
+  .foot__sub { grid-column: auto; }
+}
+@media (min-width: 900px) {
+  .promos { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr); }
+  .promos > li:last-child { grid-column: auto; }
+}
+@media (min-width: 1024px) {
+  .shelf__track { --per: 4; --gaps: 3; }
+  .band__in { grid-template-columns: 232px minmax(0, 1fr); gap: 32px; align-items: center; }
+  .band__info { display: flex; flex-direction: column; align-items: flex-start; }
+  .band .shelf__nav { order: 1; margin-block-start: 22px; }
+  .band .shelf__track { --per: 3.3333; }
+}
+@media (min-width: 1513px) {
+  .peek--prev, .peek--next { border-radius: var(--r-panel); }
+}
+@media (min-width: 1280px) {
+  .foot__in { grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)) minmax(0, 1.7fr); gap: 32px; padding-block: 44px 36px; }
+  .foot__brand { grid-column: auto; }
+  .shelf__track { --per: 5; --gaps: 4; }
+  .band .shelf__track { --per: 4; --gaps: 3; }
+}
+
+/* ---------- motion ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .shelf__track { scroll-behavior: smooth; }   /* the shelf glides; the page itself jumps */
+}
+@media (prefers-reduced-motion: reduce) {
+  .page *, .page *::before, .page *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  .card:hover .item__art, .promo:hover .promo__art, .btn:active { transform: none; }
+}

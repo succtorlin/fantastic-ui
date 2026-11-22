@@ -1,0 +1,51 @@
+[
+  {
+    "preset": "M",
+    "id": "../folio-split/index",
+    "shot": "previews/folio-split.webp",
+    "brand": "ScientistTwo",
+    "look": "An index of work: equal pale-grey tiles, each with one large, sharp capture running off its edge.",
+    "prompt": "Build a portfolio index in Folio Split. Use my own high-resolution screenshots, one per tile.",
+    "real": true
+  },
+  {
+    "preset": "N",
+    "id": "../sprint-stage/index",
+    "shot": "previews/sprint-stage.webp",
+    "brand": "Tern",
+    "look": "A black first screen, a slanted heavy headline and one shoe standing on its reflection.",
+    "prompt": "Build a sportswear shop in Sprint Stage. Use my product photographs and keep the first screen to one product."
+  },
+  {
+    "preset": "O",
+    "id": "../olive-outfitter/index",
+    "shot": "previews/olive-outfitter.webp",
+    "brand": "Fellwalk",
+    "look": "One rounded warm-white sheet, a picture that fades in from the right and dark-olive pill buttons.",
+    "prompt": "Build an outdoor shop in Olive Outfitter. Use my lifestyle photographs and keep every word on a solid surface."
+  },
+  {
+    "preset": "P",
+    "id": "../chamfer-spec/index",
+    "shot": "previews/chamfer-spec.webp",
+    "brand": "Kestrel Audio",
+    "look": "White, silver and black, wide uppercase type, corners cut at 45° and a ruled strip of specifications.",
+    "prompt": "Build a hardware launch page in Chamfer Spec. Give every claim a number with a unit."
+  },
+  {
+    "preset": "Q",
+    "id": "../market-shelf/index",
+    "shot": "previews/market-shelf.webp",
+    "brand": "Corner Market",
+    "look": "White product cards on shelves that scroll sideways, with the price as the heaviest text.",
+    "prompt": "Build a marketplace home page in Market Shelf. Use my product photographs and give each category its own shelf."
+  },
+  {
+    "preset": "R",
+    "id": "../mono-catalogue/index",
+    "shot": "previews/mono-catalogue.webp",
+    "brand": "Plain Goods",
+    "look": "A white page, pale-grey tiles with very large corners and every product in greyscale.",
+    "prompt": "Build a gadget shop in Mono Catalogue. Use my product cut-outs and keep the whole catalogue in greyscale."
+  }
+]

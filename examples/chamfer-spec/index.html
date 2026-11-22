@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="fui-preset" content="P">
+<title>Kestrel K2 wireless earbuds, 38 ms link</title>
+<meta name="description" content="Kestrel K2: wireless earbuds with a 38 millisecond link, hybrid dual drivers, six microphones and 32 hours with the case.">
+<link rel="stylesheet" href="chamfer-spec.css">
+</head>
+<body class="page">
+<a class="skip" href="#main">Skip to the product</a>
+
+<svg class="sprite" aria-hidden="true" focusable="false" width="0" height="0">
+  <!-- line icons, 24 px grid -->
+  <symbol id="i-latency" viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 3v18M16 7v10M20 10v4"/></symbol>
+  <symbol id="i-drivers" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 11.5v1"/></symbol>
+  <symbol id="i-battery" viewBox="0 0 24 24"><path d="M7 5h10v16H7zM10 2.5h4M10 17h4M10 13.5h4M10 10h4"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><path d="M9 2.5h6V13H9zM5 11a7 7 0 0 0 14 0M12 18v3.5M8 21.5h8"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5l8 3V11c0 5-3.4 8.8-8 10.5C7.4 19.8 4 16 4 11V5.5zM8.5 11.8l2.5 2.5 4.5-5"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h5l4 4v3h-9"/><circle cx="6.5" cy="17.5" r="2"/><circle cx="17.5" cy="17.5" r="2"/></symbol>
+  <symbol id="i-return" viewBox="0 0 24 24"><path d="M3 8l9-5 9 5v9l-9 5-9-5zM3 8l9 5 9-5M12 13v9"/></symbol>
+  <symbol id="i-headset" viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v5H4zM17 14h3v5h-3zM20 19c0 1.7-2 2.5-5 2.5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 13H6zM9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><path d="M2 4h20v13H2zM8 21h8M12 17v4"/></symbol>
+  <symbol id="i-gamepad" viewBox="0 0 24 24"><path d="M6 7h12l4 4v5l-3 2-3-3H8l-3 3-3-2v-5zM7 10v3M5.5 11.5h3M16 11.5h1"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M7 2h10v20H7zM11 18.5h2"/></symbol>
+
+  <!-- measuring rings behind a drawing -->
+  <symbol id="rings" viewBox="0 0 400 400">
+    <path class="r-hair" d="M200 2v396M2 200h396"/>
+    <circle class="r-hair" cx="200" cy="200" r="198"/>
+    <circle class="r-tick" cx="200" cy="200" r="186"/>
+    <circle class="r-hair" cx="200" cy="200" r="150"/>
+    <circle class="r-lit" cx="200" cy="200" r="112"/>
+    <circle class="r-hair" cx="200" cy="200" r="70"/>
+    <path class="r-lit" d="M200 2a198 198 0 0 1 171.5 99M200 398a198 198 0 0 1-171.5-99"/>
+  </symbol>
+
+  <!-- one earbud: black tip, white head, white stem -->
+  <symbol id="k2-bud" viewBox="0 0 200 320">
+    <ellipse class="d-black" cx="50" cy="96" rx="34" ry="46" transform="rotate(-18 50 96)"/>
+    <ellipse class="d-dark" cx="38" cy="92" rx="13" ry="27" transform="rotate(-18 38 92)"/>
+    <g transform="rotate(-6 120 98)">
+      <rect class="d-white d-edge" x="92" y="90" width="56" height="216" rx="28"/>
+      <rect class="d-shade" x="127" y="160" width="17" height="132" rx="8.5"/>
+      <rect class="d-deep" x="109" y="186" width="5" height="72" rx="2.5"/>
+      <rect class="d-black" x="111" y="288" width="18" height="5" rx="2.5"/>
+    </g>
+    <circle class="d-white d-edge" cx="108" cy="98" r="64"/>
+    <path class="d-shade" d="M164.4 77.5A60 60 0 0 1 69.4 144A90 90 0 0 0 164.4 77.5Z"/>
+    <circle class="d-black" cx="124" cy="62" r="3.5"/>
+  </symbol>
+
+  <!-- the pair, mirrored -->
+  <symbol id="k2-pair" viewBox="0 0 380 320">
+    <use href="#k2-bud" width="200" height="320"/>
+    <use href="#k2-bud" width="200" height="320" transform="translate(380 0) scale(-1 1)"/>
+  </symbol>
+
+  <!-- the charging case, closed -->
+  <symbol id="k2-case" viewBox="0 0 280 240">
+    <ellipse class="d-shade" cx="140" cy="216" rx="122" ry="13"/>
+    <rect class="d-white d-edge" x="24" y="34" width="232" height="172" rx="46"/>
+    <path class="d-shade" d="M27 160a46 46 0 0 0 43 43h140a46 46 0 0 0 43-43q-20 22-60 22H87q-40 0-60-22z"/>
+    <path class="d-line" d="M24.5 104h231"/>
+    <rect class="d-black" x="116" y="122" width="48" height="6" rx="3"/>
+  </symbol>
+
+  <!-- the case open, both earbuds seated -->
+  <symbol id="k2-open" viewBox="0 0 520 470">
+    <ellipse class="d-shade" cx="260" cy="434" rx="216" ry="22"/>
+    <path class="d-pale d-edge" d="M118 252L104 150a40 40 0 0 1 40-44h232a40 40 0 0 1 40 44l-14 102z"/>
+    <path class="d-shade" d="M134 246l-12-88a26 26 0 0 1 26-30h224a26 26 0 0 1 26 30l-12 88z"/>
+    <rect class="d-black" x="92" y="226" width="336" height="92" rx="36"/>
+    <use href="#k2-bud" x="118" y="62" width="150" height="240"/>
+    <use href="#k2-bud" width="150" height="240" transform="translate(402 62) scale(-1 1)"/>
+    <path class="d-white d-edge" d="M80 300a30 30 0 0 1 30-30h300a30 30 0 0 1 30 30v64a54 54 0 0 1-54 54H134a54 54 0 0 1-54-54z"/>
+    <path class="d-shade" d="M83 368a54 54 0 0 0 51 47h252a54 54 0 0 0 51-47q-24 26-70 26H153q-46 0-70-26z"/>
+    <rect class="d-black" x="232" y="312" width="56" height="7" rx="3.5"/>
+  </symbol>
+
+  <!-- the two drivers, pulled apart along one axis -->
+  <symbol id="k2-drivers" viewBox="0 0 260 130">
+    <path class="d-line" d="M14 65h232"/>
+    <ellipse class="d-white d-edge" cx="52" cy="65" rx="15" ry="50"/>
+    <ellipse class="d-shade" cx="52" cy="65" rx="8" ry="30"/>
+    <ellipse class="d-black" cx="98" cy="65" rx="17" ry="56"/>
+    <ellipse class="d-dark" cx="98" cy="65" rx="9" ry="34"/>
+    <ellipse class="d-white d-edge" cx="146" cy="65" rx="14" ry="44"/>
+    <ellipse class="d-deep" cx="146" cy="65" rx="6" ry="20"/>
+    <ellipse class="d-black" cx="190" cy="65" rx="10" ry="30"/>
+    <ellipse class="d-white d-edge" cx="224" cy="65" rx="8" ry="22"/>
+  </symbol>
+
+  <!-- one earbud with its three microphone ports marked -->
+  <symbol id="k2-mics" viewBox="0 0 320 320">
+    <path class="d-line" d="M22 150v20M38 132v56M54 144v32M266 144v32M282 132v56M298 150v20"/>
+    <use href="#k2-bud" x="60" y="0" width="200" height="320"/>
+    <circle class="d-ring" cx="184" cy="62" r="9"/>
+    <circle class="d-ring" cx="165" cy="128" r="9"/>
+    <circle class="d-ring" cx="200" cy="291" r="9"/>
+  </symbol>
+</svg>
+
+<header class="top wrap" id="top" data-fui-align-start="content" data-fui-align-end="content">
+  <a class="brand-wordmark" href="#top" aria-label="Kestrel Audio, top of page">Kestrel</a>
+  <nav class="nav" aria-label="Main">
+    <ul class="nav__list">
+      <li><a href="#features">Products</a></li>
+      <li><a href="#latency">Technology</a></li>
+      <li><a href="#support">Support</a></li>
+    </ul>
+    <ul class="nav__list nav__list--util">
+      <li><a href="#top"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-search"/></svg>Search</a></li>
+      <li><a href="#top"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-bag"/></svg>Bag</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="wrap hero__grid" data-fui-align-start="content" data-fui-align-end="content">
+      <div class="hero__copy">
+        <p class="hero__wordmark">Kestrel K2</p>
+        <h1 class="display display--1" id="hero-h">Built to hear first</h1>
+        <p class="hero__lede">Wireless earbuds with a 38 millisecond link, tuned for games where sound arrives before the picture.</p>
+        <p class="hero__action"><a class="btn btn--arrow" href="#top">Order the K2</a></p>
+        <ul class="facts" aria-label="Key figures">
+          <li class="fact">
+            <svg class="icon" aria-hidden="true"><use href="#i-latency"/></svg>
+            <p class="fact__text"><b class="fact__stat-value">38 ms</b> <span class="fact__stat-label">latency</span></p>
+          </li>
+          <li class="fact">
+            <svg class="icon" aria-hidden="true"><use href="#i-drivers"/></svg>
+            <p class="fact__text"><b class="fact__stat-value">10 mm + 6 mm</b> <span class="fact__stat-label">dual drivers</span></p>
+          </li>
+          <li class="fact">
+            <svg class="icon" aria-hidden="true"><use href="#i-battery"/></svg>
+            <p class="fact__text"><b class="fact__stat-value">32 hours</b> <span class="fact__stat-label">with the case</span></p>
+          </li>
+          <li class="fact">
+            <svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>
+            <p class="fact__text"><b class="fact__stat-value">6 microphones</b> <span class="fact__stat-label">noise cancelling</span></p>
+          </li>
+        </ul>
+      </div>
+      <div class="render render--hero">
+        <svg class="render__rings" aria-hidden="true" viewBox="0 0 400 400"><use href="#rings"/></svg>
+        <svg class="render__art" role="img" aria-label="Drawing of the Kestrel K2: a white charging case, open, with two white stem earbuds with black tips standing in it." viewBox="0 0 520 470"><use href="#k2-open"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec" id="specs" aria-labelledby="spec-h">
+    <div class="wrap" data-fui-align-start="content" data-fui-align-end="content">
+      <div class="spec__strip">
+        <div class="spec__label">
+          <div class="spec__label-in">
+            <h2 class="spec__title" id="spec-h">Technical specifications</h2>
+            <span class="spec__rule" aria-hidden="true"></span>
+          </div>
+        </div>
+        <dl class="spec__list">
+          <div class="spec__item">
+            <dt>Connection</dt>
+            <dd class="spec__value">Bluetooth 5.3</dd>
+            <dd class="spec__note">Low power, stable</dd>
+          </div>
+          <div class="spec__item">
+            <dt>Latency</dt>
+            <dd class="spec__value">38 ms</dd>
+            <dd class="spec__note">Game mode</dd>
+          </div>
+          <div class="spec__item">
+            <dt>Drivers</dt>
+            <dd class="spec__value">10 mm + 6 mm</dd>
+            <dd class="spec__note">Hybrid dual</dd>
+          </div>
+          <div class="spec__item">
+            <dt>Frequency response</dt>
+            <dd class="spec__value">20 Hz – 40 kHz</dd>
+            <dd class="spec__note">High resolution</dd>
+          </div>
+          <div class="spec__item">
+            <dt>Impedance</dt>
+            <dd class="spec__value">32 Ω</dd>
+            <dd class="spec__note">Nominal</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="callout" id="latency" aria-labelledby="latency-h">
+    <div class="wrap callout__grid" data-fui-align-start="content" data-fui-align-end="content">
+      <div class="callout__copy">
+        <h2 class="display display--2" id="latency-h">38 <span class="unit">ms</span>, measured</h2>
+        <p class="callout__body">We time the gap between a button press and the first sound leaving the driver, across 1,000 presses in game mode. The median is 38 milliseconds, and nine presses in ten land under 41.</p>
+        <p class="callout__action"><a class="btn btn--line" href="#specs">How we measured it</a></p>
+      </div>
+      <div class="render render--callout">
+        <svg class="render__rings" aria-hidden="true" viewBox="0 0 400 400"><use href="#rings"/></svg>
+        <svg class="render__art" role="img" aria-label="Drawing of one Kestrel K2 earbud, side on: black tip, white head and a white stem." viewBox="0 0 200 320"><use href="#k2-bud"/></svg>
+      </div>
+      <div class="callout__figure">
+        <p class="callout__value"><span class="display callout__num">38</span> <span class="display callout__unit">ms</span></p>
+        <p class="callout__stat-caption">Button press to sound</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features" aria-labelledby="features-h">
+    <div class="wrap" data-fui-align-start="content" data-fui-align-end="content">
+      <h2 class="vh" id="features-h">What is inside the K2</h2>
+      <ul class="cells">
+        <li class="cell">
+          <div class="cell__art render">
+            <svg class="render__art" role="img" aria-label="Drawing of the two drivers pulled apart: a large dynamic driver and a small balanced armature." viewBox="0 0 260 130"><use href="#k2-drivers"/></svg>
+          </div>
+          <h3 class="cell__title">Hybrid dual drivers</h3>
+          <p class="cell__body">A 10 mm dynamic driver for bass and a 6 mm balanced armature for detail.</p>
+        </li>
+        <li class="cell">
+          <div class="cell__art render">
+            <svg class="render__art" role="img" aria-label="Drawing of one earbud with its three microphone ports circled." viewBox="0 0 320 320"><use href="#k2-mics"/></svg>
+          </div>
+          <h3 class="cell__title">Six-microphone array</h3>
+          <p class="cell__body">Three per side. Voices stay clear over a mechanical keyboard.</p>
+        </li>
+        <li class="cell">
+          <div class="cell__art render">
+            <svg class="render__art" role="img" aria-label="Drawing of the charging case, closed." viewBox="0 0 280 240"><use href="#k2-case"/></svg>
+          </div>
+          <h3 class="cell__title">32 hours of battery</h3>
+          <p class="cell__body">8 hours per charge, and three more charges in the case.</p>
+        </li>
+        <li class="cell">
+          <div class="cell__art cell__art--icons" aria-hidden="true">
+            <svg class="icon icon--lg"><use href="#i-monitor"/></svg>
+            <svg class="icon icon--lg"><use href="#i-gamepad"/></svg>
+            <svg class="icon icon--lg"><use href="#i-phone"/></svg>
+          </div>
+          <h3 class="cell__title">Works with what you own</h3>
+          <p class="cell__body">PC, PlayStation, Xbox, Switch, Android and iOS.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="band" id="design" aria-labelledby="design-h">
+    <div class="wrap band__grid" data-fui-align-start="content" data-fui-align-end="content">
+      <div class="band__text">
+        <h2 class="display display--3" id="design-h">Made for long sessions</h2>
+        <p class="band__body">Light enough to forget by the second hour, and sealed against sweat and rain.</p>
+        <ul class="ticks">
+          <li>4.8 grams per earbud</li>
+          <li>IPX5 sweat and rain resistance</li>
+          <li>Touch controls you can remap</li>
+          <li>Three sizes of tips in the box</li>
+        </ul>
+        <p class="band__more"><a href="#support">Read about fit and returns</a></p>
+        <span class="band__slope" aria-hidden="true"></span>
+      </div>
+      <div class="band__renders">
+        <div class="render render--tall">
+          <svg class="render__art" role="img" aria-label="Drawing of the charging case, closed, seen from the front." viewBox="0 0 280 240"><use href="#k2-case"/></svg>
+        </div>
+        <div class="render render--tall">
+          <svg class="render__art" role="img" aria-label="Drawing of the pair of earbuds, facing each other." viewBox="0 0 380 320"><use href="#k2-pair"/></svg>
+        </div>
+        <div class="render render--tall">
+          <svg class="render__art" role="img" aria-label="Drawing of a single earbud, upright." viewBox="0 0 200 320"><use href="#k2-bud"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="assure-row" id="support" aria-label="Warranty, shipping, returns and support">
+    <div class="wrap" data-fui-align-start="content" data-fui-align-end="content">
+      <ul class="assure">
+        <li class="assure__item">
+          <svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>
+          <p><b class="assure__title">2-year warranty</b> <span class="assure__note">Earbuds, case and battery</span></p>
+        </li>
+        <li class="assure__item">
+          <svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg>
+          <p><b class="assure__title">Free shipping</b> <span class="assure__note">On every order</span></p>
+        </li>
+        <li class="assure__item">
+          <svg class="icon" aria-hidden="true"><use href="#i-return"/></svg>
+          <p><b class="assure__title">30-day returns</b> <span class="assure__note">Full refund, opened or not</span></p>
+        </li>
+        <li class="assure__item">
+          <svg class="icon" aria-hidden="true"><use href="#i-headset"/></svg>
+          <p><b class="assure__title">Support every day</b> <span class="assure__note">Chat and email, 7 days a week</span></p>
+        </li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot__grid" data-fui-align-start="content" data-fui-align-end="content">
+    <p class="foot__brand-wordmark">Kestrel Audio</p>
+    <ul class="foot__links">
+      <li><a href="#features">Products</a></li>
+      <li><a href="#latency">Technology</a></li>
+      <li><a href="#support">Support</a></li>
+    </ul>
+    <p class="foot__note">Drawings stand in for product renders.</p>
+    <p class="foot__legal">© 2026 Kestrel Audio</p>
+  </div>
+</footer>
+</body>
+</html>

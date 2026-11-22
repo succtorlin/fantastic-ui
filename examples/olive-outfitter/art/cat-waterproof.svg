@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 360" role="img"><title>A walker in a hooded jacket crossing puddles in the rain</title>
+<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2e0d7"/><stop offset="1" stop-color="#eeebe2"/></linearGradient></defs><rect width="520" height="360" fill="url(#s)"/>
+<path d="M0 250q130-38 260-18t260-26v154H0z" fill="#d8d5c9"/>
+<path d="M0 302.9H520V360H0z" fill="#cdc9bb"/>
+<g fill="#e4e2da"><ellipse cx="150" cy="336.9" rx="78" ry="9"/><ellipse cx="408" cy="326.9" rx="64" ry="8"/><ellipse cx="290" cy="310.9" rx="46" ry="5"/></g>
+<g fill="none" stroke="#b9b4a5" stroke-width="2"><ellipse cx="150" cy="336.9" rx="30" ry="3.500"/><ellipse cx="420" cy="326.9" rx="22" ry="3"/></g>
+<path d="M168.1 32.7l-8.5 25.1M29.8 141.6l-7.2 21.1M21.9 133.6l-5.6 16.5M228.5 9.8l-5.9 17.3M223.5 223.9l-6 17.7M112.8 167.5l-10 29.3M307.4 102.2l-10.1 29.7M15.6 232.9l-6.8 20.1M69.3 23.3l-6.9 20.3M438.9 41.1l-8.2 24.1M341.4 95.4l-8 23.7M24.5 6.9l-6.4 18.9M364.2 111l-6.9 20.4M312.1 118.2l-6.9 20.2M426.9 187.8l-6.6 19.4M305.9 138.6l-9.6 28.3M391.2 71.5l-10.1 29.7M54.9 108.3l-9 26.6M73.6 128.3l-5.6 16.5M357.5 206.3l-8.2 24M471.5 78.8l-8.7 25.7M316.9 154.1l-7.6 22.4M452 257.3l-7.7 22.6M355.3 7.2l-8.8 25.8M345.9 271l-9.4 27.5M146.5 99.2l-8.6 25.4M2.4 120.6l-6.2 18.4M54.4 6.7l-9.1 26.8M61.1 60.1l-7.3 21.5M469.3 12.8l-7.6 22.3M292.2 239.9l-9.3 27.5M465.2 68.8l-7.4 21.8M187.3 240.2l-10 29.4M73 39.9l-6.5 19.2M118.3 127.2l-8.2 24.2M134.5 -8.8l-7.4 21.9M193.1 150.2l-10 29.3M369.8 135.8l-8.4 24.6M361.9 5.3l-9.7 28.6M419 237.4l-9.2 27.2M205.8 102.9l-5.9 17.4M338.9 7.6l-5.8 16.9M104.8 35.9l-7.1 20.8M18.9 -9.9l-6.2 18.1M45.8 92.9l-5.6 16.4M470.9 163.7l-6.1 18.1" stroke="#bdb8aa" stroke-width="2.500" stroke-linecap="round"/>
+<path d="M387.6 300.9l-10-14M395.6 300.9l12-12M391.6 296.9l-2-16" stroke="#f1efe8" stroke-width="3" stroke-linecap="round"/>
+<g transform="translate(332 204) scale(0.8)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="7.5,-69.4 29.9,-36.3 67,-28.4" stroke="#474b2f" stroke-width="15"/>
+<circle cx="67" cy="-28.4" r="8" fill="#b58c6b"/>
+<polyline points="0,0 -22.5,55.6 -70.6,88.1" stroke="#77735f" stroke-width="23"/>
+<g transform="translate(-70.6 88.1) rotate(42)"><path d="M-10-3V7q0 4 4 4h29q6 0 3-6-6-5-17-10l-13-3z" fill="#2c2d27"/><path d="M-9 10.500h34" stroke="#d9c9a8" stroke-width="4" stroke-linecap="round"/></g>
+<polyline points="0,0 30,52 36.1,109.6" stroke="#8b8672" stroke-width="24"/>
+<g transform="translate(36.1 109.6) rotate(-12)"><path d="M-10-3V7q0 4 4 4h29q6 0 3-6-6-5-17-10l-13-3z" fill="#3a3b33"/><path d="M-9 10.500h34" stroke="#d9c9a8" stroke-width="4" stroke-linecap="round"/></g>
+<polyline points="0,-8 9.5,-65.4" stroke="#565b3a" stroke-width="40"/>
+<circle cx="11.3" cy="-105.6" r="21" fill="#565b3a"/>
+<polyline points="9.5,-71.4 16.3,-106.6" stroke="#c9a07f" stroke-width="11"/>
+<circle cx="16.3" cy="-106.6" r="16" fill="#c9a07f"/>
+<path d="M-0.7 -104.6a17 17 0 0 1 30-9l-6 3a11 11 0 0 0-18 6z" fill="#565b3a"/>
+<polyline points="7.5,-69.4 -14.9,-36.3 -24.1,0.6" stroke="#565b3a" stroke-width="15"/>
+<circle cx="-24.1" cy="0.6" r="8" fill="#c9a07f"/>
+</g>
+</svg>
