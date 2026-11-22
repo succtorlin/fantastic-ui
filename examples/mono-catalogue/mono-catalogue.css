@@ -1,0 +1,275 @@
+/* Mono Catalogue (fantastic-ui, Preset R). Tokens first; every rule below uses
+   only these. The first group is the preset's token block, verbatim. */
+
+.page {
+  /* ink 18.88 / ink-2 9.59 / muted 5.74 on --ground;
+     17.32 / 8.79 / 5.27 on --ground-2 (the tile)                           */
+  --ground:    #ffffff;
+  --ground-2:  #f5f5f5;   /* tiles: 1.09:1 against the page — tone, not a border */
+  --panel:     #ffffff;
+  --ground-3:  #ebebeb;   /* pressed tiles (ink 15.84, muted 4.82)           */
+  --hair:      #dcdcdc;   /* 1.37:1 — the rule under the filter row, footer rules */
+  --hair-lit:  #ececec;
+
+  --ink:       #111111;
+  --ink-2:     #454545;
+  --muted:     #666666;
+  --control:   #888888;   /* 3.54 / 3.25 — icon strokes and the search rule, never text */
+
+  /* No accent, and no colour in the pictures either. Actions invert.        */
+  --invert:           #111111;
+  --ink-on-invert:    #ffffff;   /* 18.88:1                                  */
+  --ink-2-on-invert:  #b5b5b5;   /* 9.21:1                                   */
+
+  --up:   #1a8047;   /* 4.97 on white, 4.56 on the tile                      */
+  --down: #c8322a;   /* 5.32 / 4.88                                          */
+
+  /* Local faces only, at weight 400: the voice is the lightness.            */
+  --sans:    "Helvetica Neue", Helvetica, "Segoe UI", Roboto, Arial, sans-serif;
+  --display: "Helvetica Neue", Helvetica, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --r-sheet: 0px;
+  --r-panel: 20px;   /* product tiles                                        */
+  --r-card:  32px;   /* category tiles: the large corner is the voice        */
+  --r-pill:  999px;
+  --maxw:    1160px;
+  --gap:     20px;
+
+  /* ---- additions for this page ---- */
+  /* The drawings' greys, dark to light. They stand in for product photographs. */
+  --art-1: #1c1c1c;
+  --art-2: #363636;
+  --art-3: #5c5c5c;
+  --art-4: #909090;
+  --art-5: #c6c6c6;
+
+  --gutter:   clamp(16px, 4vw, 40px);
+  --section:  clamp(56px, 8vw, 104px);
+  --pad-tile: clamp(24px, 3.4vw, 44px);
+  --row:      clamp(52px, 5.4vw, 70px);   /* the stagger's row unit */
+  --tap:      44px;
+  --hero-h:   clamp(380px, 37vw, 500px);
+  --half:     min(var(--maxw) / 2, 50% - var(--gutter));   /* half the content width, inside a full-width box */
+
+  --fast: 160ms;
+  --slow: 480ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* ---------- base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+.page {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 16px/1.5 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+.wrap { max-width: calc(var(--maxw) + 2 * var(--gutter)); margin-inline: auto; padding-inline: var(--gutter); }
+.vh { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.page a { color: inherit; }
+.page h1, .page h2, .page h3 { font-weight: 400; }   /* hierarchy comes from size alone */
+.page a:focus-visible, .page button:focus-visible, .page input:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 4px; }
+.skip {
+  position: absolute; left: var(--gutter); top: -80px; z-index: 10;
+  display: inline-flex; align-items: center; min-height: var(--tap); padding-inline: 20px; border-radius: var(--r-pill);
+  background: var(--invert); color: var(--ink-on-invert); font: 400 15px/1 var(--sans); text-decoration: none;
+}
+.page .skip { color: var(--ink-on-invert); }
+.skip:focus { top: 10px; }
+
+/* ---------- icons and drawings ---------- */
+.icon { display: block; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.a1 { fill: var(--art-1); }
+.a2 { fill: var(--art-2); }
+.a3 { fill: var(--art-3); }
+.a4 { fill: var(--art-4); }
+.a5 { fill: var(--art-5); }
+.l1, .l2, .l3, .l4, .l5 { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.l1 { stroke: var(--art-1); }
+.l2 { stroke: var(--art-2); }
+.l3 { stroke: var(--art-3); }
+.l4 { stroke: var(--art-4); }
+.l5 { stroke: var(--art-5); }
+
+/* ---------- header ---------- */
+.nav { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 0 16px; padding-block: 10px; }
+.nav__list { display: flex; flex-wrap: wrap; gap: 0 28px; margin: 0; padding: 0; list-style: none; }
+.nav__list--end { justify-content: flex-end; }
+.nav__list a {
+  display: inline-flex; align-items: center; min-height: var(--tap);
+  font: 400 14px/1 var(--sans); text-decoration: none; text-underline-offset: 6px;
+}
+.nav__list a:hover, .nav__list a[aria-current] { text-decoration: underline; text-decoration-thickness: 1px; }
+.nav__list a:active { color: var(--ink-2); }
+.wordmark {
+  display: inline-flex; align-items: center; min-height: var(--tap);
+  font: 400 21px/1 var(--display); letter-spacing: -0.02em; text-decoration: none; white-space: nowrap;
+}
+
+/* ---------- hero: words left, one product right ---------- */
+.hero { background: var(--ground-2); overflow: clip; }
+/* A full-width grid: gutter, words, picture, gutter. The glass starts inside the
+   picture column and runs to the edge of the viewport without any vw arithmetic. */
+.hero__in {
+  position: relative; display: grid; min-height: var(--hero-h);
+  grid-template-columns: minmax(var(--gutter), 1fr) minmax(0, calc(var(--maxw) / 2)) minmax(0, calc(var(--maxw) / 2)) minmax(var(--gutter), 1fr);
+}
+.hero__text { grid-column: 2; align-self: center; padding: 56px var(--gap) 56px 0; }
+.hero h1 {
+  margin: 0; max-width: 12em;
+  font: 400 clamp(30px, 3.6vw, 48px)/1.1 var(--display); letter-spacing: -0.02em; text-wrap: balance;
+}
+.hero__lede { margin: 18px 0 0; max-width: 23em; color: var(--ink-2); text-wrap: balance; }
+/* Equal tracks, so the two pills are always the same size; they stack when two no longer fit. */
+.actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; max-width: 344px; margin-top: 30px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); padding-inline: 20px;
+  border: 1px solid var(--ink); border-radius: var(--r-pill);
+  font: 400 15px/1 var(--sans); text-decoration: none; white-space: nowrap;
+  transition: background-color var(--fast) var(--ease), color var(--fast) var(--ease), transform var(--fast) var(--ease);
+}
+.page .btn--ink { background: var(--invert); color: var(--ink-on-invert); }
+.page .btn--ink:hover { background: var(--ink-2); border-color: var(--ink-2); }
+.btn--line:hover { background: var(--ground-3); }
+.btn:active { transform: scale(0.98); }
+.page .btn:focus-visible { border-radius: var(--r-pill); }
+
+.hero__flutes { position: absolute; top: 0; left: calc(50% + 0.46 * var(--half)); width: calc(50% - 0.46 * var(--half)); height: 100%; }
+.f-sheet { fill: var(--ground); opacity: 0.55; }
+.f-lit { fill: var(--ground); }
+.f-hair { fill: var(--hair); }
+.hero__art { grid-column: 3; align-self: end; width: min(calc(var(--hero-h) * 0.88), 100%); aspect-ratio: 1; filter: grayscale(1); }
+.hero__art svg, .tile__art svg { display: block; width: 100%; height: 100%; }
+
+/* ---------- staggered category tiles ---------- */
+.cats { padding-top: var(--section); }
+.tiles {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(var(--row), auto);
+  gap: var(--gap); margin: 0; padding: 0; list-style: none;
+}
+.tiles > li { display: grid; }
+.tiles > li:nth-child(1) { grid-area: 1 / 1 / span 6 / auto; }   /* tall  | short */
+.tiles > li:nth-child(2) { grid-area: 1 / 2 / span 5 / auto; }
+.tiles > li:nth-child(3) { grid-area: 7 / 1 / span 5 / auto; }   /* short | tall  */
+.tiles > li:nth-child(4) { grid-area: 6 / 2 / span 6 / auto; }
+.tile {
+  position: relative; display: grid; grid-template-rows: auto minmax(190px, 1fr);
+  overflow: clip; border-radius: var(--r-card); background: var(--ground-2);
+  transition: background-color var(--fast) var(--ease);
+}
+.tile:active { background: var(--ground-3); }
+.tile__text { padding: var(--pad-tile) var(--pad-tile) 12px; }
+.tile h3 { margin: 0; font: 400 22px/1.25 var(--display); letter-spacing: -0.01em; }
+.tile p { margin: 10px 0 0; max-width: 23ch; color: var(--muted); font-size: 15px; }
+.tile__link {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 32px; margin-top: 12px;
+  font-size: 14px; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 6px;
+}
+.tile__link::after { content: ""; position: absolute; inset: 0; z-index: 1; }   /* the whole tile is the link */
+.tile__link .icon { transition: transform var(--fast) var(--ease); }
+.tile:hover .tile__link { text-decoration-thickness: 2px; }
+.tile:hover .tile__link .icon { transform: translateX(3px); }
+/* The picture box: its own row under the words, flush with the tile's right and
+   bottom edges, which crop the drawing. It can never reach the words above it. */
+.tile__art { justify-self: end; width: 88%; min-height: 0; filter: grayscale(1); }
+.tile__art svg { transform-origin: 100% 100%; transition: transform var(--slow) var(--ease); }
+.tile:hover .tile__art svg { transform: scale(1.03); }
+
+/* ---------- filter row and product grid ---------- */
+.shop { padding-block: var(--section); }
+.filters { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 0 32px; border-bottom: 1px solid var(--hair); }
+.filters__list { display: flex; flex-wrap: wrap; align-items: center; margin: 0 0 0 -5px; padding: 0; list-style: none; font-size: 14px; }
+.filters__list li { display: inline-flex; align-items: center; }
+.filters__list li + li::before { content: "/"; margin-inline: 9px; color: var(--muted); }
+.filters__list a { display: inline-flex; align-items: center; min-height: var(--tap); padding-inline: 5px; color: var(--muted); text-decoration: none; text-underline-offset: 6px; }
+.page .filters__list a { color: var(--muted); }
+.page .filters__list a[aria-current], .page .filters__list a:hover { color: var(--ink); }
+.filters__list a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
+.search { display: flex; align-items: center; gap: 12px; flex: 0 1 320px; min-width: 0; margin-bottom: -1px; border-bottom: 1px solid var(--control); }
+.search__label { flex: none; font-size: 14px; color: var(--muted); }
+.search__input {
+  flex: 1 1 auto; min-width: 0; min-height: var(--tap); padding: 0; border: 0; border-radius: 0; background: transparent;
+  color: var(--ink); font: 400 14px/1 var(--sans); appearance: none; -webkit-appearance: none;
+}
+.search__go {
+  display: grid; place-items: center; flex: none; width: var(--tap); height: var(--tap); margin-right: -12px; padding: 0;
+  border: 0; border-radius: 50%; background: transparent; color: var(--control); cursor: pointer;
+  transition: color var(--fast) var(--ease), background-color var(--fast) var(--ease);
+}
+.search__go:hover { color: var(--ink); background: var(--ground-2); }
+.search__go:active { background: var(--ground-3); }
+.page .search__go:focus-visible { border-radius: 50%; outline-offset: -4px; }
+
+.products { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px var(--gap); margin: 28px 0 0; padding: 0; list-style: none; }
+.product { position: relative; }
+.product__art {
+  display: grid; place-items: center; aspect-ratio: 1; border-radius: var(--r-panel); background: var(--ground-2);
+  filter: grayscale(1); transition: background-color var(--fast) var(--ease);
+}
+.product__art svg { display: block; width: 70%; height: 70%; transition: transform var(--slow) var(--ease); }
+.product:hover .product__art svg { transform: scale(1.04); }
+.product:active .product__art { background: var(--ground-3); }
+/* The category is a data label on a product, the one place the preset sets tracked caps. */
+.data-label { margin: 16px 0 0; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.product__name { margin: 2px 0 0; font: 400 18px/24px var(--display); }
+.product__name a { display: inline-block; min-height: 24px; text-decoration: none; text-underline-offset: 5px; }
+.product__name a::after { content: ""; position: absolute; inset: 0; z-index: 1; }   /* the whole product is the link */
+.product:hover .product__name a { text-decoration: underline; text-decoration-thickness: 1px; }
+.product__price { display: flex; flex-wrap: wrap; gap: 0 10px; margin: 4px 0 0; font-size: 13px; }
+.product__price s, .product__sale { color: var(--muted); }
+
+/* ---------- footer ---------- */
+.foot { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 40px var(--gap); padding-block: 48px 28px; border-top: 1px solid var(--hair); }
+.foot__statement { margin: 0; max-width: 15em; font: 400 clamp(22px, 2.3vw, 28px)/1.2 var(--display); letter-spacing: -0.015em; text-wrap: balance; }
+.foot__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px var(--gap); }
+.foot__cols h2 { margin: 0 0 6px; font: 400 14px/1.5 var(--sans); color: var(--muted); }
+.foot__cols ul { margin: 0; padding: 0; list-style: none; }
+.foot__cols a { display: inline-flex; align-items: center; min-height: 32px; font-size: 14px; text-decoration: none; text-underline-offset: 5px; overflow-wrap: anywhere; }
+.foot__cols a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
+.foot__base { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 24px; padding-top: 20px; border-top: 1px solid var(--hair); color: var(--muted); font-size: 13px; }
+.foot__base p { margin: 0; }
+
+/* ---------- wider: three products across ---------- */
+@media (min-width: 900px) {
+  .products { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px var(--gap); }
+}
+
+/* ---------- tablet and phone ---------- */
+@media (max-width: 820px) {
+  .foot { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  /* The hero stacks: the glass fades in under the words instead of starting on a hard edge. */
+  .hero__in { grid-template-columns: var(--gutter) minmax(0, 1fr) var(--gutter); grid-template-rows: auto 300px; min-height: 0; }
+  .hero__text { padding: 40px 0 0; }
+  .hero__flutes {
+    top: auto; bottom: 0; left: 50%; width: 50%; height: 300px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, var(--ink) 45%);
+    mask-image: linear-gradient(to bottom, transparent, var(--ink) 45%);
+  }
+  .hero__art { grid-area: 2 / 2; width: min(270px, 100%); margin-left: 6%; }
+  .nav { grid-template-columns: minmax(0, 1fr) auto; }
+  .wordmark { grid-area: 1 / 1; justify-self: start; }
+  .nav__list { grid-area: 2 / 1 / auto / -1; gap: 0 22px; }
+  .nav__list--end { grid-area: 1 / 2; }
+  .search { flex-basis: 100%; }
+}
+@media (max-width: 559px) {
+  /* One column: no stagger, and the picture box sits under the words. */
+  .tiles { grid-template-columns: minmax(0, 1fr); grid-auto-rows: auto; }
+  .tiles > li:nth-child(n) { grid-area: auto; }
+  .tile { grid-template-rows: auto 220px; }
+  .foot__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .foot__cols > :last-child { grid-column: 1 / -1; }   /* the address needs the full width */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page *, .page *::before, .page *::after { transition: none; }
+  .tile:hover .tile__art svg, .tile:hover .tile__link .icon, .product:hover .product__art svg, .btn:active { transform: none; }
+}

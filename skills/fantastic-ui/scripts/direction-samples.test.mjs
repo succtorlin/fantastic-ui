@@ -27,8 +27,8 @@ function manifest(extra = {}) {
   };
 }
 
-test("every preset A–L parses and yields a readable button", () => {
-  for (const L of "ABCDEFGHIJKL") {
+test("every preset A–R parses and yields a readable button", () => {
+  for (const L of "ABCDEFGHIJKLMNOPQR") {
     const { decls } = presetBlock(L);
     const map = parseTokens(decls);
     assert.ok(map.ground && map.ink, `${L} has ground and ink`);
@@ -41,6 +41,9 @@ test("every preset A–L parses and yields a readable button", () => {
 test("separation and sheet are inferred from the tokens", () => {
   assert.equal(derive(parseTokens(presetBlock("E").decls), "E").sep, "shadow");
   assert.equal(derive(parseTokens(presetBlock("L").decls), "L").sep, "tone");
+  assert.equal(derive(parseTokens(presetBlock("M").decls), "M").sep, "tone");
+  for (const L of "NQR") assert.equal(derive(parseTokens(presetBlock(L).decls), L).sep, "tone", `${L} separates by tone`);
+  for (const L of "OP") assert.equal(derive(parseTokens(presetBlock(L).decls), L).sep, "hairline", `${L} separates by hairline`);
   assert.equal(derive(parseTokens(presetBlock("B").decls), "B").sep, "hairline");
   assert.equal(derive(parseTokens(presetBlock("A").decls), "A").sheet, true);
   assert.equal(derive(parseTokens(innerDecls(fresh)), undefined).sheet, false);
@@ -145,7 +148,15 @@ test("validate: reserved and case-colliding ids, enums, stats shape, recommended
   bad((m) => { m.directions[0].hero = "centered"; }, /hero must be one of/);
   bad((m) => { m.content = { ...content, stats: [{ value: 1 }] }; }, /stats must be/);
   bad((m) => { delete m.recommended; }, /recommended.*required/);
-  assert.throws(() => presetBlock("."), /letter A–L/);
+  assert.throws(() => presetBlock("."), /letter A–R/);
+  assert.throws(() => presetBlock("S"), /letter A–R/);
+  // M is its pictures of real work: the template cannot stand in for them.
+  bad((m) => { m.directions[1] = { id: "folio", preset: "M" }; }, /preset M shows the user's own pictures.*folio-modules\.md/);
+  // N to R allow the showcase lane without requiring it, so the template may stand in for them.
+  for (const L of "NOPQR") {
+    const m = manifest(); m.directions[1] = { id: `shop-${L}`, preset: L };
+    assert.doesNotThrow(() => validate(m), `preset ${L} renders through the template`);
+  }
   const ok = manifest(); ok.content = { ...content, brand: "Acmeist Studio" };
   assert.doesNotThrow(() => validate(ok), "placeholder match is whole-word only");
 });
@@ -172,6 +183,8 @@ test("white text never sits on an accent unless the preset declares it", () => {
   assert.notEqual(J.ctaBgName, "accent", "J's red only reads with white, so the button takes the inverted fill");
   const L = derive(parseTokens(presetBlock("L").decls), "L");
   assert.equal(L.ctaBgName, "accent-fill", "L declares its white-on-accent pairing (whiteOnAccent: declared)");
+  const O = derive(parseTokens(presetBlock("O").decls), "O");
+  assert.equal(O.ctaBgName, "accent-fill", "O declares white on its olive (7.11:1)");
 });
 
 test("number columns get the num class; prose columns do not", async () => {

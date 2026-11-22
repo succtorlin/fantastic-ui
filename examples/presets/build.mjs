@@ -41,12 +41,30 @@ const galleryWhite = {
   look: 'Quiet studio lighting, generous white space and one blue action.',
   prompt: 'Build a device launch in Gallery White. Use my product photography and give each section one idea.',
 };
-const entries = [...examples, galleryWhite];
+// Pages built by hand in their own folders, like Gallery White. Each has its
+// own layout, so the build links to it and does not write it.
+const handBuilt = JSON.parse(readFileSync(new URL('hand-built.json', here), 'utf8'));
+const entries = [...examples, galleryWhite, ...handBuilt];
+const gates = JSON.parse(readFileSync(new URL('../../skills/fantastic-ui/scripts/preset-gates.json', here), 'utf8'));
+const allPresets = Object.keys(gates.presets).sort();
+const missing = allPresets.filter((letter) => !entries.some(({ preset }) => preset === letter));
+const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven',
+  'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
+const word = (n) => WORDS[n] ?? String(n);
+const capital = (text) => text[0].toUpperCase() + text.slice(1);
+// "all eighteen", or "seventeen of the skill’s eighteen" while a preset has no page yet.
+const coverage = missing.length
+  ? `${word(entries.length)} of the skill’s ${word(allPresets.length)}`
+  : `all ${word(allPresets.length)}`;
+// Hand-built pages that show a real product, not a fictional brief.
+const realNames = handBuilt.filter(({ real }) => real).map(({ preset }) => presetBlock(preset).name);
+const shotOf = ({ preset, id, shot }) => shot ?? (preset === 'L' ? '../../assets/gallery-white.png' : `previews/${id}.webp`);
 const liveGallery = 'https://succtorlin.github.io/fantastic-ui/';
 const escape = (value) => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-const cards = entries.map(({ preset, id, brand, look }) => {
+const cards = entries.map((entry) => {
+  const { preset, id, brand, look } = entry;
   const { name } = presetBlock(preset);
-  const shot = preset === 'L' ? '../../assets/gallery-white.png' : `previews/${id}.webp`;
+  const shot = shotOf(entry);
   return `  <article class="style-card">
     <a href="${id}.html"><img src="${shot}" width="640" height="400" alt="" loading="lazy"><span>${escape(name)}</span></a>
     <p><strong>${escape(brand)}</strong> · ${escape(look)}</p>
@@ -65,8 +83,8 @@ writeFileSync(new URL('index.html', here), `<!doctype html>
 <header data-fui-align-start="gallery" data-fui-align-end="gallery"><nav aria-label="Main"><a href="#styles">Browse styles</a></nav></header>
 <main id="main" data-fui-align-start="gallery" data-fui-align-end="gallery">
   <h1>Fantastic UI preset gallery</h1>
-  <p class="intro">Explore twelve design directions. Each uses a fictional brief and the preset’s own tokens.</p>
-  <section class="style-grid" id="styles" aria-label="The twelve presets">
+  <p class="intro">Explore ${coverage} design directions. Each uses the preset’s own tokens and a fictional brief${realNames.length ? `, except ${escape(realNames.join(' and '))}, which shows a real interface` : ''}.</p>
+  <section class="style-grid" id="styles" aria-label="${capital(coverage)} presets">
 ${cards}
   </section>
 </main>
@@ -75,9 +93,10 @@ ${cards}
 </html>
 `);
 
-const guide = entries.map(({ id, preset, brand, look, prompt }) => {
+const guide = entries.map((entry) => {
+  const { id, preset, brand, look, prompt } = entry;
   const { name } = presetBlock(preset);
-  const shot = preset === 'L' ? '../../assets/gallery-white.png' : `previews/${id}.webp`;
+  const shot = shotOf(entry);
   const demo = new URL(`examples/presets/${id}.html`, liveGallery).href;
   return `### ${preset} · ${name}
 
@@ -92,8 +111,11 @@ ${look}
 }).join('\n');
 writeFileSync(new URL('README.md', here), `# Fantastic UI preset gallery
 
-All twelve presets are shown below with a screenshot and a starter prompt.
-The examples use fictional content. Their illustrations are intentionally
+${capital(coverage)} presets are shown below with a screenshot and a starter
+prompt.${missing.length ? ` ${missing.length === 1 ? 'Preset' : 'Presets'} ${missing.join(', ')} ${missing.length === 1 ? 'has' : 'have'} no example page here yet; see the
+[main README](../../README.md#the-six-newer-presets-a-portfolio-and-five-shops).` : ''}
+The examples use fictional content${realNames.length ? `, except ${realNames.join(' and ')}, which shows real
+captures of one interface` : ''}. Their illustrations are intentionally
 stylized examples of art direction. Use your own product, venue, or team photos
 where the prompt calls for them.
 
@@ -120,7 +142,14 @@ It writes the pages and this guide. The exam uses Playwright and axe-core. If
 they are installed elsewhere, pass \`--modules /path/to/node_modules\`.
 The existing [Gallery White example](../gallery-white/) is maintained separately.
 
+${handBuilt.length ? `Presets ${handBuilt.map(({ preset }) => preset).join(', ')} are hand-built pages in their own folders beside this one.
+The build links to them and does not write them. ${handBuilt.filter(({ real }) => real).map(({ preset, brand }) => `Preset ${preset} shows real
+captures of the ${brand} interface. `).join('')}On the others, drawings stand in for
+product photographs. Examine one with
+\`node skills/fantastic-ui/scripts/exam.mjs examples/sprint-stage\`; their
+card pictures in \`previews/\` are 640×400 screenshots of the first screen.
+` : ''}
 The **Gallery geometry** check runs on pull requests targeting \`main\` and
 before GitHub Pages deployment. It measures button size and block alignment
-in all twelve packaged examples at 320, 390, and 1440 CSS pixels.
+in all ${word(entries.length)} packaged examples at 320, 390, and 1440 CSS pixels.
 `);

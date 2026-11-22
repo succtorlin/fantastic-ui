@@ -7,7 +7,7 @@
  *   node exam.mjs --url http://localhost:3000/ --preset E --lint src/app/landing
  *   node exam.mjs path/to/static-site            (serves the folder itself)
  *   node exam.mjs --url http://localhost:3000/ --dialog "#open-menu"
- *   options: --preset <A-L>  --lint <path>...  --modules <node_modules>  --json <file>
+ *   options: --preset <A-R>  --lint <path>...  --modules <node_modules>  --json <file>
  *            --dialog <trigger selector>...  (each overlay the page opens)
  *            --fragment  (a component preview, not a whole page: skips only the
  *                         skip-link, landmark, single-h1 and fold checks)
@@ -18,6 +18,8 @@
  *      never silently passed
  *   2. reflow at 320/375/390/768/1024/1440/1920: no horizontal overflow and no
  *      content cut off (overflow-x: clip hides overflow from scrollWidth);
+ *      a row marked data-fui-scroll is exempt when it scrolls by itself, can
+ *      be reached from the keyboard and has no item wider than the screen;
  *      every link and button ≥24×24 px (2.5.8); no button label wrapping (M3)
  *      marked button groups and block edges match within 1 CSS pixel
  *   3. keyboard and structure: a skip link first, a visible :focus-visible
@@ -25,7 +27,9 @@
  *      lang on <html>
  *   4. with --preset (or a <meta name="fui-preset">): scripts/verify-preset.mjs
  *      (contrast, zero webfonts, asset weight, focus ring, reduced-motion path,
- *      token roles, accent restraint, separation, the preset's own traps)
+ *      token roles, accent restraint, separation, the preset's own traps;
+ *      and for a preset with the showcase lane (M, N to R), its content images:
+ *      markup, no upscaling at 1440@2x and 390@3x, weight budget)
  *   5. scripts/lint-surface.mjs --strict over every --lint path (or the folder)
  *   6. the no-JS pass: text a visitor sees with JavaScript is not hidden when
  *      JavaScript is off (content must survive removal; the opacity:0-until-
@@ -54,7 +58,7 @@ export const WIDTHS = [320, 375, 390, 768, 1024, 1440, 1920];
 export const FOLD = { width: 1280, height: 800 };
 const MAX_CPL = 100;
 export const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
-const MIME = { ".html": "text/html", ".css": "text/css", ".webp": "image/webp", ".png": "image/png", ".js": "text/javascript", ".json": "application/json" };
+const MIME = { ".html": "text/html", ".css": "text/css", ".webp": "image/webp", ".avif": "image/avif", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".svg": "image/svg+xml", ".js": "text/javascript", ".json": "application/json" };
 
 export class InputError extends Error {}
 
@@ -119,10 +123,43 @@ async function layoutChecks(page, width) {
     const out = [];
     const sw = document.documentElement.scrollWidth;
     if (sw > width + 1) out.push(`horizontal overflow (${sw}px) at ${width}`);
+    // A row that is meant to scroll sideways (a shelf of cards, a filter rail)
+    // says so with data-fui-scroll="<name>". The mark is honoured only when
+    // the row really scrolls by itself; it must also be reachable from the
+    // keyboard, and no single item may be wider than the screen.
+    const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])';
+    const scrollers = new Set();
+    for (const row of document.querySelectorAll("[data-fui-scroll]")) {
+      if (row.checkVisibility && !row.checkVisibility()) continue;
+      const box = row.getBoundingClientRect();
+      if (!box.width || !box.height) continue;
+      const name = row.getAttribute("data-fui-scroll") || row.getAttribute("aria-label") || "row";
+      const flow = getComputedStyle(row).overflowX;
+      if (flow !== "auto" && flow !== "scroll") {
+        // Not a scroller at this width (a row may wrap on wide screens). It
+        // earns no exemption, and it is a fault only if content overflows it.
+        if (row.scrollWidth > row.clientWidth + 1) {
+          out.push(`scroller "${name}" at ${width}: overflow-x is ${flow}; a marked row must scroll by itself (overflow-x: auto)`);
+        }
+        continue;
+      }
+      scrollers.add(row);
+      if (!row.matches(FOCUSABLE) && !row.querySelector(FOCUSABLE)) {
+        out.push(`scroller "${name}" at ${width}: cannot be reached from the keyboard (give it tabindex="0" and a name, or focusable items)`);
+      }
+      if (box.right > width + 1 || box.left < -1) {
+        out.push(`scroller "${name}" at ${width}: the row itself is wider than the screen (${Math.round(box.width)}px)`);
+      }
+      const widest = Math.max(0, ...[...row.children].map((item) => item.getBoundingClientRect().width));
+      if (widest > width + 1) {
+        out.push(`scroller "${name}" at ${width}: an item is wider than the screen (${Math.round(widest)}px), so reading it takes scrolling both ways`);
+      }
+    }
+    const inScroller = (el) => { for (let e = el.parentElement; e; e = e.parentElement) if (scrollers.has(e)) return true; return false; };
     // overflow-x: clip keeps scrollWidth honest-looking while cutting content
     // off, so also look for content that extends past the viewport edge.
     for (const el of document.querySelectorAll("body *")) {
-      if (el.classList.contains("skip") || el.closest(".table-wrap")) continue;
+      if (el.classList.contains("skip") || el.closest(".table-wrap") || inScroller(el)) continue;
       const r = el.getBoundingClientRect();
       if (!r.width || !r.height) continue;
       // Content of a closed <details> has a box but is not rendered.
@@ -474,7 +511,7 @@ export async function auditPage(browser, AxeBuilder, url, { dialogs = [] } = {})
 }
 
 export function presetOf(html) {
-  const m = html.match(/<meta name="fui-preset" content="([A-L])">/);
+  const m = html.match(/<meta name="fui-preset" content="([A-R])">/);
   return m ? m[1] : null;
 }
 
@@ -571,7 +608,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
     else if (!k.startsWith("--")) opt.dir = k;
     else { console.error(`exam: unknown option ${k}`); process.exit(2); }
   }
-  if (opt.preset && !/^[A-L]$/.test(opt.preset)) { console.error("exam: --preset must be A-L"); process.exit(2); }
+  if (opt.preset && !/^[A-R]$/.test(opt.preset)) { console.error("exam: --preset must be A-R"); process.exit(2); }
   exam(opt).then(({ results }) => {
     if (jsonOut) writeFileSync(jsonOut, JSON.stringify({ examinedAt: new Date().toISOString(), widths: WIDTHS, fold: FOLD, axeTags: AXE_TAGS, results }, null, 2));
     process.exit(report(results) ? 1 : 0);

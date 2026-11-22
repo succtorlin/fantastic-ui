@@ -658,6 +658,24 @@ SEPARATION_PROSE = {
 }
 
 
+FONT_VARS = ("sans", "display", "mono")
+
+
+def _written_section(token: str) -> str:
+    """Where a token goes when the front matter has no group for its value: a
+    fluid length, a ratio, a shadow, a font setting. It is written out under
+    the section it belongs to, so no declared token leaves the file."""
+    if token.startswith("lift") or token.endswith("shadow"):
+        return "Elevation & Depth"
+    if token.split("-")[0] in FONT_VARS:
+        return "Typography"
+    return "Layout"
+
+
+def _noted(token: str, value: str, notes: Dict[str, str]) -> str:
+    return f"- **{token}:** {value}" + (f" ({notes[token]})" if notes.get(token) else "")
+
+
 def export(letter: str, name: Optional[str]) -> str:
     title, section = _preset_section(letter)
     gates = json.loads(GATES_JSON.read_text(encoding="utf-8"))["presets"][letter]
@@ -665,11 +683,16 @@ def export(letter: str, name: Optional[str]) -> str:
     toks = _token_lines(block)
     colors = {n: v for n, v, _ in toks if is_color(v)}
     notes = {n: c for n, _, c in toks}
-    fonts = {n: v for n, v, _ in toks if n in ("sans", "display", "mono")}
+    fonts = {n: v for n, v, _ in toks if n in FONT_VARS}
     radii = {n[2:]: v for n, v, _ in toks if n.startswith("r-")}
     dims = {n: v for n, v, _ in toks
             if re.fullmatch(r"-?[\d.]+(px|rem|em)", v) and not n.startswith("r-")}
-    shadows = {n: v for n, v, _ in toks if n.startswith("lift")}
+    grouped = set(colors) | set(fonts) | {"r-" + n for n in radii} | set(dims)
+    written: Dict[str, Dict[str, str]] = {}
+    for n, v, _ in toks:
+        if n not in grouped:
+            written.setdefault(_written_section(n), {})[n] = v
+    shadows = written.get("Elevation & Depth", {})
     primary = "accent-ink" if "accent-ink" in colors else ("accent" if "accent" in colors else "ink")
     p = _prose(section)
 
@@ -710,9 +733,10 @@ def export(letter: str, name: Optional[str]) -> str:
     for key, var in (("headline-display", "display"), ("body-md", "sans"), ("label-mono", "mono")):
         if var in fonts:
             md.append(f"- **{key}** (`--{var}`): {fonts[var]}")
+    md += [_noted(n, v, notes) for n, v in written.get("Typography", {}).items()]
     md += ["", "Sizes, weights and tracking per element are in the component grammar below.", "",
            "## Layout", ""]
-    md += [f"- **{n}:** {v}" + (f" ({notes[n]})" if notes.get(n) else "") for n, v in dims.items()]
+    md += [_noted(n, v, notes) for n, v in {**dims, **written.get("Layout", {})}.items()]
     md += [f"- Density is {gates['density']}.", "", "## Elevation & Depth", "",
            SEPARATION_PROSE.get(gates["separation"], "")]
     md += [f"- **{n}:** `{v}`" for n, v in shadows.items()]

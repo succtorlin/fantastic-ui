@@ -7,9 +7,13 @@ import { geometryChecks, serve } from '../../skills/fantastic-ui/scripts/exam.mj
 
 const { chromium } = createRequire(import.meta.url)('playwright');
 const examples = JSON.parse(readFileSync(new URL('examples.json', import.meta.url), 'utf8'));
+const handBuilt = JSON.parse(readFileSync(new URL('hand-built.json', import.meta.url), 'utf8'));
 const whitePath = '/examples/gallery-white/index.html';
-const expectedPaths = [whitePath, ...examples.map(({ id }) => `/examples/presets/${id}.html`)].sort();
-assert.equal(expectedPaths.length, 12, 'The gallery must cover all 12 styles');
+// Hand-built pages sit beside presets/, so their ids start with "../".
+const ownPaths = new Set(handBuilt.map(({ id }) => new URL(`${id}.html`, 'http://gallery.invalid/examples/presets/').pathname));
+const expectedPaths = [whitePath, ...examples.map(({ id }) => `/examples/presets/${id}.html`), ...ownPaths].sort();
+const STYLES = 18;
+assert.equal(expectedPaths.length, STYLES, `The gallery must cover all ${STYLES} styles`);
 const widths = [320, 390, 1440];
 const tolerance = 1;
 const near = (a, b) => Math.abs(a - b) <= tolerance;
@@ -26,7 +30,7 @@ try {
     assert.ok((await page.goto(`${base}/index.html`))?.ok(), 'Packaged gallery did not load');
     const links = await page.locator('.style-card a').evaluateAll((anchors) => anchors.map((a) => a.href));
     assert.ok(links.every((url) => new URL(url).origin === base), 'Examples must come from the packaged site');
-    assert.deepEqual(links.map((url) => new URL(url).pathname).sort(), expectedPaths, 'Gallery links must cover all 12 styles exactly once');
+    assert.deepEqual(links.map((url) => new URL(url).pathname).sort(), expectedPaths, `Gallery links must cover all ${STYLES} styles exactly once`);
     failures.push(...await geometryChecks(page, width));
 
     for (const url of links) {
@@ -34,6 +38,16 @@ try {
       const label = `${url.slice(base.length)} @ ${width}px`;
       assert.ok((await page.goto(url))?.ok(), `${label}: page did not load`);
       await page.evaluate(() => document.fonts.ready.then(() => undefined));
+
+      if (ownPaths.has(new URL(url).pathname)) {
+        // A hand-built page has its own button sizes and grids, so the shared
+        // template's fixed 192×44 action and gutter rules do not apply to it.
+        // It must still mark its own peer buttons or block edges, and meet them.
+        const marked = await page.locator('[data-fui-buttons], [data-fui-align-start], [data-fui-align-end]').count();
+        if (!marked) failures.push(`${label}: expected at least one marked group of buttons or blocks`);
+        failures.push(...(await geometryChecks(page, width)).map((issue) => `${label}: ${issue}`));
+        continue;
+      }
 
       const rail = white ? 'lumen' : 'preset';
       const rails = await page.locator(`[data-fui-align-start="${rail}"][data-fui-align-end="${rail}"]`).count();
@@ -99,7 +113,7 @@ try {
   }
 
   assert.equal(failures.length, 0, failures.join('\n'));
-  console.log(`Geometry passed for all 12 examples at ${widths.join(', ')} CSS px (36 checks).`);
+  console.log(`Geometry passed for all ${STYLES} examples at ${widths.join(', ')} CSS px (${STYLES * widths.length} checks).`);
 } finally {
   await browser?.close();
   srv.close();

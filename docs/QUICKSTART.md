@@ -29,8 +29,10 @@ settled, say “Build in Gallery White” or “Follow our DESIGN.md.”
 
 ![Gallery White sample showing the Lumen One lamp on a light studio stage, with the headline and product details as the focus](../assets/gallery-white.png)
 
-Try all twelve presets in the [live gallery](https://succtorlin.github.io/fantastic-ui/).
+Try all eighteen presets in the [live gallery](https://succtorlin.github.io/fantastic-ui/).
 For copyable prompts and screenshots, see the [preset guide](../examples/presets/).
+The six newer presets, a portfolio index and five shop looks, are described in the
+[main README](../README.md#the-six-newer-presets-a-portfolio-and-five-shops).
 
 ## 2. Build a dashboard
 

@@ -1,6 +1,6 @@
 {
   "$comment": [
-    "Machine-checkable gates for the twelve presets in references/theme-presets.md.",
+    "Machine-checkable gates for the eighteen presets in references/theme-presets.md.",
     "Read by scripts/verify-preset.mjs. Every value here is transcribed from that",
     "file — accent hexes and radii from each preset's token block, separation and",
     "density from the 'Choosing between them' table, traps from each preset's own",
@@ -190,6 +190,233 @@
           "kind": "geometry",
           "selector": ".stage-light",
           "mustNotOverlap": "h1, h2, h3, p, li, a, button"
+        }
+      ]
+    },
+    "M": {
+      "name": "Folio Split",
+      "accent": null,
+      "accentNote": "No accent: all colour on the page arrives in the work. Actions invert (ink fill, white text, 18.43:1).",
+      "separation": "tone",
+      "separationNote": "Tiles are a tone step with no border and no shadow. The nav pill is the page's one shadow: it is a <nav>, which the separation gate does not count.",
+      "radii": { "sheet": 0, "panel": 10, "card": 10, "pill": 999 },
+      "density": "airy",
+      "showcase": {
+        "$comment": "The showcase lane (scripts/showcase-gate.mjs, references/folio-modules.md). Images matching the selector are content: they leave universal.maxAssetKB and meet showcase-markup, showcase-sharpness and showcase-weight instead. Budgets are for the file served at the FIRST density.",
+        "selector": "img[data-showcase]",
+        "required": true,
+        "maxKB": 200,
+        "firstScreenKB": 600,
+        "upscaleTolerance": 1.02,
+        "lazyBelowScreens": 2,
+        "densities": [
+          { "width": 1440, "height": 900, "dpr": 2 },
+          { "width": 390, "height": 844, "dpr": 3 }
+        ]
+      },
+      "traps": [
+        {
+          "id": "art-never-over-the-words",
+          "rule": "The art sits under the tile's words, never over them: a tile's art must not overlap its title, sentence, tags or status note, unless the tile is a declared full-bleed tile whose words carry the tile tone under them.",
+          "kind": "geometry",
+          "selector": ".tile:not(.tile--full) .tile__art",
+          "mustNotOverlap": ".tile__title, .tile__desc, .tags li, .tile__note"
+        }
+      ]
+    },
+    "N": {
+      "name": "Sprint Stage",
+      "accent": null,
+      "accentNote": "No accent: the product is the only colour. An action takes the opposite of its ground: a white pill on the stage (ink text, 19.67:1), an ink pill on white.",
+      "separation": "tone",
+      "separationNote": "Product tiles are a tone step with no border and no shadow; the black banner is the other extreme of the same idea.",
+      "radii": { "sheet": 0, "panel": 16, "card": 6, "pill": 999 },
+      "density": "medium",
+      "showcase": {
+        "$comment": "The showcase lane, allowed but not required: a product photograph or render marked data-showcase leaves universal.maxAssetKB and meets showcase-markup, showcase-sharpness and showcase-weight instead. A page with none yet still passes; everything not marked stays under the cap.",
+        "selector": "img[data-showcase]",
+        "required": false,
+        "maxKB": 200,
+        "firstScreenKB": 600,
+        "upscaleTolerance": 1.02,
+        "lazyBelowScreens": 2,
+        "densities": [
+          { "width": 1440, "height": 900, "dpr": 2 },
+          { "width": 390, "height": 844, "dpr": 3 }
+        ]
+      },
+      "traps": [
+        {
+          "id": "stage-grey-never-on-white",
+          "rule": "--stage-ink-2 is 10.42:1 on the stage and 1.95:1 on white. Stage tokens are used only on the two black surfaces, .stage and .banner.",
+          "kind": "forbidden-pairing",
+          "fg": "#b9b9be",
+          "bg": "#ffffff",
+          "measured": 1.95
+        },
+        {
+          "id": "product-never-under-the-headline",
+          "rule": "Text over a photograph cannot be measured: the hero product never overlaps the stage's heading, sentence or button. Below 768 px it moves under them.",
+          "kind": "geometry",
+          "selector": ".stage__product",
+          "mustNotOverlap": ".stage h1, .stage p, .stage a, .stage button"
+        }
+      ]
+    },
+    "O": {
+      "name": "Olive Outfitter",
+      "accent": "#565b3a",
+      "whiteOnAccent": "declared",
+      "accentNote": "The olive carries white at 7.11:1, so the pairing is declared and measured. Lightened to #7a7f58 it is 4.20:1, a fail.",
+      "separation": "hairline",
+      "separationNote": "Nested rounded panels with 1px outlines. No shadows anywhere: that is Terracotta Commerce.",
+      "radii": { "sheet": 28, "panel": 20, "card": 16, "pill": 999 },
+      "density": "medium",
+      "showcase": {
+        "$comment": "The showcase lane, allowed but not required: a product photograph or render marked data-showcase leaves universal.maxAssetKB and meets showcase-markup, showcase-sharpness and showcase-weight instead. A page with none yet still passes; everything not marked stays under the cap.",
+        "selector": "img[data-showcase]",
+        "required": false,
+        "maxKB": 200,
+        "firstScreenKB": 600,
+        "upscaleTolerance": 1.02,
+        "lazyBelowScreens": 2,
+        "densities": [
+          { "width": 1440, "height": 900, "dpr": 2 },
+          { "width": 390, "height": 844, "dpr": 3 }
+        ]
+      },
+      "traps": [
+        {
+          "id": "fact-cards-are-opaque",
+          "rule": "A fact card sits on the photograph. Text on a translucent card over a picture cannot be measured, so the card is fully opaque.",
+          "kind": "min-bg-alpha",
+          "selector": ".fact",
+          "minAlpha": 1
+        },
+        {
+          "id": "words-never-on-the-photograph",
+          "rule": "The copy column is solid tone and the photograph is a separate box beside it, masked at its near edge. The photograph never overlaps a heading, sentence or link of its panel.",
+          "kind": "geometry",
+          "selector": ".hero__photo, .cat__photo",
+          "mustNotOverlap": ".hero__copy h1, .hero__copy p, .hero__copy a, .hero__copy button, .cat h3, .cat p, .cat a"
+        }
+      ]
+    },
+    "P": {
+      "name": "Chamfer Spec",
+      "accent": null,
+      "accentNote": "No accent: black does the work (buttons, the spec label, the angled band; white on it is 19.79:1).",
+      "separation": "hairline",
+      "separationNote": "Cells are divided by hairlines and the spec strip is outlined. No shadows and no rounded corners.",
+      "radii": { "sheet": 0, "panel": 0, "card": 0, "pill": 0 },
+      "density": "medium",
+      "showcase": {
+        "$comment": "The showcase lane, allowed but not required: a product photograph or render marked data-showcase leaves universal.maxAssetKB and meets showcase-markup, showcase-sharpness and showcase-weight instead. A page with none yet still passes; everything not marked stays under the cap.",
+        "selector": "img[data-showcase]",
+        "required": false,
+        "maxKB": 200,
+        "firstScreenKB": 600,
+        "upscaleTolerance": 1.02,
+        "lazyBelowScreens": 2,
+        "densities": [
+          { "width": 1440, "height": 900, "dpr": 2 },
+          { "width": 390, "height": 844, "dpr": 3 }
+        ]
+      },
+      "traps": [
+        {
+          "id": "cut-never-clips-the-focus-ring",
+          "rule": "clip-path on a control clips its own outline, so the keyboard focus ring vanishes. The cut is painted by a ::before layer; the control keeps clip-path: none.",
+          "kind": "computed-style",
+          "selector": "a[href], button, input, select, textarea, summary, [tabindex]",
+          "property": "clip-path",
+          "equals": "none"
+        },
+        {
+          "id": "render-never-under-the-words",
+          "rule": "Text over a picture cannot be measured: a render and its ring graphics never overlap a heading, paragraph, list item, link or button. A callout sits beside the render.",
+          "kind": "geometry",
+          "selector": ".render",
+          "mustNotOverlap": "h1, h2, h3, p, li, dt, dd, a, button"
+        }
+      ]
+    },
+    "Q": {
+      "name": "Market Shelf",
+      "accent": null,
+      "accentNote": "No accent: one midnight band per page, and the same midnight fills the buttons (white on it is 18.52:1).",
+      "separation": "tone",
+      "separationNote": "White cards on the pale aisle: a tone step with no border and no shadow. The rule inside a card's foot is not a card outline.",
+      "radii": { "sheet": 0, "panel": 8, "card": 6, "pill": 999 },
+      "density": "dense",
+      "showcase": {
+        "$comment": "The showcase lane, allowed but not required: a product photograph or render marked data-showcase leaves universal.maxAssetKB and meets showcase-markup, showcase-sharpness and showcase-weight instead. A page with none yet still passes; everything not marked stays under the cap.",
+        "selector": "img[data-showcase]",
+        "required": false,
+        "maxKB": 200,
+        "firstScreenKB": 600,
+        "upscaleTolerance": 1.02,
+        "lazyBelowScreens": 2,
+        "densities": [
+          { "width": 1440, "height": 900, "dpr": 2 },
+          { "width": 390, "height": 844, "dpr": 3 }
+        ]
+      },
+      "traps": [
+        {
+          "id": "bright-star-never-on-light",
+          "rule": "The bright star yellow is 1.84:1 on a white card. On light grounds stars take --rating (4.64:1) and are followed by the number as text; the bright yellow is for the midnight band only.",
+          "kind": "forbidden-pairing",
+          "fg": "#f5b400",
+          "bg": "#ffffff",
+          "measured": 1.84
+        },
+        {
+          "id": "shelf-scrolls-without-script",
+          "rule": "A shelf whose track is overflow: hidden shows nothing past its fifth card without script, on touch or from the keyboard. The track is overflow-x: auto; the arrows only scroll it.",
+          "kind": "computed-style",
+          "selector": ".shelf__track",
+          "property": "overflow-x",
+          "equals": "auto"
+        }
+      ]
+    },
+    "R": {
+      "name": "Mono Catalogue",
+      "accent": null,
+      "accentNote": "No accent and no colour in the pictures. Actions invert (ink fill, white text, 18.88:1).",
+      "separation": "tone",
+      "separationNote": "Tiles are a tone step with no border and no shadow. The rule under the filter row is not a surface outline.",
+      "radii": { "sheet": 0, "panel": 20, "card": 32, "pill": 999 },
+      "density": "airy",
+      "showcase": {
+        "$comment": "The showcase lane, allowed but not required: a product photograph or render marked data-showcase leaves universal.maxAssetKB and meets showcase-markup, showcase-sharpness and showcase-weight instead. A page with none yet still passes; everything not marked stays under the cap.",
+        "selector": "img[data-showcase]",
+        "required": false,
+        "maxKB": 200,
+        "firstScreenKB": 600,
+        "upscaleTolerance": 1.02,
+        "lazyBelowScreens": 2,
+        "densities": [
+          { "width": 1440, "height": 900, "dpr": 2 },
+          { "width": 390, "height": 844, "dpr": 3 }
+        ]
+      },
+      "traps": [
+        {
+          "id": "pictures-stay-greyscale",
+          "rule": "With no accent, the first picture left in colour becomes the accent by accident. Every art box carries filter: grayscale(1), even when the export is already grey.",
+          "kind": "computed-style",
+          "selector": ".tile__art, .product__art, .hero__art",
+          "property": "filter",
+          "equals": "grayscale(1)"
+        },
+        {
+          "id": "art-never-over-the-words",
+          "rule": "The cut-out leans off the tile's corner under the words, never over them.",
+          "kind": "geometry",
+          "selector": ".tile__art",
+          "mustNotOverlap": ".tile h3, .tile p, .tile a"
         }
       ]
     }

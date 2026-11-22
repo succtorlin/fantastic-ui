@@ -127,7 +127,7 @@ node ~/.claude/skills/fantastic-ui/scripts/direction-samples.mjs design-samples.
 - `section` (per direction, overriding the content's `kind`): `table`,
   `cards` (asymmetric bento), or `list` (index rows).
 - `separation`: `hairline`, `shadow` or `tone`; inferred from the tokens
-  (`--lift*` means shadow, Preset L means tone) when omitted.
+  (`--lift*` means shadow, a preset whose gates declare `"separation": "tone"` (L, M, N, Q, R) means tone) when omitted.
 
 The script writes `<id>.html` per candidate and an `index.html` comparison
 sheet. When Playwright is available (resolved from the project, or
@@ -164,6 +164,21 @@ folder. Results go to `checks.json` and onto each card in the sheet. It needs
 `playwright` and `@axe-core/playwright` (the same tools `verify-preset.mjs`
 uses), from the project or `--modules <node_modules>`. A failing sample is
 fixed in its tokens or replaced; it is never shown with a note.
+
+**Preset M is the exception.** Folio Split is its pictures of the user's own
+work, and this template has no slot for them: the generator refuses
+`"preset": "M"` with a message saying so. When M is a candidate, build its
+sample by hand from [folio-modules.md](folio-modules.md) (the tile grid with
+three or four of the user's real images, `<meta name="fui-preset"
+content="M">` in the head), save it in the samples folder beside the generated
+pages, and `check-samples.mjs` examines it with the rest. No real images of
+the work means M is disqualified, not sampled with stand-ins.
+
+The five shop presets (N to R) allow the showcase lane without requiring it,
+so the generator renders them like any other preset, with a labelled plate
+standing in for the product photographs. Say so when showing them: these
+directions depend on the user's own product pictures more than most, and a
+plate undersells them.
 
 The generator already builds for these gates: a measured focus colour (≥3:1
 on the surface), 44 px nav targets, a skip link, a reduced-motion block,

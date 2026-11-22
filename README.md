@@ -13,8 +13,8 @@ copyable prompts, screenshots, and workflow diagrams for choosing a design,
 building a dashboard, auditing an interaction, and polishing an app.
 
 Open the [live preset gallery](https://succtorlin.github.io/fantastic-ui/) to
-try all twelve examples. The [preset guide](examples/presets/) includes
-screenshots and starter prompts.
+try all eighteen presets as live examples. The
+[preset guide](examples/presets/) includes screenshots and starter prompts.
 
 ---
 
@@ -82,9 +82,22 @@ The five disciplines decide **direction**. They don't, on their own, stop a surf
 
 This layer is adapted from [*Refactoring UI*](https://www.refactoringui.com/) by Adam Wathan & Steve Schoger. Several of the book's defaults **invert** on a dark ground, and those are marked `↯` in the reference rather than copied across. Where the mechanics and the disciplines disagree, the disciplines win: they are the direction, the mechanics are the mechanism.
 
-## Twelve theme presets, with automatic selection
+## Eighteen theme presets, with automatic selection
 
-The five disciplines say *how* to design; a preset is a pre-committed answer to *what direction*. The skill ships twelve contrast-validated directions — from Coastal Editorial and Blueprint Mono to Midnight Showroom, Dispatch Yellow and Gallery White (product-gallery minimalism with studio-lit products) — each with a full token block, type pairing, and component grammar.
+The five disciplines say *how* to design; a preset is a pre-committed answer to *what direction*. The skill ships eighteen contrast-validated directions — from Coastal Editorial and Blueprint Mono to Midnight Showroom, Dispatch Yellow and Gallery White (product-gallery minimalism with studio-lit products), plus a portfolio index and five ways to sell products — each with a full token block, type pairing, and component grammar.
+
+### The six newer presets: a portfolio and five shops
+
+| Preset | What it is | Its own checks |
+| --- | --- | --- |
+| **M · Folio Split** | A white index of work: two columns of equal pale-grey tiles, each with one large, sharp image running off the tile's edge. No accent colour. | High-resolution images are required and checked for sharpness and weight |
+| **N · Sprint Stage** | Sportswear shop: a black first screen with a slanted, heavy headline and one product, then a white catalogue broken by black banners. | The product never sits under the headline; the stage grey never lands on white |
+| **O · Olive Outfitter** | Outdoor shop on one rounded warm-white sheet: a photograph that dissolves in from the right, fact cards on its edge, dark-olive pill buttons. | Words never sit on the photograph; fact cards are opaque |
+| **P · Chamfer Spec** | Hardware launch page in white, silver and black: wide uppercase type, corners cut at 45°, a ruled strip of specifications. | The cut never clips a focus ring; the render never sits under the words |
+| **Q · Market Shelf** | Marketplace: white product cards on shelves that scroll sideways, the price as the heaviest text, one midnight band for deals. | Shelves scroll without JavaScript; the bright star colour stays off light grounds |
+| **R · Mono Catalogue** | Monochrome gadget shop: pale-grey tiles with very large corners, light headlines, every product in greyscale. | Pictures stay greyscale; the art never covers the words |
+
+Folio Split has a hand-built example page, [ScientistTwo, screen by screen](examples/folio-split/), made of real captures of one interface. Each shop preset has one too: [Sprint Stage](examples/sprint-stage/), [Olive Outfitter](examples/olive-outfitter/), [Chamfer Spec](examples/chamfer-spec/), [Market Shelf](examples/market-shelf/) and [Mono Catalogue](examples/mono-catalogue/). Drawings stand in for product photographs on those five. Recipes copied from those pages are in [folio-modules.md](skills/fantastic-ui/references/folio-modules.md) for M and [storefront-modules.md](skills/fantastic-ui/references/storefront-modules.md) for N to R. The five shop presets share one rule: words never sit on a picture, because text over an image cannot be measured for contrast. N to R accept large product photographs through the same high-resolution lane as M, but do not require them.
 
 Selection is part of the workflow, not a menu you're shown: before writing a brief, the skill runs a preset check with three gates — the user named a direction → use it; the codebase already has a token system → **no preset** (recover and extend the existing brief instead of running a second design system); otherwise score the request against a signal table (medium, domain, imagery, density) with per-preset disqualifiers, and render the strongest two or three directions as sample pages to pick from (next section).
 
@@ -98,7 +111,7 @@ If the project has a [DESIGN.md](https://github.com/google-labs-code/design.md) 
 
 - **Mismatches are always asked about.** `scripts/design_md.py drift` compares the file's tokens with the stylesheet's custom properties. Every difference, missing token or likely rename is put to you as a question, every time; the skill never decides which side is right.
 - **Replacing needs an explicit request.** Naming a preset in a project with a DESIGN.md gets you a question ("follow the file, or replace it?"), not a rewrite. Asked to replace it, the skill writes the new file beside the old one, shows the diff, and moves it into place only on a yes. Then it migrates the code, tokens first.
-- **No file? It offers to write one** once the direction is settled. `design_md.py export --preset L` turns any of the twelve presets into a DESIGN.md. All twelve pass the official linter (`@google/design.md` 0.4.0) with 0 errors and 0 warnings.
+- **No file? It offers to write one** once the direction is settled. `design_md.py export --preset L` turns any of the eighteen presets into a DESIGN.md. Presets A to L pass the official linter (`@google/design.md` 0.4.0) with 0 errors and 0 warnings; M to R have not been run through it yet.
 
 Procedure: [design-md.md](skills/fantastic-ui/references/design-md.md).
 
@@ -130,14 +143,14 @@ Every page the skill builds or changes, in any project, has to pass `scripts/exa
 | Check | What fails it |
 | --- | --- |
 | axe-core, WCAG 2.0/2.1/2.2 A + AA, at 1440 and 390 px | any violation; `incomplete` nodes are listed for measuring by hand, never passed |
-| Reflow at 320, 375, 390, 768, 1024, 1440 and 1920 px | horizontal overflow, or content cut off under `overflow-x: clip` |
+| Reflow at 320, 375, 390, 768, 1024, 1440 and 1920 px | horizontal overflow, or content cut off under `overflow-x: clip`. A row marked `data-fui-scroll` may scroll sideways inside itself, and fails if it cannot be scrolled, cannot be reached by keyboard, or holds an item wider than the screen |
 | Targets and labels | a link or button under 24×24 px; a button label that wraps |
 | [Button sizes and block edges](skills/fantastic-ui/references/control-geometry.md) | marked peer button widths or heights, or shared block edges, differ by more than 1 CSS pixel |
 | Keyboard and structure | no skip link first, a missing `header`/`nav`/`main`/`footer`, not exactly one `h1`, no `lang`, a focus ring under 2 px or 3:1 |
 | No-JS pass | text a visitor sees with JavaScript is in the page but hidden without it |
 | Composition | a prose line past ~100 characters at 1024+ (the uncapped container at 1920); text painted under another element at 1440 or 390; the hero `h1` or its first action below the fold at 1280×800 |
 | `--dialog <trigger>`, at 1440 and 390 | the trigger opens no dialog from the keyboard; the dialog has no name, is not modal, lacks a close button, lets Tab out, fails axe while open, ignores Escape or loses focus on close |
-| `--preset <A–L>` | any of that preset's gates in `verify-preset.mjs` (contrast, zero webfonts, asset weight, reduced motion, token roles, accent restraint, separation, its own traps) |
+| `--preset <A–R>` | any of that preset's gates in `verify-preset.mjs` (contrast, zero webfonts, asset weight, reduced motion, token roles, accent restraint, separation, its own traps, and for M to R the markup, sharpness and weight of images marked `data-showcase`) |
 | `--lint <path>` | any `lint-surface.mjs --strict` finding in the touched source |
 
 The exam needs `playwright` and `@axe-core/playwright`, installed in the project or pointed to with `--modules <node_modules>`. Without them the work is reported as **not examined**, not as done.
@@ -331,11 +344,16 @@ skills/fantastic-ui/
 ├── SKILL.md                        # the methodology + ship checklist
 ├── scripts/
 │   ├── verify-preset.mjs            # runnable checks against a live page (+ advisory imagery count)
+│   ├── showcase-gate.mjs           # high-resolution image lane: markup, no upscaling, weight
+│   ├── showcase-gate.test.mjs      # its tests
+│   ├── trap-style.mjs              # preset trap: a CSS property that must hold on every match
+│   ├── trap-style.test.mjs         # its tests
 │   ├── direction-samples.mjs       # 2–3 candidate looks as sample pages + side-by-side sheet
 │   ├── exam.mjs                    # THE exam every page must pass: axe WCAG 2.2 AA, reflow, targets,
 │   │                               #   focus, landmarks, preset gates, lint, no-JS pass, fold/measure/cover, --dialog
-│   ├── exam.test.mjs               # browser tests for the no-JS pass and the dialog check
+│   ├── exam.test.mjs               # browser tests for the no-JS pass, the dialog check and marked scrollers
 │   ├── fixtures/exam/              # a page that passes the exam and its trap twin (hidden text, fake dialog)
+│   ├── fixtures/design-md/         # the Gallery White example page, shipped so the tests run when installed
 │   ├── direction-samples.test.mjs  # generator tests (no browser)
 │   ├── check-samples.mjs           # the exam over a sample folder + the sheet's gate lines
 │   ├── lint-surface.mjs            # static lint: dead refs, sticky-killing overflow, zoom, reduced motion,
@@ -381,13 +399,17 @@ skills/fantastic-ui/
     ├── data-charts.md              # chart by question, accessibility grades, bars, chart colour under one accent
     ├── motion-routes.md            # route ladder, effect lookup, beat sheet, motion slop
     ├── phone-surfaces.md           # phone frame, safe areas, thumb zone, touch, native furniture
-    ├── theme-presets.md            # twelve named directions with contrast-validated token blocks and
+    ├── theme-presets.md            # eighteen named directions with contrast-validated token blocks and
     │                               #   component grammar, plus the signal table and gates for automatic
     │                               #   preset selection (and refusal)
     ├── design-md.md                # a project's DESIGN.md: precedence, drift questions,
     │                               #   create on a yes, replace only on an explicit request
     ├── gallery-modules.md          # Preset L kit: tone bands, glass nav + chapter strip, studio-lit
     │                               #   product stage, bento tiles, spec numerals, gates
+    ├── folio-modules.md            # Preset M kit: equal split tiles, the pill nav, high-resolution
+    │                               #   images with srcset rungs, gates
+    ├── storefront-modules.md       # Presets N to R kit: the five shop looks, product pictures, the cut
+    │                               #   button, sideways shelves, greyscale tiles, gates
     ├── wcag-audit.md               # WCAG 2.2 AA check-and-fix phase: contrast-matrix script (semantic
     │                               #   tints included), the opacity rule, axe sweep with violations-vs-
     │                               #   incomplete triage, validating your own checker, auditing the real
@@ -408,7 +430,7 @@ The skill is framework-light: the worked code is React + CSS modules, but the di
 
 ## Verification boundaries
 
-The existing mechanics layer and all twelve preset declarations and verification tools remain included. Run the exam (and the preset checker it calls) from a project with `playwright` and `@axe-core/playwright` installed; see [Verifying an applied preset](skills/fantastic-ui/references/theme-presets.md#verifying-an-applied-preset) for the command and coverage.
+The existing mechanics layer and all eighteen preset declarations and verification tools remain included. Run the exam (and the preset checker it calls) from a project with `playwright` and `@axe-core/playwright` installed; see [Verifying an applied preset](skills/fantastic-ui/references/theme-presets.md#verifying-an-applied-preset) for the command and coverage.
 
 A passing automated check does not establish design quality, actual user comprehension, or full WCAG conformance. Manually verify keyboard and screen-reader behavior, reduced motion, reflow, and the relevant loading, error, permission, and recovery states. A visual reference establishes intent, not live data or proven interaction behavior.
 

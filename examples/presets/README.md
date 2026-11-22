@@ -1,7 +1,9 @@
 # Fantastic UI preset gallery
 
-All twelve presets are shown below with a screenshot and a starter prompt.
-The examples use fictional content. Their illustrations are intentionally
+All eighteen presets are shown below with a screenshot and a starter
+prompt.
+The examples use fictional content, except Folio Split, which shows real
+captures of one interface. Their illustrations are intentionally
 stylized examples of art direction. Use your own product, venue, or team photos
 where the prompt calls for them.
 
@@ -135,6 +137,66 @@ Quiet studio lighting, generous white space and one blue action.
 > $fantastic-ui Build a device launch in Gallery White. Use my product photography and give each section one idea.
 
 [Open live example](https://succtorlin.github.io/fantastic-ui/examples/gallery-white/index.html) · [View source](../gallery-white/index.html)
+
+### M · Folio Split
+
+[![ScientistTwo preview in Folio Split](previews/folio-split.webp)](https://succtorlin.github.io/fantastic-ui/examples/folio-split/index.html)
+
+An index of work: equal pale-grey tiles, each with one large, sharp capture running off its edge.
+
+> $fantastic-ui Build a portfolio index in Folio Split. Use my own high-resolution screenshots, one per tile.
+
+[Open live example](https://succtorlin.github.io/fantastic-ui/examples/folio-split/index.html) · [View source](../folio-split/index.html)
+
+### N · Sprint Stage
+
+[![Tern preview in Sprint Stage](previews/sprint-stage.webp)](https://succtorlin.github.io/fantastic-ui/examples/sprint-stage/index.html)
+
+A black first screen, a slanted heavy headline and one shoe standing on its reflection.
+
+> $fantastic-ui Build a sportswear shop in Sprint Stage. Use my product photographs and keep the first screen to one product.
+
+[Open live example](https://succtorlin.github.io/fantastic-ui/examples/sprint-stage/index.html) · [View source](../sprint-stage/index.html)
+
+### O · Olive Outfitter
+
+[![Fellwalk preview in Olive Outfitter](previews/olive-outfitter.webp)](https://succtorlin.github.io/fantastic-ui/examples/olive-outfitter/index.html)
+
+One rounded warm-white sheet, a picture that fades in from the right and dark-olive pill buttons.
+
+> $fantastic-ui Build an outdoor shop in Olive Outfitter. Use my lifestyle photographs and keep every word on a solid surface.
+
+[Open live example](https://succtorlin.github.io/fantastic-ui/examples/olive-outfitter/index.html) · [View source](../olive-outfitter/index.html)
+
+### P · Chamfer Spec
+
+[![Kestrel Audio preview in Chamfer Spec](previews/chamfer-spec.webp)](https://succtorlin.github.io/fantastic-ui/examples/chamfer-spec/index.html)
+
+White, silver and black, wide uppercase type, corners cut at 45° and a ruled strip of specifications.
+
+> $fantastic-ui Build a hardware launch page in Chamfer Spec. Give every claim a number with a unit.
+
+[Open live example](https://succtorlin.github.io/fantastic-ui/examples/chamfer-spec/index.html) · [View source](../chamfer-spec/index.html)
+
+### Q · Market Shelf
+
+[![Corner Market preview in Market Shelf](previews/market-shelf.webp)](https://succtorlin.github.io/fantastic-ui/examples/market-shelf/index.html)
+
+White product cards on shelves that scroll sideways, with the price as the heaviest text.
+
+> $fantastic-ui Build a marketplace home page in Market Shelf. Use my product photographs and give each category its own shelf.
+
+[Open live example](https://succtorlin.github.io/fantastic-ui/examples/market-shelf/index.html) · [View source](../market-shelf/index.html)
+
+### R · Mono Catalogue
+
+[![Plain Goods preview in Mono Catalogue](previews/mono-catalogue.webp)](https://succtorlin.github.io/fantastic-ui/examples/mono-catalogue/index.html)
+
+A white page, pale-grey tiles with very large corners and every product in greyscale.
+
+> $fantastic-ui Build a gadget shop in Mono Catalogue. Use my product cut-outs and keep the whole catalogue in greyscale.
+
+[Open live example](https://succtorlin.github.io/fantastic-ui/examples/mono-catalogue/index.html) · [View source](../mono-catalogue/index.html)
 ## Rebuild the examples
 
 ```bash
@@ -147,6 +209,13 @@ It writes the pages and this guide. The exam uses Playwright and axe-core. If
 they are installed elsewhere, pass `--modules /path/to/node_modules`.
 The existing [Gallery White example](../gallery-white/) is maintained separately.
 
+Presets M, N, O, P, Q, R are hand-built pages in their own folders beside this one.
+The build links to them and does not write them. Preset M shows real
+captures of the ScientistTwo interface. On the others, drawings stand in for
+product photographs. Examine one with
+`node skills/fantastic-ui/scripts/exam.mjs examples/sprint-stage`; their
+card pictures in `previews/` are 640×400 screenshots of the first screen.
+
 The **Gallery geometry** check runs on pull requests targeting `main` and
 before GitHub Pages deployment. It measures button size and block alignment
-in all twelve packaged examples at 320, 390, and 1440 CSS pixels.
+in all eighteen packaged examples at 320, 390, and 1440 CSS pixels.

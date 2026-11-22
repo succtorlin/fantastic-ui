@@ -1,0 +1,159 @@
+/* Folio Split (fantastic-ui, Preset M). Tokens first; every rule below uses
+   only these. Kit and reasons: references/folio-modules.md in the skill. */
+
+.page {
+  /* ink 18.43 / ink-2 9.66 / muted 5.70 on --ground;
+     ink 16.89 / ink-2 8.85 / muted 5.23 on --ground-2 (the tile) */
+  --ground: #ffffff;
+  --ground-2: #f4f5f7;
+  --panel: #ffffff;
+  --ground-3: #eceef2;
+  --hair: #d8dbe1;
+  --hair-lit: #e8eaee;
+
+  --ink: #0e1420;
+  --ink-2: #3d4553;
+  --muted: #5f6775;
+  --control: #868d99;
+
+  --invert: #0e1420;
+  --ink-on-invert: #ffffff;
+
+  --up: #1a8047;
+  --down: #c8322a;
+
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --r-sheet: 0px;
+  --r-panel: 10px;
+  --r-card: 10px;
+  --r-pill: 999px;
+  --maxw: 1520px;
+  --gutter: clamp(16px, 2.9vw, 34px);
+  --gap: 24px;
+  --pad: clamp(18px, 2.1vw, 30px);
+  --tile-ratio: 14 / 15;
+  --nav-shadow: 0 6px 24px color-mix(in oklab, var(--ink) 9%, transparent);
+
+  --fast: 180ms;
+  --slow: 520ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* ---------- base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+.page {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 16px/1.5 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+.wrap { max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); }
+.page a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 4px; }
+.skip {
+  position: absolute; left: var(--gutter); top: -80px; z-index: 10;
+  padding: 10px 16px; border-radius: var(--r-pill);
+  background: var(--invert); color: var(--ink-on-invert); font: 600 15px/1 var(--sans); text-decoration: none;
+}
+.skip:focus { top: 12px; }
+
+/* ---------- header: mark and pill nav ---------- */
+.top { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px 16px; padding-block: 26px; }
+.mark {
+  justify-self: start; display: inline-flex; align-items: center; min-height: 44px;
+  font: 800 22px/1 var(--display); letter-spacing: -0.04em; color: var(--ink); text-decoration: none;
+}
+.pillnav { display: flex; gap: 4px; padding: 5px; border-radius: var(--r-pill); background: var(--panel); box-shadow: var(--nav-shadow); }
+.pillnav a {
+  display: inline-flex; align-items: center; min-height: 36px; padding-inline: 20px; border-radius: var(--r-pill);
+  font: 600 15px/1 var(--sans); color: var(--muted); text-decoration: none;
+  transition: color var(--fast) var(--ease), background-color var(--fast) var(--ease);
+}
+.pillnav a:hover { color: var(--ink); }
+.pillnav a[aria-current] { background: var(--ground-3); color: var(--ink); }
+.pillnav a:focus-visible { border-radius: var(--r-pill); }
+
+/* ---------- hero: left-aligned, no button ---------- */
+.hero { padding-block: clamp(36px, 6.4vw, 92px) clamp(28px, 3.6vw, 50px); }
+.hero h1 {
+  margin: 0; max-width: 18ch;
+  font: 800 clamp(40px, 4.6vw, 64px)/1.05 var(--display); letter-spacing: -0.03em; text-wrap: balance;
+}
+.hero p { margin: 14px 0 0; max-width: 44ch; text-wrap: balance; font: 400 clamp(18px, 1.9vw, 24px)/1.35 var(--sans); color: var(--muted); }
+
+/* ---------- the split grid ---------- */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); margin: 0; padding: 0; list-style: none; }
+.tile {
+  position: relative; isolation: isolate;
+  display: grid; grid-template-rows: auto minmax(180px, 1fr);
+  aspect-ratio: var(--tile-ratio); overflow: clip;   /* clip, not hidden: a long text block may grow the tile */
+  border-radius: var(--r-card); background: var(--ground-2);
+}
+.tile:has(a:focus-visible) { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+.tile__text { padding: var(--pad) calc(var(--pad) + 56px) 22px var(--pad); }
+.tile__title { margin: 0; font: 800 clamp(20px, 1.9vw, 26px)/1.25 var(--display); letter-spacing: -0.02em; }
+.tile__title a { display: inline-block; color: inherit; text-decoration: none; }
+.tile__title a::after { content: ""; position: absolute; inset: 0; z-index: 2; }   /* the whole tile is the link */
+.tile__desc { margin: 8px 0 0; max-width: 34ch; text-wrap: pretty; font: 400 clamp(15px, 1.25vw, 17px)/1.45 var(--sans); color: var(--ink); }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
+.tags li { padding: 7px 14px; border-radius: var(--r-pill); background: var(--panel); font: 600 12px/1 var(--sans); color: var(--muted); }
+.tile__note { margin: 14px 0 0; font: 400 14px/1.4 var(--sans); color: var(--muted); }
+
+.tile__go {
+  position: absolute; top: calc(var(--pad) - 6px); right: calc(var(--pad) - 6px); z-index: 1;
+  display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--hair); color: var(--control);
+  transition: background-color var(--fast) var(--ease), color var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
+}
+.tile__go svg { display: block; transition: transform var(--fast) var(--ease); }
+.tile:hover .tile__go, .tile:has(a:focus-visible) .tile__go {
+  background: var(--invert); color: var(--ink-on-invert); box-shadow: inset 0 0 0 1px var(--invert);
+}
+.tile:hover .tile__go svg, .tile:has(a:focus-visible) .tile__go svg { transform: translateX(2px); }
+.tile:active .tile__go { background: var(--ink-2); }
+
+/* The art: the lower part of the tile, running off its right and bottom edge.
+   The angle and the crop are baked into the export; the box never leaves the tile. */
+.tile__art { position: relative; min-height: 0; margin-left: 8%; }
+.tile__art img {
+  position: absolute; inset: 0; display: block; width: 100%; height: 100%;
+  object-fit: cover; object-position: left top; transform-origin: left top;
+  transition: transform var(--slow) var(--ease);
+}
+.tile:hover .tile__art img { transform: scale(1.025); }
+
+/* Full-bleed tile: the picture fills the tile and the words keep the tile tone under them. */
+.tile--full .tile__text { grid-area: 1 / 1; background: var(--ground-2); }   /* solid under the words, so the contrast is the tile's own */
+.tile--full::before {                      /* the tone fades out below the words, over the picture */
+  content: ""; grid-area: 1 / 1; align-self: end; z-index: -1; height: 64px; transform: translateY(100%);
+  background: linear-gradient(to bottom, var(--ground-2), color-mix(in oklab, var(--ground-2) 0%, transparent));
+}
+.tile--full .tile__art { grid-area: 1 / 1 / -1 / -1; z-index: -2; margin: 0; }
+
+/* ---------- footer ---------- */
+.foot { margin-top: clamp(48px, 7vw, 96px); padding-block: 28px 44px; border-top: 1px solid var(--hair); color: var(--muted); font: 400 14px/1.55 var(--sans); }
+.foot p { margin: 0; max-width: 72ch; }
+.foot code { font: 400 13px/1 var(--mono); color: var(--ink-2); }
+.foot a { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink); text-underline-offset: 3px; }
+
+/* ---------- tablet and phone ---------- */
+@media (max-width: 1023px) {
+  .tile { aspect-ratio: 4 / 5; }      /* a narrow tile's words take more of it, so it gets taller */
+}
+@media (max-width: 767px) {
+  .top { grid-template-columns: minmax(0, 1fr) auto; padding-block: 16px; }
+  .pillnav { grid-row: 2; grid-column: 1 / -1; justify-self: stretch; max-width: 420px; }
+  .pillnav a { flex: 1 1 auto; justify-content: center; padding-inline: 8px; }   /* four short items share a 320 px row */
+  .tiles { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page *, .page *::before, .page *::after { transition: none; }
+  .tile:hover .tile__art img, .tile:hover .tile__go svg, .tile:has(a:focus-visible) .tile__go svg { transform: none; }
+}

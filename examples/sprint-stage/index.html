@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="fui-preset" content="N">
+<title>Tern: running shoes and kit</title>
+<meta name="description" content="Tern makes running shoes and kit. The Road 3 weighs 214 grams and comes in four colours.">
+<link rel="stylesheet" href="sprint-stage.css">
+</head>
+<body class="page">
+<a class="skip" href="#shop">Skip to the shop</a>
+
+<!-- Every drawing on the page, defined once. Original flat drawings: no marks, no logos. -->
+<svg class="defs" aria-hidden="true" focusable="false" width="0" height="0">
+  <defs>
+    <radialGradient id="glow-coral" class="glow--coral" gradientUnits="userSpaceOnUse" cx="150" cy="150" r="150"><stop class="glow__in" offset="0"/><stop class="glow__out" offset="1"/></radialGradient>
+    <radialGradient id="glow-teal" class="glow--teal" gradientUnits="userSpaceOnUse" cx="214" cy="84" r="130"><stop class="glow__in" offset="0"/><stop class="glow__out" offset="1"/></radialGradient>
+    <radialGradient id="glow-ember" class="glow--ember" gradientUnits="userSpaceOnUse" cx="60" cy="44" r="170"><stop class="glow__in" offset="0"/><stop class="glow__out" offset="1"/></radialGradient>
+    <radialGradient id="glow-cobalt" class="glow--cobalt" gradientUnits="userSpaceOnUse" cx="226" cy="110" r="170"><stop class="glow__in" offset="0"/><stop class="glow__out" offset="1"/></radialGradient>
+
+    <g id="g-sole">
+      <path class="d-sole" d="M12 134C60 141 150 141 230 137C290 134 340 128 388 116C398 132 400 150 394 162C390 171 380 175 366 175L112 175C70 175 32 168 14 150C8 144 8 138 12 134Z"/>
+      <path class="d-groove" d="M34 155C120 161 290 156 394 146"/>
+      <path class="d-rubber" d="M22 157C44 170 78 175 112 175L366 175C380 175 390 171 394 162C396 172 388 182 370 182L106 182C70 182 38 174 22 157Z"/>
+    </g>
+    <!-- the part of the shoe nearest the floor: all the reflection ever shows -->
+    <g id="g-shoe-foot">
+      <path class="d-main" d="M40 109H375C377 118 380 128 382 138H26C23 128 28 118 40 109Z"/>
+      <path class="d-deep" d="M40 109H64C62 119 64 129 68 138H26C23 128 28 118 40 109Z"/>
+      <path class="d-deep" d="M317 109H375C377 118 380 128 382 138H318C317 128 317 118 317 109Z"/>
+      <use href="#g-sole"/>
+    </g>
+    <g id="g-shoe">
+      <path class="d-main" d="M26 138C18 120 38 106 72 98C112 90 150 72 184 48L200 32C210 22 228 22 236 36C246 54 276 60 304 52C320 47 334 36 350 36C362 38 368 66 374 100C376 116 380 128 382 138Z"/>
+      <path class="d-lite" d="M184 48L200 32C210 22 228 22 236 36C230 46 218 56 206 62Z"/>
+      <path class="d-deep" d="M26 138C18 120 38 106 72 98C64 110 62 126 68 138Z"/>
+      <path class="d-deep" d="M326 44C336 38 344 36 350 36C362 38 368 66 374 100C376 116 380 128 382 138L318 138C314 110 316 72 326 44Z"/>
+      <path class="d-deep" d="M110 92C142 82 166 66 186 46L204 62C186 82 158 100 134 108C124 104 116 98 110 92Z"/>
+      <path class="d-deep" d="M82 113a2.2 2.2 0 1 0 .1 0zM95 107a2.2 2.2 0 1 0 .1 0zM91 122a2.2 2.2 0 1 0 .1 0zM104 117a2.2 2.2 0 1 0 .1 0zM101 129a2.2 2.2 0 1 0 .1 0zM114 126a2.2 2.2 0 1 0 .1 0z"/>
+      <rect class="d-second" x="345" y="25" width="9" height="17" rx="3"/>
+      <path class="d-lace" d="M128 87L143 104M146 78L161 95M163 67L178 84M178 55L193 72"/>
+      <path class="d-seam" d="M236 47C248 65 278 71 306 63M254 66C248 96 228 118 190 138"/>
+      <use href="#g-sole"/>
+    </g>
+    <symbol id="shoe-flush" viewBox="0 0 400 182"><use href="#g-shoe"/></symbol>
+    <symbol id="shoe" viewBox="0 0 400 190"><use href="#g-shoe"/></symbol>
+    <symbol id="shoe-trail" viewBox="0 0 400 190">
+      <use href="#g-shoe"/>
+      <path class="d-rubber" d="M80 180h18l-4 10H84zM116 180h18l-4 10h-10zM152 180h18l-4 10h-10zM188 180h18l-4 10h-10zM224 180h18l-4 10h-10zM260 180h18l-4 10h-10zM296 180h18l-4 10h-10zM332 180h18l-4 10h-10z"/>
+    </symbol>
+    <symbol id="shoe-spike" viewBox="0 0 400 190">
+      <use href="#g-shoe"/>
+      <path class="d-rubber" d="M72 180h7l-3.5 10zM98 181h7l-3.5 9zM124 181h7l-3.5 9zM150 181h7l-3.5 9zM176 181h7l-3.5 9z"/>
+    </symbol>
+
+    <symbol id="jacket" viewBox="0 0 240 230">
+      <path class="d-deep" d="M88 46C88 16 152 16 152 46L142 60L98 60Z"/>
+      <path class="d-main" d="M90 44L60 58C46 64 38 76 34 92L14 172L44 182L62 122L62 210L178 210L178 122L196 182L226 172L206 92C202 76 194 64 180 58L150 44C142 58 98 58 90 44Z"/>
+      <path class="d-deep" d="M62 196h116v14H62zM16 164l30 10l-2 8l-30-10zM224 164l-30 10l2 8l30-10z"/>
+      <path class="d-seam" d="M120 56V210M78 150L94 174M162 150L146 174"/>
+    </symbol>
+    <symbol id="cap" viewBox="0 0 240 150">
+      <path class="d-main" d="M70 112C66 62 104 32 146 34C186 36 216 68 218 112Z"/>
+      <path class="d-deep" d="M70 100C44 100 16 108 8 122C5 128 10 132 16 131C52 124 88 122 130 124L130 112L70 112Z"/>
+      <path class="d-seam" d="M146 34C128 54 118 80 116 112M146 34C164 52 176 78 180 112"/>
+      <circle class="d-deep" cx="146" cy="32" r="5"/>
+    </symbol>
+    <symbol id="socks" viewBox="0 0 250 200">
+      <g transform="translate(64 6)">
+        <path class="d-second" d="M70 20h42v92c0 8 4 14 12 18l36 16c18 8 16 32-4 32h-46c-24 0-40-16-40-40z"/>
+      </g>
+      <path class="d-main" d="M70 20h42v92c0 8 4 14 12 18l36 16c18 8 16 32-4 32h-46c-24 0-40-16-40-40z"/>
+      <path class="d-deep" d="M70 20h42v18H70zM148 141l12 5c18 8 16 32-4 32h-12c10-10 12-26 4-37z"/>
+      <path class="d-seam" d="M72 122c14-4 28 0 38 8"/>
+    </symbol>
+    <symbol id="flask" viewBox="0 0 140 230">
+      <rect class="d-second" x="58" y="8" width="24" height="28" rx="8"/>
+      <rect class="d-deep" x="44" y="30" width="52" height="28" rx="6"/>
+      <path class="d-main" d="M40 56h60c14 30 18 110 8 150c-3 10-73 10-76 0c-10-40-6-120 8-150z"/>
+      <path class="d-lite" d="M52 76c-6 30-8 80-4 112h8c-4-32-2-82 4-112z"/>
+      <path class="d-seam" d="M88 104h12M90 134h12M90 164h12"/>
+    </symbol>
+    <symbol id="belt" viewBox="0 0 280 150">
+      <ellipse class="d-strap" cx="140" cy="60" rx="126" ry="40"/>
+      <rect class="d-deep" x="6" y="46" width="22" height="28" rx="4"/>
+      <rect class="d-main" x="70" y="72" width="140" height="54" rx="18"/>
+      <path class="d-seam" d="M90 92h100"/>
+      <rect class="d-second" x="182" y="87" width="16" height="10" rx="3"/>
+    </symbol>
+
+    <symbol id="scene-road" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice">
+      <rect class="sc-1" width="300" height="300"/>
+      <rect width="300" height="300" fill="url(#glow-coral)"/>
+      <path class="sc-0" d="M0 150L0 128L34 120L58 134L92 112L118 138L150 150Z"/>
+      <path class="sc-0" d="M300 150L300 122L262 132L236 116L204 136L176 150Z"/>
+      <rect class="sc-0" y="150" width="300" height="150"/>
+      <path class="sc-2" d="M140 150h20l124 150H16z"/>
+      <path class="sc-light" d="M149 158h2l2 18h-6zM146 190h8l4 32h-16zM139 240h22l8 60h-38z"/>
+      <path class="sc-ray" d="M140 150L16 300M160 150L284 300"/>
+    </symbol>
+    <symbol id="scene-trail" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice">
+      <rect class="sc-1" width="300" height="300"/>
+      <rect width="300" height="300" fill="url(#glow-teal)"/>
+      <circle class="sc-light" cx="214" cy="84" r="15"/>
+      <path class="sc-3" d="M0 190C50 150 90 150 130 176C170 140 230 130 300 170V300H0z"/>
+      <path class="sc-2" d="M0 230C60 190 120 200 170 226C220 200 260 196 300 214V300H0z"/>
+      <path class="sc-0" d="M40 216l10-28l10 28zM62 222l8-22l8 22zM236 206l10-30l10 30zM0 270C80 236 160 250 300 262V300H0z"/>
+      <path class="sc-ray" d="M150 300C140 276 190 264 172 246C158 232 198 222 186 206"/>
+    </symbol>
+    <symbol id="scene-track" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice">
+      <rect class="sc-1" width="300" height="300"/>
+      <rect width="300" height="300" fill="url(#glow-ember)"/>
+      <path class="sc-0" d="M0 172H300V140L240 124H120L80 146H0Z"/>
+      <rect class="sc-0" x="57" y="44" width="5" height="128"/>
+      <rect class="sc-light" x="42" y="30" width="36" height="14" rx="2"/>
+      <rect class="sc-2" y="172" width="300" height="128"/>
+      <path class="sc-ray" d="M0 196C100 188 204 182 300 176M0 222C100 207 204 195 300 183M0 252C100 229 204 208 300 190M0 288C100 253 204 223 300 197"/>
+    </symbol>
+    <symbol id="scene-gym" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice">
+      <rect class="sc-1" width="300" height="300"/>
+      <rect width="300" height="300" fill="url(#glow-cobalt)"/>
+      <rect class="sc-light" x="196" y="34" width="62" height="152"/>
+      <path class="sc-1" d="M225 34h4v152h-4zM196 106h62v4h-62z"/>
+      <rect class="sc-0" y="214" width="300" height="86"/>
+      <path class="sc-wash" d="M196 214h62l-66 86H66z"/>
+      <path class="sc-3" d="M34 246l150-16v12L34 262zM170 232l14-98h9l-11 98zM160 122h44v14h-44z"/>
+      <path class="sc-2" d="M34 262l150-20v8L34 274zM186 150l-56 34l3 5l56-34z"/>
+    </symbol>
+
+    <symbol id="i-search" viewBox="0 0 20 20"><circle cx="9" cy="9" r="5.5"/><path d="M13.2 13.2L17 17"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 20 20"><path d="M4.5 7h11l1 10h-13zM7.5 7V5.5a2.5 2.5 0 0 1 5 0V7"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav" id="top">
+  <nav class="wrap nav__in" aria-label="Main" data-fui-align-start="content" data-fui-align-end="content">
+    <a class="mark" href="#top" aria-label="Tern, top of page">Tern</a>
+    <ul class="nav__links">
+      <li><a href="#best-sellers">Shoes</a></li>
+      <li><a href="#shell">Clothing</a></li>
+      <li><a href="#kit">Equipment</a></li>
+      <li><a href="#road-3">Sale</a></li>
+    </ul>
+    <ul class="nav__tools">
+      <li><a href="#shop"><svg class="ico" aria-hidden="true" viewBox="0 0 20 20"><use href="#i-search"/></svg>Search</a></li>
+      <li><a href="#returns"><svg class="ico" aria-hidden="true" viewBox="0 0 20 20"><use href="#i-bag"/></svg>Bag</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="shop" data-fui-buttons="See all pills">
+  <section class="stage" aria-labelledby="stage-h" data-fui-buttons="Stage action">
+    <div class="wrap stage__in" data-fui-align-start="content" data-fui-align-end="content">
+      <div class="stage__copy">
+        <h1 id="stage-h"><span>Go now.</span> <span>Run light.</span></h1>
+        <p class="stage__line">The Road 3 weighs 214 grams and comes in four colours.</p>
+        <a class="btn btn--light" href="#road-3">Shop the Road 3</a>
+      </div>
+      <div class="stage__product">
+        <svg class="stage__shoe art" viewBox="0 0 400 182" role="img" aria-label="The Tern Road 3 in coral: a low running shoe seen from the side, with a thick pale midsole."><use href="#shoe-flush"/></svg>
+        <div class="stage__floor" aria-hidden="true"><svg class="stage__mirror art" viewBox="0 106 400 76" aria-hidden="true" focusable="false"><use href="#g-shoe-foot"/></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap section" id="best-sellers" aria-labelledby="best-h" data-fui-align-start="content" data-fui-align-end="content">
+    <div class="head">
+      <h2 class="title" id="best-h">Best sellers</h2>
+      <a class="btn btn--line" href="#best-sellers" aria-label="See all best sellers">See all</a>
+    </div>
+    <ul class="row" data-fui-buttons="Best seller tiles">
+      <li><a class="item" href="#road-3">
+        <span class="tile"><svg class="art" viewBox="0 0 400 190" role="img" aria-label="A coral road shoe with a pale midsole, seen from the side."><use href="#shoe"/></svg></span>
+        <span class="item__name">Tern Road 3</span>
+        <span class="item__meta">Daily road shoe<span class="item__dot"> · </span><span class="item__price">£129</span></span>
+      </a></li>
+      <li><a class="item" href="#terrain">
+        <span class="tile"><svg class="art art--moss" viewBox="0 0 400 190" role="img" aria-label="A moss green trail shoe with a lugged sole, seen from the side."><use href="#shoe-trail"/></svg></span>
+        <span class="item__name">Tern Ridge</span>
+        <span class="item__meta">Trail shoe<span class="item__dot"> · </span><span class="item__price">£149</span></span>
+      </a></li>
+      <li><a class="item" href="#terrain">
+        <span class="tile"><svg class="art art--volt" viewBox="0 0 400 190" role="img" aria-label="A yellow-green track spike with five pins under the forefoot, seen from the side."><use href="#shoe-spike"/></svg></span>
+        <span class="item__name">Tern Lap</span>
+        <span class="item__meta">Track spike<span class="item__dot"> · </span><span class="item__price">£119</span></span>
+      </a></li>
+      <li id="shell"><a class="item" href="#kit">
+        <span class="tile"><svg class="art art--tall art--cobalt" viewBox="0 0 240 230" role="img" aria-label="A blue hooded rain jacket with a full zip, seen from the front."><use href="#jacket"/></svg></span>
+        <span class="item__name">Tern Shell</span>
+        <span class="item__meta">Rain jacket<span class="item__dot"> · </span><span class="item__price">£95</span></span>
+      </a></li>
+    </ul>
+  </section>
+
+  <section class="wrap banner" id="road-3" aria-labelledby="banner-h" data-fui-buttons="Banner action" data-fui-align-start="content" data-fui-align-end="content">
+    <div class="banner__copy">
+      <h2 class="title" id="banner-h"><span>Road 3.</span> <span>Four colours.</span></h2>
+      <p class="banner__line">Coral, teal, ember and slate, all in stock.</p>
+      <a class="btn btn--light" href="#best-sellers">Choose a colour</a>
+    </div>
+    <ul class="lineup">
+      <li><svg class="art" viewBox="0 0 400 190" role="img" aria-label="The Road 3 in coral."><use href="#shoe"/></svg><span>Coral</span></li>
+      <li><svg class="art art--teal" viewBox="0 0 400 190" role="img" aria-label="The Road 3 in teal."><use href="#shoe"/></svg><span>Teal</span></li>
+      <li><svg class="art art--ember" viewBox="0 0 400 190" role="img" aria-label="The Road 3 in ember orange."><use href="#shoe"/></svg><span>Ember</span></li>
+      <li><svg class="art art--slate" viewBox="0 0 400 190" role="img" aria-label="The Road 3 in slate grey."><use href="#shoe"/></svg><span>Slate</span></li>
+    </ul>
+  </section>
+
+  <section class="wrap section" id="terrain" aria-labelledby="terrain-h" data-fui-align-start="content" data-fui-align-end="content">
+    <div class="head">
+      <h2 class="title" id="terrain-h">Run by terrain</h2>
+      <a class="btn btn--line" href="#terrain" aria-label="See all terrains">See all</a>
+    </div>
+    <ul class="row" data-fui-buttons="Terrain cards">
+      <li><a class="item" href="#best-sellers">
+        <span class="shot"><svg class="scene scene--coral" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="An empty road at night running to a low coral light on the horizon."><use href="#scene-road"/></svg></span>
+        <span class="item__name">Road</span>
+        <span class="item__meta">Tarmac and pavement</span>
+      </a></li>
+      <li><a class="item" href="#best-sellers">
+        <span class="shot"><svg class="scene scene--teal" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A path winding over dark hills under a teal moon."><use href="#scene-trail"/></svg></span>
+        <span class="item__name">Trail</span>
+        <span class="item__meta">Mud, rock and roots</span>
+      </a></li>
+      <li><a class="item" href="#best-sellers">
+        <span class="shot"><svg class="scene scene--ember" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="The lanes of a running track at night under one orange floodlight."><use href="#scene-track"/></svg></span>
+        <span class="item__name">Track</span>
+        <span class="item__meta">Intervals and race day</span>
+      </a></li>
+      <li><a class="item" href="#best-sellers">
+        <span class="shot"><svg class="scene scene--cobalt" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A treadmill in a dark gym beside a tall window of blue light."><use href="#scene-gym"/></svg></span>
+        <span class="item__name">Treadmill</span>
+        <span class="item__meta">Indoors, any weather</span>
+      </a></li>
+    </ul>
+  </section>
+
+  <section class="wrap section" id="kit" aria-labelledby="kit-h" data-fui-align-start="content" data-fui-align-end="content">
+    <div class="head">
+      <h2 class="title" id="kit-h">Kit</h2>
+      <a class="btn btn--line" href="#kit" aria-label="See all kit">See all</a>
+    </div>
+    <ul class="row" data-fui-buttons="Kit tiles">
+      <li><a class="item" href="#kit">
+        <span class="tile"><svg class="art art--teal" viewBox="0 0 240 150" role="img" aria-label="A teal running cap with a curved peak, seen from the side."><use href="#cap"/></svg></span>
+        <span class="item__name">Run cap</span>
+        <span class="item__meta">One size<span class="item__dot"> · </span><span class="item__price">£22</span></span>
+      </a></li>
+      <li><a class="item" href="#kit">
+        <span class="tile"><svg class="art art--tall" viewBox="0 0 250 200" role="img" aria-label="Two crew socks, one coral and one slate grey."><use href="#socks"/></svg></span>
+        <span class="item__name">Crew socks</span>
+        <span class="item__meta">3 pairs<span class="item__dot"> · </span><span class="item__price">£18</span></span>
+      </a></li>
+      <li><a class="item" href="#kit">
+        <span class="tile"><svg class="art art--tall art--cobalt" viewBox="0 0 140 230" role="img" aria-label="A blue soft flask with a yellow-green bite valve."><use href="#flask"/></svg></span>
+        <span class="item__name">Soft flask</span>
+        <span class="item__meta">500 ml<span class="item__dot"> · </span><span class="item__price">£16</span></span>
+      </a></li>
+      <li><a class="item" href="#kit">
+        <span class="tile"><svg class="art art--slate" viewBox="0 0 280 150" role="img" aria-label="A slate grey race belt with a zipped pouch and an orange zip pull."><use href="#belt"/></svg></span>
+        <span class="item__name">Race belt</span>
+        <span class="item__meta">Holds a phone<span class="item__dot"> · </span><span class="item__price">£24</span></span>
+      </a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot__in" data-fui-align-start="content" data-fui-align-end="content">
+    <div>
+      <h2>Shop</h2>
+      <ul>
+        <li><a href="#best-sellers">Shoes</a></li>
+        <li><a href="#shell">Clothing</a></li>
+        <li><a href="#kit">Equipment</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Help</h2>
+      <ul>
+        <li><a href="#returns">Delivery</a></li>
+        <li><a href="#returns">Returns</a></li>
+        <li><a href="#best-sellers">Size guide</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Tern</h2>
+      <ul>
+        <li><a href="#top">Our story</a></li>
+        <li><a href="#terrain">Where we run</a></li>
+        <li><a href="#top">Back to the top</a></li>
+      </ul>
+    </div>
+    <div class="foot__last" id="returns">
+      <p class="foot__promise">Free returns for 30 days.</p>
+      <p class="foot__note">Drawings stand in for product photographs.</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

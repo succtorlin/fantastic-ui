@@ -7,6 +7,12 @@ on:
       - '.github/workflows/gallery-pages.yml'
       - 'examples/presets/**'
       - 'examples/gallery-white/**'
+      - 'examples/folio-split/**'
+      - 'examples/sprint-stage/**'
+      - 'examples/olive-outfitter/**'
+      - 'examples/chamfer-spec/**'
+      - 'examples/market-shelf/**'
+      - 'examples/mono-catalogue/**'
       - 'assets/gallery-white.png'
       - 'skills/fantastic-ui/scripts/exam.mjs'
   pull_request:
@@ -32,10 +38,11 @@ jobs:
           mkdir -p _site/examples/presets _site/examples/gallery-white _site/assets
           cp examples/presets/index.html _site/index.html
           sed -i 's|href="index.css"|href="examples/presets/index.css"|; s|href="\([^"]*\.html\)"|href="examples/presets/\1"|g; s|src="previews/|src="examples/presets/previews/|g; s|src="../../assets/|src="assets/|g' _site/index.html
-          sed -i 's|href="examples/presets/../gallery-white/|href="examples/gallery-white/|g' _site/index.html
+          sed -i 's|href="examples/presets/\.\./|href="examples/|g' _site/index.html
           cp examples/presets/*.{html,css,pdf} _site/examples/presets/
           cp -R examples/presets/art examples/presets/previews _site/examples/presets/
           cp examples/gallery-white/*.{html,webp} _site/examples/gallery-white/
+          for page in folio-split sprint-stage olive-outfitter chamfer-spec market-shelf mono-catalogue; do cp -R "examples/$page" _site/examples/; done
           cp assets/gallery-white.png _site/assets/
       - uses: actions/setup-node@v4
         with:
@@ -44,7 +51,7 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.65.1
           npx --no-install playwright install --with-deps --only-shell chromium
-      - name: Check all 12 examples on desktop and mobile
+      - name: Check all 18 examples on desktop and mobile
         run: node examples/presets/check-geometry.mjs _site
       - uses: actions/upload-pages-artifact@v4
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

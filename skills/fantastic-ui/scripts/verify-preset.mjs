@@ -9,7 +9,11 @@
  * references/theme-presets.md. Seven gates are universal; three more are
  * per-preset (accent, separation strategy, radii) plus each direction's own
  * stated traps. One ADVISORY check counts decorative imagery (see
- * imageryAdvisory below): it can warn, it never fails the run.
+ * imageryAdvisory below): it can warn, it never fails the run. A preset that
+ * declares "showcase" (M requires it; N to R allow it) adds three gates for
+ * its content images and takes those images, and only those, out of the 30 KB
+ * asset gate: showcase-gate.mjs. A trap is one of four kinds: forbidden-pairing,
+ * geometry, min-bg-alpha, or computed-style (trap-style.mjs).
  *
  * WHAT THIS CANNOT CHECK, stated so nobody mistakes a pass for a verdict:
  *   - density (airy / medium / dense) — a composition judgement
@@ -24,6 +28,8 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { showcaseConfig, judgeShowcase, collectShowcase, showcaseUrls } from "./showcase-gate.mjs";
+import { collectComputedStyle, judgeComputedStyle } from "./trap-style.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const GATES = JSON.parse(readFileSync(join(HERE, "preset-gates.json"), "utf8"));
@@ -40,13 +46,15 @@ const THEMES = (arg("themes") || "").split(",").filter(Boolean);
 const SCOPE = arg("scope", "body");                 // limit checks to a subtree
 
 if (!URL_ || !GATES.presets[PRESET]) {
-  console.error("usage: verify-preset.mjs --url <url> --preset <A-K> [--theme-key <ls-key> --themes dark,light] [--scope <sel>]");
+  console.error("usage: verify-preset.mjs --url <url> --preset <letter> [--theme-key <ls-key> --themes dark,light] [--scope <sel>]");
   console.error("presets:", Object.keys(GATES.presets).join(" "));
   process.exit(2);
 }
 
 const P = GATES.presets[PRESET];
 const U = GATES.universal;
+// The showcase lane exists only for a preset that declares it (see showcase-gate.mjs).
+const SHOWCASE = P.showcase ? showcaseConfig(P.showcase) : null;
 const results = [];
 const record = (id, pass, evidence, note) => results.push({ id, pass, evidence, note });
 // Advisory rows print INFO/WARN and never count toward the exit code.
@@ -191,12 +199,16 @@ for (const theme of themeList) {
   record("zero-webfonts", fonts.faces === 0 && fonts.remote.length === 0,
     `${fonts.faces} @font-face rules, ${fonts.remote.length} font requests`, fonts.remote.slice(0, 3).join(", "));
 
-  // 3. asset weight
-  const heavy = await page.evaluate((maxKB) => performance.getEntriesByType("resource")
-    .filter(e => /\.(png|jpe?g|webp|avif|gif|svg)(\?|$)/i.test(e.name))
+  // 3. asset weight. Showcase images (content, in a preset that declares the
+  // lane) are judged by the showcase gates below instead; everything else,
+  // and every image on a preset without the lane, stays under the cap.
+  const exempt = SHOWCASE ? await page.evaluate(`(${showcaseUrls.toString()})(${JSON.stringify(SHOWCASE.selector)})`) : [];
+  const heavy = await page.evaluate(({ maxKB, exempt }) => performance.getEntriesByType("resource")
+    .filter(e => /\.(png|jpe?g|webp|avif|gif|svg)(\?|$)/i.test(e.name) && !exempt.includes(e.name))
     .map(e => ({ n: e.name.split("/").pop(), kb: Math.round((e.encodedBodySize || e.transferSize || 0) / 1024) }))
-    .filter(a => a.kb > maxKB), U.maxAssetKB);
-  record("asset-weight", heavy.length === 0, `${heavy.length} over ${U.maxAssetKB}KB`,
+    .filter(a => a.kb > maxKB), { maxKB: U.maxAssetKB, exempt });
+  record("asset-weight", heavy.length === 0,
+    `${heavy.length} over ${U.maxAssetKB}KB${SHOWCASE ? ` (${exempt.length} showcase file(s) judged separately)` : ""}`,
     heavy.map(a => `${a.n} ${a.kb}KB`).join(", "));
 
   // 4. focus ring on interactive elements
@@ -321,7 +333,9 @@ for (const theme of themeList) {
       : "preset separates with hairlines — shadows found (theme-presets.md: do not mix the two strategies)");
 
   // advisory: decorative imagery (never fails)
-  await imageryAdvisory(page, SCOPE, U.imageryAdvisory || { warnWhenZero: true });
+  // A showcase preset's pictures are its content and it takes no plates, so
+  // zero DECORATIVE images is its normal state, not something to explain.
+  await imageryAdvisory(page, SCOPE, { warnWhenZero: true, ...(U.imageryAdvisory || {}), ...(SHOWCASE ? { warnWhenZero: false } : {}) });
 
   // 10. per-preset traps: geometry (every match) and min-bg-alpha
   for (const trap of (P.traps || [])) {
@@ -361,6 +375,13 @@ for (const theme of themeList) {
       record(`trap:${trap.id}`, hits.length === 0, hits.length ? `${hits.length} element(s) render ${trap.fg} on ${trap.bg}` : "none", hits.length ? trap.rule : "");
       continue;
     }
+    if (trap.kind === "computed-style") {
+      // One property that must hold on every match (P: clip-path, Q: overflow-x, R: filter).
+      const got = await page.evaluate(`(${collectComputedStyle.toString()})(${JSON.stringify(trap.selector)}, ${JSON.stringify(trap.property)})`);
+      const verdict = judgeComputedStyle(got, trap);
+      record(`trap:${trap.id}`, verdict.pass, verdict.evidence, verdict.note);
+      continue;
+    }
     if (trap.kind !== "geometry") continue;
     const hit = await page.evaluate(({ sel, against }) => {
       const gs = [...document.querySelectorAll(sel)];
@@ -385,6 +406,30 @@ for (const theme of themeList) {
   }
 
   await ctx.close();
+}
+
+// ===== GATES: the showcase lane (only for a preset that declares it) =====
+if (SHOWCASE) {
+  const fails = { markup: [], sharpness: [], weight: [] };
+  const seen = [];
+  let count = 0, firstScreenKB = 0, live = 0;
+  for (const [i, density] of SHOWCASE.densities.entries()) {
+    const ctx = await browser.newContext({ viewport: { width: density.width, height: density.height }, deviceScaleFactor: density.dpr });
+    const page = await ctx.newPage();
+    await page.goto(URL_, { waitUntil: "networkidle" });
+    const facts = await page.evaluate(`(${collectShowcase.toString()})(${JSON.stringify(SHOWCASE.selector)}, ${JSON.stringify(SHOWCASE.liveSelector)})`);
+    const verdict = judgeShowcase(facts, SHOWCASE, density, { checkMarkup: i === 0, checkWeight: i === 0 });
+    for (const k of Object.keys(fails)) fails[k].push(...verdict[k]);
+    seen.push(`${verdict.worstUpscale.toFixed(2)}× at ${density.width}@${density.dpr}x`);
+    if (i === 0) { count = verdict.count; firstScreenKB = verdict.firstScreenKB; live = facts.live || 0; }
+    await ctx.close();
+  }
+  record("showcase-markup", fails.markup.length === 0,
+    `${count} showcase image(s): alt, dimensions, srcset, loading${live ? `; ${live} live art element(s), drawn in the page` : ""}`, fails.markup.slice(0, 4).join(" | "));
+  record("showcase-sharpness", fails.sharpness.length === 0,
+    `largest scale ${seen.join(", ")} (over ${SHOWCASE.upscaleTolerance}× the browser invents pixels)`, fails.sharpness.slice(0, 4).join(" | "));
+  record("showcase-weight", fails.weight.length === 0,
+    `first screen ${firstScreenKB} KB (max ${SHOWCASE.firstScreenKB}); per file max ${SHOWCASE.maxKB} KB`, fails.weight.slice(0, 4).join(" | "));
 }
 
 // ===== GATE: reflow across widths =====

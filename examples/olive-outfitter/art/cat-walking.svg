@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 360" role="img"><title>A walker on a field path</title>
+<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ecebe0"/><stop offset="1" stop-color="#f6f3ea"/></linearGradient></defs><rect width="520" height="360" fill="url(#s)"/>
+<circle cx="170" cy="96" r="54" fill="#faf8f1"/>
+<path d="M0 236q110-70 230-40t290-52v216H0z" fill="#e1e2d1"/>
+<path d="M0 268q150-52 290-22t230-34v148H0z" fill="#d0d4bb"/>
+<path d="M0 308.9q180-26 520-8V360H0z" fill="#c3c8a8"/>
+<path d="M150 360q60-59.1 370-65.1v24q-250 6-270 41.1z" fill="#efe9da"/>
+<g fill="#b9b3a2"><rect x="36" y="290.9" width="34" height="16" rx="6"/><rect x="74" y="288.9" width="42" height="18" rx="7"/><rect x="120" y="292.9" width="30" height="14" rx="6"/><rect x="52" y="275.9" width="40" height="15" rx="6"/><rect x="96" y="275.9" width="36" height="14" rx="6"/></g>
+<g fill="#8a9070"><circle cx="452" cy="228.9" r="30"/><circle cx="484" cy="244.9" r="22"/></g><path d="M462 256.9v40" stroke="#6a6f55" stroke-width="5"/>
+<ellipse cx="355.6" cy="304.9" rx="40" ry="4" fill="#8a9070" opacity=".5"/>
+<g transform="translate(338 204) scale(0.8)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="7.5,-69.4 29.9,-36.3 67,-28.4" stroke="#6a7053" stroke-width="15"/>
+<circle cx="67" cy="-28.4" r="8" fill="#774e38"/>
+<polyline points="0,0 -22.5,55.6 -70.6,88.1" stroke="#3f4138" stroke-width="23"/>
+<g transform="translate(-70.6 88.1) rotate(42)"><path d="M-10-3V7q0 4 4 4h29q6 0 3-6-6-5-17-10l-13-3z" fill="#c4b493"/><path d="M-9 10.500h34" stroke="#f4f1e8" stroke-width="4" stroke-linecap="round"/></g>
+<polyline points="0,0 30,52 36.1,109.6" stroke="#4d4f45" stroke-width="24"/>
+<g transform="translate(36.1 109.6) rotate(-12)"><path d="M-10-3V7q0 4 4 4h29q6 0 3-6-6-5-17-10l-13-3z" fill="#d9c9a8"/><path d="M-9 10.500h34" stroke="#f4f1e8" stroke-width="4" stroke-linecap="round"/></g>
+<polyline points="0,-8 9.5,-65.4" stroke="#7b8261" stroke-width="40"/>
+<polyline points="9.5,-71.4 16.3,-106.6" stroke="#8a5d44" stroke-width="11"/>
+<circle cx="16.3" cy="-106.6" r="16" fill="#8a5d44"/>
+<path d="M-0.2 -106.6a16.500 16.500 0 0 1 31-8q-10 0-14 6-8 0-10 12-6-3-7-10z" fill="#23241e"/>
+<polyline points="7.5,-69.4 -14.9,-36.3 -24.1,0.6" stroke="#7b8261" stroke-width="15"/>
+<circle cx="-24.1" cy="0.6" r="8" fill="#8a5d44"/>
+</g>
+</svg>

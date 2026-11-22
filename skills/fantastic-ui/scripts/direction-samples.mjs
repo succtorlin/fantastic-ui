@@ -29,7 +29,7 @@ export class InputError extends Error {}
 
 // ---------- tokens ----------
 export function presetBlock(letter, text = readFileSync(PRESETS_MD, "utf8")) {
-  if (!/^[A-L]$/.test(String(letter))) throw new InputError(`preset must be a letter A–L, got "${letter}"`);
+  if (!/^[A-R]$/.test(String(letter))) throw new InputError(`preset must be a letter A–R, got "${letter}"`);
   const re = new RegExp(`^## Preset ${letter} — "([^"]+)"\\n([\\s\\S]*?)(?=^## |(?![\\s\\S]))`, "m");
   const m = text.match(re);
   if (!m) throw new InputError(`no preset ${letter} in theme-presets.md`);
@@ -135,13 +135,15 @@ export function bestInk(bg, names, map, min = 4.5) {
 }
 
 const GATES_JSON = join(SKILL, "scripts", "preset-gates.json");
-/** Presets whose gates declare a measured white-on-accent exception (`whiteOnAccent: "declared"`, Preset L). */
-function whiteOnAccentAllowed(letter) {
-  if (!letter) return false;
+/** One preset's declaration in preset-gates.json, or {} when there is none. */
+function gatesFor(letter) {
+  if (!letter) return {};
   try {
-    return JSON.parse(readFileSync(GATES_JSON, "utf8")).presets?.[letter]?.whiteOnAccent === "declared";
-  } catch { return false; }
+    return JSON.parse(readFileSync(GATES_JSON, "utf8")).presets?.[letter] || {};
+  } catch { return {}; }
 }
+/** Presets whose gates declare a measured white-on-accent exception (`whiteOnAccent: "declared"`, Preset L). */
+const whiteOnAccentAllowed = (letter) => gatesFor(letter).whiteOnAccent === "declared";
 const isWhite = (v) => { const c = parseColor(v); return !!c && c.r > 250 && c.g > 250 && c.b > 250; };
 
 export function derive(map, presetLetter) {
@@ -165,7 +167,7 @@ export function derive(map, presetLetter) {
   const eyebrow = bestInk(tok(surface), ["accent-ink", "accent", "ink-2"], map);
   // Focus ring: a UI component, so 3:1 against the surface it sits on (1.4.11).
   const focus = bestInk(tok(surface), ["accent-ink", "accent", "ink"], map, 3);
-  const sep = map.lift || map["lift-1"] ? "shadow" : presetLetter === "L" ? "tone" : "hairline";
+  const sep = map.lift || map["lift-1"] ? "shadow" : gatesFor(presetLetter).separation === "tone" ? "tone" : "hairline";
   // Every text/surface pair the sample actually paints. null = not measurable
   // (a token missing or in a colour syntax this script cannot read): flagged.
   const checks = [
@@ -416,6 +418,15 @@ export function validate(m) {
     ids.add(d.id); lower.add(k);
     for (const [field, allowed] of Object.entries(ENUMS)) {
       if (d[field] != null && !allowed.includes(d[field])) throw new InputError(`direction "${d.id}": ${field} must be one of ${allowed.join(", ")}`);
+    }
+    // A preset that REQUIRES the showcase lane (M) is its pictures of the
+    // user's own work. This template has no slot for them, and a generated
+    // plate in their place would fail the preset's own gate, so its sample is
+    // built by hand from its kit. A preset that only allows the lane (N to R)
+    // renders here with labelled stand-ins like any other.
+    const lane = d.preset ? gatesFor(d.preset).showcase : null;
+    if (lane && lane.required !== false) {
+      throw new InputError(`direction "${d.id}": preset ${d.preset} shows the user's own pictures, which this template has no slot for. Build its sample page from references/folio-modules.md with three or four real images, save it in the samples folder, and check-samples.mjs will examine it with the rest`);
     }
   }
   if (!m.recommended) throw new InputError(`"recommended" is required: the samples are evidence for a recommendation, not a quiz`);

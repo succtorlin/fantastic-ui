@@ -36,6 +36,7 @@ to compare. CSS or component layout props control the geometry.
 | `data-fui-buttons="Review actions"` on a group | The rendered width and height of its visible action buttons and button links |
 | `data-fui-align-start="content"` and `data-fui-align-end="content"` on blocks | Shared inline start or end edges, including right-to-left layouts |
 | `data-fui-align-top="summary"` and `data-fui-align-bottom="summary"` on blocks | Shared top or bottom edges for a row that remains a row at the examined sizes |
+| `data-fui-scroll="Best sellers"` on a row that scrolls sideways inside itself (a shelf of cards, a filter rail) | Nothing is compared. The mark tells the exam that the cards past the screen edge are not cut-off content, and the exam then checks that the row has `overflow-x: auto` or `scroll`, can be reached from the keyboard (`tabindex="0"` and a name, or focusable items inside), fits the screen itself, and holds no item wider than the screen. A row that wraps on wide screens and scrolls on narrow ones is checked only where it scrolls. Without the mark, a scrolling row is reported as content cut off |
 
 Use the same edge name only for elements that share that edge at the
 examined widths. For layouts that collapse between rows and columns, mark

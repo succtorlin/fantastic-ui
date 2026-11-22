@@ -21,7 +21,7 @@ Two rules that keep presets from becoming the costume party Shift 1 forbids:
   pair warn states with an icon and a word
   ([wcag-audit.md](wcag-audit.md#the-accent-must-not-impersonate-a-semantic)).
 
-Ten of the twelve presets are **light-ground** and two are dark. That mix
+Sixteen of the eighteen presets are **light-ground** and two are dark. That mix
 matters, because the accent rule inverts between them and the inversion is the
 single most useful thing in this file.
 
@@ -40,8 +40,9 @@ this in one direction or the other.
 Either way the failure is the same pairing. Expect to need one of the two
 splits in any preset you derive from a design you admire.
 
-One preset declares the pairing instead: **L · Gallery White**, whose deep blue
-carries white at 5.93:1. The rule is a contrast rule, so a preset may declare
+Two presets declare the pairing instead: **L · Gallery White**, whose deep blue
+carries white at 5.93:1, and **O · Olive Outfitter**, whose dark olive carries
+it at 7.11:1. The rule is a contrast rule, so a preset may declare
 white-on-accent when it measures ≥4.5:1, and the gate then measures it rather
 than banning it.
 
@@ -1028,6 +1029,741 @@ atmosphere. Module recipes, CSS and the gates in
 
 ---
 
+## Preset M — "Folio Split"
+
+> A white page that is an index of work: two columns of equal pale-grey
+> tiles, each with a title, one sentence, tags and an arrow in the same
+> top-left position, and one large, sharp image of the work filling the rest
+> and running off the tile's edge — no accent colour anywhere, because all
+> the colour on the page arrives in the work.
+
+Light, airy and image-led. Suits portfolios, case-study indexes, product and
+app galleries, and the home or index screen of an app whose items are visual.
+It was derived from a designer's portfolio and owes that page nothing but its
+structure: no names, marks, copy or project imagery belong in it.
+
+**Not Gallery White.** Both are white, tone-separated and product-led. L gives
+one object a whole full-width band, centres its type and spends a blue pill
+on one buy action. M puts many things of equal standing on one screen,
+aligns everything left, has no bands, no accent and no buy action: the tile
+*is* the action.
+
+```css
+.page {
+  /* ink 18.43 / ink-2 9.66 / muted 5.70 on --ground;
+     ink 16.89 / ink-2 8.85 / muted 5.23 on --ground-2 (the tile)          */
+  --ground:    #ffffff;
+  --ground-2:  #f4f5f7;   /* the tile: 1.09:1 against the page — tone, not a border */
+  --panel:     #ffffff;   /* tag pills on a tile, the nav pill              */
+  --ground-3:  #eceef2;   /* the active nav item, pressed states            */
+  --hair:      #d8dbe1;   /* 1.39:1 — the arrow ring and footer rule only   */
+  --hair-lit:  #e8eaee;
+
+  --ink:       #0e1420;   /* near-black navy: 18.43:1 on --ground           */
+  --ink-2:     #3d4553;   /* 9.66:1 on white, 8.85:1 on the tile            */
+  --muted:     #5f6775;   /* 5.70:1 on white, 5.23:1 on the tile, 4.91:1 on --ground-3 */
+  --control:   #868d99;   /* 3.34 / 3.06 — icon strokes only (1.4.11), never text */
+
+  /* No accent. Actions invert: ink fill, white text (18.43:1).            */
+  --invert:        #0e1420;
+  --ink-on-invert: #ffffff;
+
+  --up:   #1a8047;   /* 4.97 on white, 4.56 on the tile; 4.28 on --ground-3: never there */
+  --down: #c8322a;   /* 5.32 on white, 4.88 on the tile                    */
+
+  /* The platform's own UI face at weight 800 — local only, zero downloads. */
+  --sans:    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --r-sheet: 0px;
+  --r-panel: 10px;
+  --r-card:  10px;    /* tiles: a small, quiet corner — the art is the voice */
+  --r-pill:  999px;   /* nav, tags, the arrow ring                          */
+  --maxw:    1520px;  /* the grid's cap: past it the tiles outgrow their art */
+  --gutter:  clamp(16px, 2.9vw, 34px);
+  --gap:     24px;
+  --tile-ratio: 14 / 15;   /* slightly taller than wide                     */
+  --nav-shadow: 0 6px 24px color-mix(in oklab, var(--ink) 9%, transparent);
+}
+```
+
+**The greys in the reference fail, so they were darkened.** Its subtitle, tag
+labels and status note sit near `#9aa0a6`: **2.64:1** on white and 2.42:1 on
+the tile. `--muted` here is the lightest grey that clears 4.5:1 on white, on
+the tile *and* on the active nav item (4.91:1). The hierarchy survives because
+it was never carried by faintness: weight 800 against 400 does the work. Never
+set text in `--control` or `--hair`.
+
+**The trap is the picture.** This preset's images are content, and the
+skill's ≤30 KB raster rule would turn each into a smear. M therefore declares
+the **showcase lane** (`"showcase"` in preset-gates.json): images marked
+`data-showcase` are exempt from the 30 KB cap and held to their own gates
+instead — real `alt` text, explicit dimensions, a `srcset`, no browser
+upscaling at 1440 px @2× or 390 px @3×, and a weight budget per file and for
+the first screen. Everything not marked stays under 30 KB. Contract, markup
+and export recipe: [folio-modules.md](folio-modules.md#6-the-showcase-lane).
+
+**Imagery.** The user's own work, never stock and never generated: captured
+product screens (Playwright at `deviceScaleFactor: 3`), device shots on a
+transparent ground, or photographs. Angled mockups are allowed here, and only
+here, because the thing in the frame is real — a tilted frame around an
+invented dashboard is still the failure SKILL.md names. Where the product
+runs, prefer live HTML under a CSS 3D transform to a raster: it is sharp at
+every density and weighs nothing. No atmosphere plates: the tile tone is the
+backdrop.
+
+### Component grammar
+
+- **A split grid of equal tiles.** Two columns from 768 px, one below, a 24 px
+  gap both ways, every tile `--tile-ratio`. Equal size is the statement: the
+  page is an index and no entry outranks another, so the reader compares the
+  work, not the frames. This is the one place the skill's ban on uniform card
+  grids is lifted, and the next rule is what pays for it.
+- **Variety lives in the art, never the frame.** Four compositions: a device
+  at an isometric angle, a fan of flat screens at the same angle, devices
+  square-on, and a full-bleed photograph or close crop. No two neighbouring
+  tiles (side by side or stacked) share one, and at most one tile in four is
+  full-bleed. Identical frames around
+  identical thumbnails is the template this rule exists to prevent.
+- **Words top-left, art below, in the same place on every tile.** Title
+  (`--display`, 800, `clamp(20px, 1.9vw, 26px)`), one sentence in `--ink`
+  capped near 34ch and two lines, then tags. A fixed text block lets the eye
+  learn one position and then read only pictures.
+- **The art runs off the tile.** It fills the lower ~60% and is cropped by at
+  least one edge (the crop is baked into the export; the box stays inside the
+  tile). The cropped edge says there
+  is more behind it; an image floating whole inside the tile reads as a
+  thumbnail in a card.
+- **The tile is one link; the arrow is its signifier.** The title is the
+  `<a>`, stretched over the tile with `::after`; the 40 px outlined ring with
+  an arrow top-right is `aria-hidden` and answers hover and focus. One tab
+  stop per tile, and a name ("Stake") a screen reader can list.
+- **Tags are white pills on the tile tone.** `--panel` on `--ground-2`,
+  `--muted` text at 12 px/600. They classify; they are not links unless the
+  page really filters.
+- **The chrome has no colour.** Navy ink, three greys, white. A status note
+  ("Case study coming soon") is `--muted` text, not a badge. Anything coloured
+  on the page is therefore the work.
+- **A centred pill nav, the page's only shadow.** White on white has no tone
+  to separate by, so the nav pill alone takes `--nav-shadow`; the active item
+  is a `--ground-3` inner pill. Tiles never take a shadow or a border
+  (`"separation": "tone"`).
+- **A left-aligned hero with no button.** h1 at `--display` 800,
+  `clamp(40px, 4.6vw, 64px)`, tracking `-0.03em`; one `--muted` line under it.
+  The grid is the call to action, so the first row of tiles starts above the
+  1280×800 fold.
+- **Bad at:** anything whose items are not visual (articles, tables, settings),
+  dense or operator-facing screens, pages that must argue a case in prose, and
+  any project without sharp imagery of the work at twice the tile's width. With
+  fewer than four tiles the grid reads as empty, and with blurry or invented
+  art it reads as a template — use L for one hero product, G for a list.
+
+---
+
+## Preset N — "Sprint Stage"
+
+> Sportswear storefront: a black first screen with a slanted, heavy headline
+> and one product standing on its own reflection, then a white catalogue of
+> pale-grey product tiles broken by rounded black banners — no accent colour,
+> because the only colour on the page is the product.
+
+Fast, loud and product-led. Suits sportswear, footwear, sports equipment and
+any shop whose products are bright and photographed as cut-outs. It was
+derived from a sports-shoe storefront and owes that page nothing but its
+structure: no names, marks, slogans or product imagery belong in it.
+
+**Not Midnight Showroom, and not Gallery White.** F is dark from top to
+bottom, hard-edged and amber. L drops to black for a band but is centred,
+sentence-case and calm. N is black for one screen only, then a white shop;
+its type leans and shouts, and it has no accent at all.
+
+```css
+.page {
+  /* light: ink 19.67 / ink-2 10.47 / muted 5.70 on --ground;
+     17.59 / 9.36 / 5.10 on --ground-2 (the product tile)                   */
+  --ground:    #ffffff;
+  --ground-2:  #f2f2f3;   /* product tiles: 1.12:1 against the page — tone, not a border */
+  --panel:     #ffffff;
+  --ground-3:  #e6e6e8;   /* pressed tiles                                   */
+  --hair:      #dcdcdf;   /* 1.37:1 — the footer rule and the outlined pill only */
+  --hair-lit:  #ebebed;
+
+  --ink:       #0b0b0c;
+  --ink-2:     #3f3f44;
+  --muted:     #66666c;   /* 5.70 on white, 5.10 on the tile, 4.58 on --ground-3 */
+  --control:   #8a8a90;   /* 3.43 / 3.07 — icon strokes only (1.4.11), never text */
+
+  /* the stage: the black first screen and the rounded black banners         */
+  --stage:        #050506;
+  --stage-2:      #161618;   /* a card standing on the stage                 */
+  --stage-ink:    #ffffff;   /* 20.37 on --stage, 18.07 on --stage-2         */
+  --stage-ink-2:  #b9b9be;   /* 10.42 / 9.25 — and 1.95:1 on white: never off the stage */
+  --stage-muted:  #8f8f96;   /* 6.34 / 5.63                                  */
+
+  /* No accent. An action takes the opposite of its ground: a white pill on
+     the stage (ink text, 19.67:1), an ink pill on white (white text).       */
+  --invert:        #0b0b0c;
+  --ink-on-invert: #ffffff;
+
+  --up:   #157540;   /* 5.75 on white, 5.14 on the tile                      */
+  --down: #c12e26;   /* 5.70 / 5.09 — a marked-down price, always with the word */
+
+  /* Local faces only. The display voice is weight 900, italic, uppercase:
+     the system face has a true black italic (Helvetica Neue stops at bold).  */
+  --sans:    "Helvetica Neue", Helvetica, "Segoe UI", Roboto, Arial, sans-serif;
+  --display: system-ui, -apple-system, "Segoe UI", Roboto, "Arial Black", "Helvetica Neue", sans-serif;
+  --mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --r-sheet: 0px;
+  --r-panel: 16px;    /* the black banner                                    */
+  --r-card:  6px;     /* product tiles and photo cards: nearly square        */
+  --r-pill:  999px;
+  --maxw:    1180px;
+  --gap:     20px;
+}
+```
+
+**The trap is the grey that belongs to the stage.** `--stage-ink-2` is the
+right secondary text on black (10.42:1) and is **1.95:1** on white. The page
+changes ground twice in one scroll, so a class reused from the hero in a white
+section fails without anyone choosing it. Stage tokens are used only on the
+two black surfaces, `.stage` and `.banner`; the gate looks for that grey on
+white.
+
+**The second trap is the product over the headline.** At phone width the
+product wants to slide under the type. Text over a photograph cannot be
+measured, so the product box never overlaps the hero's heading, sentence or
+button: below 768 px it moves under them.
+
+**Imagery.** Cut-out products are the user's own, shot or rendered on black
+for the stage and on a plain ground for the tiles; never generated. The hero
+product is a showcase image (`data-showcase`, see the showcase lane below):
+it is the largest thing on the page and a 30 KB file would smear it. Category
+photographs (people, movement, coloured light) are the user's own or `ai`
+scenes via `compress`. No atmosphere plate: the black is the atmosphere.
+
+### Component grammar
+
+- **A black first screen.** `.stage` is full-bleed `--stage` under a white
+  nav: headline, one sentence and one pill on the left, one product on the
+  right, lit from above. One product, not a carousel: on black, the product
+  is the brightest thing on the screen, and a second one halves it.
+- **Slanted caps for display only.** `--display`, weight 900, italic,
+  uppercase, tracking `-0.02em`, `clamp(40px, 6.4vw, 84px)`, line-height
+  1, as two short sentences with full stops (never under 1: capitals have no
+  descenders to spare, and wrapped lines collide). The slant is the motion cue.
+  It is for the h1, section titles (22–26 px) and banner titles; body text,
+  captions and buttons stay upright, because slanted small type slows reading.
+- **The reflection.** A second, flipped copy of the product under the first,
+  faded out with a mask within 40% of its height, `aria-hidden`. It is what
+  makes the product stand on a floor instead of floating in a void. It never
+  reaches the copy column.
+- **Rows of four tone tiles.** `--ground-2` tiles at `--r-card`, the product
+  centred on the tile, the caption *under* the tile: name 13 px/700 caps, one
+  `--muted` line. Four across from 1024 px, two below. The caption sits
+  outside the tile so every product gets the same clean field.
+- **Cut-outs and photographs alternate by row.** One row is studio cut-outs
+  on tiles, the next is full-bleed photographs at the same size and radius.
+  The switch between object and scene is the page's rhythm; two cut-out rows
+  in a row read as a spreadsheet of shoes.
+- **The rounded black banner.** A `--stage` panel at `--r-panel` inside the
+  content column, not full-bleed: slanted title left, three or four products
+  in a line right. It repeats the opening at small scale and breaks the white
+  scroll. At most two per page.
+- **A pill that answers its ground.** White pill with `--ink` text on the
+  stage and banners; `--invert` pill on white. Height 44 px. Section headers
+  carry one outlined "see all" pill at the right, `--hair` outline, `--ink`
+  text.
+- **Bad at:** quiet, formal or luxury-restrained brands, services, long
+  reading, B2B, and any shop without cut-out product photography. Without a
+  strong hero product the stage is an empty black box — use L for a calm
+  single product and K for a brand with no photography at all.
+
+---
+
+## Preset O — "Olive Outfitter"
+
+> Outdoor-lifestyle shop laid out on one rounded warm-white sheet: a hero
+> panel whose photograph dissolves in from the right, small fact cards
+> stacked on the picture's edge, dark-olive pills for every action, and
+> rounded shapes nested inside rounded shapes all the way down the page.
+
+Soft, warm and organised. Suits outdoor and lifestyle apparel, footwear, home
+goods and wellness — shops that sell a way of living as much as an object and
+have lifestyle photography to prove it. It was derived from a trainer shop
+and owes that page nothing but its structure: no names, marks, copy or
+imagery belong in it.
+
+**Not Terracotta Commerce.** Both are warm retail. E floats shadowed cards
+over a full-bleed photograph, sets a serif headline and anchors the page with
+a dark band. O has no shadows and no dark band: it is one pale sheet of
+nested rounded panels with hairline outlines, caps sans headlines, and an
+olive that is dark enough to carry white.
+
+```css
+.page {
+  /* ink 15.64 / ink-2 8.08 / muted 5.51 on --panel (the sheet);
+     14.22 / 7.34 / 5.01 on --ground-2; 12.99 / 6.71 / 4.58 on --ground      */
+  --ground:    #eceae3;   /* the desk the sheet lies on                      */
+  --ground-2:  #f6f4ee;   /* hero panel, category tiles, the club band       */
+  --panel:     #ffffff;   /* the sheet, product cards, fact cards            */
+  --panel-2:   #efece4;   /* chips, the secondary pill (ink 13.25:1)         */
+  --hair:      #e3dfd4;   /* 1.33:1 on the sheet — card and tile outlines    */
+  --hair-lit:  #cfc9ba;   /* 1.65:1 — rules inside the footer                */
+
+  --ink:       #23241e;
+  --ink-2:     #4f5147;
+  --muted:     #686a5e;
+  --control:   #84867a;   /* 3.70 on the sheet, 3.37 on --ground-2 — input outlines and icons */
+
+  --accent:      #565b3a;  /* olive. As text: 7.11 on the sheet, 6.47 on --ground-2 */
+  --accent-fill: #565b3a;
+  --on-accent:   #ffffff;  /* 7.11:1 — declared, see below                   */
+  --accent-deep: #3f4329;  /* hover and pressed: white 10.26:1               */
+  --accent-dim:  #e6e8d6;  /* the selected filter pill: olive text 5.72:1    */
+
+  --up:       #3f6b3a;   /* 6.22 on the sheet, 5.66 on --ground-2            */
+  --down:     #9f3526;   /* 6.97 on the sheet, 6.34 on --ground-2: a discount, as text */
+
+  --sans:    "Avenir Next", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", sans-serif;
+  --display: "Avenir Next", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", sans-serif;
+  --mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --r-sheet: 28px;   /* the page itself                                      */
+  --r-panel: 20px;   /* hero, category tiles, bands                          */
+  --r-card:  16px;   /* product cards, fact cards                            */
+  --r-pill:  999px;
+  --maxw:    1240px;
+  --gap:     16px;
+}
+```
+
+**The declared exception — white on the olive.** Like L's blue, this accent
+is dark enough to carry white: **7.11:1**. O declares the pairing
+(`"whiteOnAccent": "declared"`), so the gate measures it instead of banning
+it. The margin is real but not unlimited: lightened to `#6b7048` white is
+5.20:1, and at `#7a7f58` it is 4.20:1, a fail. A sage or khaki that looks
+"the same but fresher" is the usual way this breaks.
+
+**The trap is words on the photograph.** The reference sets its headline on
+the pale side of the hero photo and its fact cards on translucent glass. Text
+whose background is a picture cannot be measured, and an automated check
+reports it as undecided, which this skill counts as a failure. So the copy
+column is solid `--ground-2`, the photograph is a separate box that starts
+where the copy ends, and its near edge is masked to transparent so it still
+seems to dissolve into the panel. Fact cards are fully opaque `--panel`.
+
+**Imagery.** Lifestyle photographs (a person moving, pale architecture, soft
+daylight) are the user's own or `ai` scenes; products are the user's own,
+never generated. The hero photograph and category photographs may be showcase
+images. Decorative gaps take `plate --style contour` in the sheet's own
+tones.
+
+### Component grammar
+
+- **A sheet on a desk.** The whole page is one `--panel` sheet at
+  `--r-sheet`, with a margin of `--ground` showing around it from 768 px and
+  flush to the screen below. Everything inside steps the radius down: 28 →
+  20 → 16 → pill. The nesting is the direction; a square corner anywhere
+  inside the sheet breaks it.
+- **Photo hero panel.** A `--ground-2` panel at `--r-panel`. Copy fills the
+  left 46%; the photograph fills the rest and is masked at its left edge
+  (`mask-image: linear-gradient(to right, transparent, var(--ink) 28%)`:
+  a mask reads only alpha, and a token keeps colour literals out of the
+  stylesheet). Below 768 px the photograph moves above the copy.
+- **Two-tone caps headline.** `--display`, weight 700, uppercase, tracking
+  `-0.01em`, `clamp(30px, 4.2vw, 56px)`, line-height 1.02. The first line is
+  `--ink`, the rest `--ink-2` (8.08:1). The step in tone lets a four-line
+  headline be read as a name and then a promise.
+- **Fact cards on the picture's edge.** Three small opaque `--panel` cards
+  stacked at the photograph's right edge, each a line icon and two lines
+  (delivery, try before paying, guarantee). They answer what a buyer checks
+  before buying, at the point where the eye leaves the picture. One proof
+  chip (rating and count) sits bottom-right.
+- **Olive pill, pale pill.** Primary: `--accent-fill` with `--on-accent` and
+  a trailing arrow. Secondary: `--panel-2` pill with `--ink`. Height 44 px.
+  One olive pill per panel.
+- **Search with a filter rail.** A rounded search field with a round olive
+  submit, and beside it one row of outlined category pills, each with a line
+  icon. The rail scrolls sideways on a phone and never wraps to two rows; it is
+  marked `data-fui-scroll`, and each pill has its own `--panel` fill so a
+  half-scrolled pill is still a measurable surface.
+- **Product cards in a row of five.** `--panel` with a 1 px `--hair` outline
+  at `--r-card`: the product on a `--ground-2` plate, a 44 px heart button
+  top-right, a label top-left set as coloured text and never as a filled
+  chip ("New" in `--accent`, a discount in `--down` with its figure: a tinted
+  pill on every other card is a halo of badges), name 12 px/700 caps, price
+  15 px/700 with the old price struck in `--muted`, a rating as a star plus
+  the number, and the size range. Five across at full width, a scrolling row
+  below 1024 px (marked `data-fui-scroll`).
+- **Category tiles, two by two.** `--ground-2` at `--r-panel` with a `--hair`
+  outline: caps title, two lines, a text link with an arrow on the left; the
+  photograph enters from the right behind the same mask as the hero.
+- **Icon feature strip.** Six small outlined cards in one row: line icon,
+  caps label, two lines. It names the product's technologies; it is not a
+  place for marketing adjectives.
+- **The club band.** A wide `--ground-2` panel: a tilted membership card
+  drawn in CSS on the left (live art, not a raster), the offer in the middle,
+  one olive pill on the right.
+- **Bad at:** data-dense or analytical work, formal and regulated subjects,
+  dark or aggressive brands, and shops with no lifestyle photography. The
+  softness that sells a walking shoe reads as vagueness on a pricing table.
+
+---
+
+## Preset P — "Chamfer Spec"
+
+> Hardware launch page in white, silver and black: wide uppercase display
+> type, corners cut at 45° instead of rounded, a ruled strip of
+> specifications, and the product rendered large on a pale technical
+> backdrop — every claim on the page is a number with a unit.
+
+Precise, cold and engineered. Suits gaming hardware, audio, peripherals,
+components and tools — products bought on measurable performance. It was
+derived from an earbuds product page and owes that page nothing but its
+structure: no names, marks, copy or renders belong in it.
+
+**Not Gallery White.** Both are white pages for one device. L is soft,
+centred, sentence-case and spends a blue pill. P has no curve anywhere, sets
+its type wide and in capitals, has no accent, and organises the page around
+a specification table instead of around whitespace.
+
+```css
+.page {
+  /* ink 19.79 / ink-2 11.17 / muted 5.82 on --ground;
+     17.97 / 10.15 / 5.28 on --ground-2                                     */
+  --ground:    #ffffff;
+  --ground-2:  #f3f4f5;   /* feature cells, the render's backdrop            */
+  --panel:     #ffffff;
+  --panel-2:   #f8f8f9;
+  --hair:      #d9dadd;   /* 1.40:1 — dividers between cells                 */
+  --hair-lit:  #b9bbc1;   /* 1.92:1 — the spec strip's outline               */
+
+  --ink:       #0a0a0b;
+  --ink-2:     #3a3b40;
+  --muted:     #63656c;
+  --control:   #84868d;   /* 3.64 / 3.30 — icon strokes and input outlines, never text */
+
+  /* No accent. Black does the work: buttons, the spec label, the angled band. */
+  --invert:           #0a0a0b;
+  --ink-on-invert:    #ffffff;   /* 19.79:1                                  */
+  --ink-2-on-invert:  #b4b6bc;   /* 9.76:1                                   */
+  --muted-on-invert:  #8e9097;   /* 6.21:1                                   */
+
+  --up:   #1a8047;   /* 4.97 on white, 4.52 on --ground-2                    */
+  --down: #c8322a;   /* 5.32 / 4.83                                          */
+
+  /* Local faces only. Where an extended face is installed it is used; the
+     system face is widened with font-stretch and a little tracking.        */
+  --sans:    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --display: "Eurostile Extended", "Eurostile", "Microgramma", "Bank Gothic", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --display-stretch: 125%;
+  --mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --r-sheet: 0px;    /* nothing on this page is rounded                      */
+  --r-panel: 0px;
+  --r-card:  0px;
+  --r-pill:  0px;
+  --cut:     14px;   /* the chamfer: one corner cut at 45°                   */
+  --maxw:    1200px;
+}
+```
+
+**The trap is that the cut removes the focus ring.** The obvious way to cut
+a corner is `clip-path` on the button, and `clip-path` clips the element's
+own outline: the keyboard focus ring vanishes and nothing reports it. The
+cut is therefore painted by a `::before` layer behind the label, and the
+control itself keeps `clip-path: none`. The gate reads that property on
+every link, button and field. The control also states the fill as its own
+`background-color`, held inside its content box: a fill that exists only on
+a pseudo-element cannot be measured, and the label's contrast then reads as
+1:1. Recipe: [storefront-modules.md](storefront-modules.md#6-chamfer-spec-p).
+
+**The second trap is the render behind the words.** The reference lets a
+large numeral run across the product's technical rings. Text over a picture
+cannot be measured, so renders and their ring graphics never overlap a
+heading, paragraph, list item, link or button; a callout sits beside the
+render.
+
+**Imagery.** Product renders are the user's own, on a transparent or pale
+ground, and are showcase images: a render this large is the page's proof.
+Never generated. Behind a render, thin concentric rings and tick marks drawn
+in SVG from `--hair` (`aria-hidden`) stand for a measuring instrument; they
+replace atmosphere plates.
+
+### Component grammar
+
+- **Corners are cut, never rounded.** One corner per shape: bottom-right on
+  buttons, top-right on labels, both right corners on the angled band. The
+  cut is `--cut` on a `::before` layer (`clip-path: polygon(...)`); an
+  outlined shape is two layers, `--ink` under `--ground` inset by 1 px. One
+  corner language across the page is what makes it read as machined.
+- **Wide caps display.** `--display`, weight 800, uppercase,
+  `font-stretch: var(--display-stretch)`, tracking `0.02em`,
+  `clamp(34px, 5.2vw, 68px)`, line-height 1. Two or three words per line.
+  It is for headings and the callout numeral only: wide capitals are slow
+  to read past a few words, so sentences and labels over three words use
+  `--sans`.
+- **Icon facts under the action.** Four line icons in a row under the hero
+  button, each with a two-line caps label that contains a value ("40 ms",
+  "35 hours"). They are the first proof, so each one is a number.
+- **The spec strip.** A full-width strip outlined in `--hair-lit`: a black
+  cut label on the left, then five columns of a `<dl>`: a `--muted` caps
+  caption (11 px), the value in `--ink` (16 px/600), a `--muted` note.
+  Columns are divided by `--hair`. Two columns on a phone. It sits directly
+  under the first screen: the buyer's next question after "what is it" is
+  "what are the numbers".
+- **Callout numeral.** One very large wide numeral with its unit, beside a
+  render, with a caps caption. One per page.
+- **Cells, not cards.** Feature rows are four cells divided by `--hair`,
+  with no gap, no fill and no shadow: a render or icon, a caps title,
+  two or three lines. Dividers make it a table of parts.
+- **The angled band.** An `--invert` block whose right edge is cut on a
+  slope, carrying a caps title, a short paragraph and a tick list in
+  `--ink-on-invert`; beside it, three tall renders cut on the same slope.
+  One per page, low on the page.
+- **Bad at:** warmth, lifestyle and soft consumer brands, long-form reading,
+  and products with nothing to measure. With no real specifications the
+  strip fills with adjectives and the direction turns into costume — use L.
+
+---
+
+## Preset Q — "Market Shelf"
+
+> Multi-category marketplace: a pale blue-grey page of white product cards
+> arranged as shelves that page sideways, the price as the heaviest text on
+> every card, a hero whose neighbouring slides show at both edges, and one
+> midnight band for the deals that end today.
+
+Dense, plain and built for scanning. Suits electronics retailers, department
+stores, marketplaces and any catalogue with many categories and hundreds of
+products. It was derived from a general-merchandise shop and owes that page
+nothing but its structure: no names, marks, copy or product imagery belong
+in it.
+
+**Not Campus Bright, and not Terracotta Commerce.** I is a dense catalogue
+too, but of courses, with a yellow accent and alternating bands. E sells a
+few objects with atmosphere and shadows. Q sells many objects with none: no
+accent, no shadow, no lifestyle photography, and the same card forty times.
+
+```css
+.page {
+  /* ink 14.57 / ink-2 7.56 / muted 5.15 on --ground (the aisle);
+     16.17 / 8.39 / 5.72 on --panel (a card)                                */
+  --ground:    #f1f3f8;   /* the aisle: pale blue-grey                       */
+  --ground-2:  #e7eaf2;   /* picture plates, pressed states (muted 4.75)     */
+  --panel:     #ffffff;   /* product cards, the search field: 1.11:1 on the aisle — tone */
+  --panel-2:   #f7f8fb;
+  --hair:      #dfe3ec;   /* 1.29:1 on a card — the rule inside a card, footer rules */
+  --hair-lit:  #c8cedc;
+
+  --ink:       #1c2030;
+  --ink-2:     #474d61;
+  --muted:     #5f667b;
+  --control:   #77809a;   /* 3.54 on the aisle, 3.93 on a card — input outlines and arrow rings */
+
+  /* No accent. One midnight band per page, and the same midnight for buttons. */
+  --invert:           #0d1030;
+  --invert-2:         #171b45;   /* a raised surface on the band             */
+  --ink-on-invert:    #ffffff;   /* 18.52 / 16.42                            */
+  --ink-2-on-invert:  #b3b8d0;   /* 9.42 / 8.35                              */
+
+  --rating:           #a86500;   /* star marks on light: 4.64 on a card, 4.18 on the aisle */
+  --rating-on-invert: #f5b400;   /* 10.06 on the band — and 1.84 on a card: band only */
+
+  --up:   #17703d;   /* 6.14 on a card, 5.53 on the aisle                    */
+  --down: #bd2f28;   /* 5.83 / 5.25                                          */
+
+  --sans:    "Avenir Next", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", sans-serif;
+  --display: "Avenir Next", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", sans-serif;
+  --mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --r-sheet: 0px;
+  --r-panel: 8px;    /* the hero slide, promo tiles                          */
+  --r-card:  6px;    /* product cards, buttons                               */
+  --r-pill:  999px;  /* arrow rings only                                     */
+  --maxw:    1320px;
+  --gap:     16px;
+}
+```
+
+**The trap is the star.** The reference's rating stars are a bright yellow
+that measures **1.84:1** on a white card: on a page where a rating is one of
+three facts per product, a third of the information is close to invisible.
+On light grounds stars take `--rating` (4.64:1) and are always followed by
+the number as text; the bright yellow is allowed on the midnight band only
+(10.06:1).
+
+**The second trap is a shelf that cannot be reached.** A sideways row built
+with `overflow: hidden` and script-driven arrows shows nothing past the
+fifth card when the script fails, on touch, or from the keyboard. A shelf's
+track is `overflow-x: auto` with scroll snapping; the arrows only scroll it.
+The gate reads that property. The track is also marked
+`data-fui-scroll="<shelf name>"`: the exam otherwise reports its off-screen
+cards as content cut off, and with the mark it checks instead that the track
+scrolls by itself, can be reached from the keyboard, and holds no card wider
+than the screen.
+
+**Imagery.** Product shots are the user's own, many and small, on white, via
+`compress` (each fits the 30 KB cap at card size). The hero slide's picture
+may be a showcase image. No atmosphere plates and no lifestyle scenes: the
+products are the decoration.
+
+### Component grammar
+
+- **Shelves, not grids.** Each category is one row of equal cards: five
+  across from 1280 px, four at 1024, and on a phone two and a third, so the
+  cut-off card says the row scrolls. A shelf keeps every category one row
+  tall, so twelve categories fit in the scroll that a grid spends on two.
+- **Arrows beside the shelf's title.** The previous and next rings sit at
+  the top right of each shelf, level with its title — not below the row as
+  in the shared grammar. A shelf holds more cards than fit on one screen
+  (eight to twelve); a shelf whose cards all fit shows no rings. A shopper decides whether to page a shelf when they
+  read its name, before they have scanned its cards.
+- **The card is a price tag.** `--panel` at `--r-card`, with no border and
+  no shadow: a fixed 4:3 picture area, the name (14 px/500), one `--muted`
+  spec line clamped to two lines, then a foot ruled with `--hair`: rating on
+  the left, price on the right at 15 px/700 (name the foot `item__foot`, not
+  `card__foot`: the separation gate reads a border on any class containing
+  "card" as a card outline). The price is the heaviest text
+  on the card, because it is the fact the shopper compares across a shelf.
+- **Search-first nav.** The wordmark, then a wide search field that takes
+  the middle of the bar, then account links. With this many products the
+  search field is the page's main control and is sized like it.
+- **A hero that shows its neighbours.** One slide at `--r-panel`, no wider
+  than `--maxw`, with up to 80 px of the previous and next slides visible at
+  the edges; on a screen too narrow for both, the slide gives up width, not
+  the neighbours. The copy sits on a solid half of the slide, the picture on the
+  other. Neighbouring slides are `inert`; 44 px white rings on the slide's
+  edges page it.
+- **The midnight band.** One full-bleed `--invert` band: a title and a
+  countdown on the left, a shelf of white cards on the right. The countdown
+  is `--mono`, is not a live region, and the end time is also written as
+  words ("Ends today at 18:00"), so the deadline survives without script.
+- **Promo trio.** Three tiles of unequal width (1 : 1 : 1.4), each one
+  product on a flat panel with at most one button. The wide one is the only
+  place a product gets more room than a card.
+- **Square buttons.** `--invert` fill, white label, `--r-card`, height
+  40 px. Pills are for the arrow rings only.
+- **Bad at:** brands that sell on story, luxury, anything airy, and small
+  catalogues: with fewer than about fifteen products the shelves are half
+  empty and the density has nothing to organise — use E or R.
+
+---
+
+## Preset R — "Mono Catalogue"
+
+> Monochrome gadget shop: a white page, pale-grey tiles with very large
+> corners, light-weight headlines, and every product desaturated to
+> greyscale and cut out so it leans off the corner of its tile — the
+> catalogue has no colour at all, including in the pictures.
+
+Quiet, even and object-led. Suits gadgets, accessories, design objects and
+small considered catalogues where shape and material are the difference
+between one product and the next. It was derived from a tech-accessories
+shop and owes that page nothing but its structure: no names, marks, copy or
+product imagery belong in it.
+
+**Not Folio Split, and not Gallery White.** M is an index of work with equal
+tiles, heavy titles and no price. L gives one product a whole screen and
+spends a blue pill. R is a shop, with prices and a filter row; its
+tiles are staggered, its type is light, and it removes colour from the
+pictures as well as the chrome.
+
+```css
+.page {
+  /* ink 18.88 / ink-2 9.59 / muted 5.74 on --ground;
+     17.32 / 8.79 / 5.27 on --ground-2 (the tile)                           */
+  --ground:    #ffffff;
+  --ground-2:  #f5f5f5;   /* tiles: 1.09:1 against the page — tone, not a border */
+  --panel:     #ffffff;
+  --ground-3:  #ebebeb;   /* pressed tiles (ink 15.84, muted 4.82)           */
+  --hair:      #dcdcdc;   /* 1.37:1 — the rule under the filter row, footer rules */
+  --hair-lit:  #ececec;
+
+  --ink:       #111111;
+  --ink-2:     #454545;
+  --muted:     #666666;
+  --control:   #888888;   /* 3.54 / 3.25 — icon strokes and the search rule, never text */
+
+  /* No accent, and no colour in the pictures either. Actions invert.        */
+  --invert:           #111111;
+  --ink-on-invert:    #ffffff;   /* 18.88:1                                  */
+  --ink-2-on-invert:  #b5b5b5;   /* 9.21:1                                   */
+
+  --up:   #1a8047;   /* 4.97 on white, 4.56 on the tile                      */
+  --down: #c8322a;   /* 5.32 / 4.88                                          */
+
+  /* Local faces only, at weight 400: the voice is the lightness.            */
+  --sans:    "Helvetica Neue", Helvetica, "Segoe UI", Roboto, Arial, sans-serif;
+  --display: "Helvetica Neue", Helvetica, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --r-sheet: 0px;
+  --r-panel: 20px;   /* product tiles                                        */
+  --r-card:  32px;   /* category tiles: the large corner is the voice        */
+  --r-pill:  999px;
+  --maxw:    1160px;
+  --gap:     20px;
+}
+```
+
+**The greys in the reference fail, so they were darkened.** Its body copy
+and category labels sit near `#9b9b9b`: **2.78:1** on white and 2.55:1 on a
+tile. `--muted` here is 5.74:1 and 5.27:1. The page stays quiet because the
+quiet was never in the faintness: it is in weight 400, generous space and
+the absence of colour.
+
+**The trap is one coloured picture.** On a page with no accent, the first
+product photograph left in colour becomes the accent by accident, and the
+eye goes to whichever product happens to be red. Every art box carries
+`filter: grayscale(1)` in CSS, even when the export is already grey: it
+costs nothing and it catches the picture someone adds next year. The gate
+reads the filter.
+
+**Imagery.** Cut-out products are the user's own, on a transparent ground,
+never generated, and may be showcase images. Behind the hero product, a
+field of thin vertical lines drawn in SVG from `--hair` stands for fluted
+glass (`aria-hidden`). No atmosphere plates and no photographs of people.
+
+### Component grammar
+
+- **No colour, including the pictures.** With every product grey, form is
+  the only difference between two of them, which is what a catalogue of
+  objects wants the shopper to compare. A sale is the word "Sale" and a
+  struck price in `--muted`, not a red badge.
+- **Light-weight headlines.** `--display`, weight 400, tracking `-0.02em`,
+  `clamp(30px, 3.6vw, 48px)`, line-height 1.1, left-aligned, sentence case,
+  two lines. Hierarchy comes from size alone; a bold headline here reads as
+  shouting in a library.
+- **Hero: words left, one product right.** Headline, two lines of `--ink-2`,
+  then an ink pill and an outlined pill. The product stands on a pale field
+  on the right with the fluted lines beside it.
+- **Ink pill, outlined pill.** Primary: `--invert` with white text.
+  Secondary: transparent with a 1 px `--ink` outline. Height 44 px. Never
+  two ink pills side by side.
+- **Staggered category tiles.** Two columns of `--ground-2` tiles at
+  `--r-card`, where the left column's first tile is taller than the right's
+  and the second pair reverses it. Title (22 px/400), two `--muted` lines
+  and an underlined text link with an arrow sit top-left; the cut-out
+  product sits bottom-right and is cropped by the tile's right and bottom
+  edges. The stagger is what separates this from a grid of equal boxes.
+- **Slash filter row.** Filter links separated by slashes ("All / Audio /
+  Gear"), the current one in `--ink` with `aria-current`, the rest
+  `--muted`; a search field with only a bottom rule at the right; one
+  full-width `--hair` rule under the row. Slashes are quieter than tabs or
+  chips and keep the row a line of text.
+- **Product grid, three across.** A square `--ground-2` tile at `--r-panel`
+  with the product centred; under it a caps category label (11 px, tracking
+  `0.04em`, `--muted`), the name (18 px/400) and the price (13 px, `--ink`).
+  Three across from 900 px, two below.
+- **Bad at:** products sold on colour (fashion, food, cosmetics, paint),
+  dense marketplaces, urgency and promotions, and long copy. If the brand
+  owns a colour, this preset throws it away — use N or O.
+
+---
+
 ## Shared grammar (recurs across the references, reusable beyond them)
 
 These devices carry across directions — they're structural, not stylistic, and
@@ -1060,8 +1796,8 @@ even when every other signal matches.**
 | Signal | Values to read off the request |
 |---|---|
 | **Medium** | marketing page · in-app screen · document/PDF · slide deck · storefront |
-| **Domain** | travel & hospitality · trades & engineering · professional services · interiors, fashion, craft, food · retail & catalogue · data & analytics |
-| **Imagery** | rich lifestyle · product shots · material/texture · greyscale or stock · none supplied → generate (`plate`, or `ai` for photo slots) |
+| **Domain** | travel & hospitality · trades & engineering · professional services · interiors, fashion, craft, food · retail & catalogue · portfolios & case studies · data & analytics |
+| **Imagery** | rich lifestyle · product shots · the user's own work at 2× · material/texture · greyscale or stock · none supplied → generate (`plate`, or `ai` for photo slots) |
 | **Density** | airy · medium · dense |
 
 ### Scoring
@@ -1080,12 +1816,20 @@ even when every other signal matches.**
 | **J · Charter Navy** | marketing, booking | aviation, marine, logistics, finance | corporate, aircraft, people | medium | the brand wants warmth or a consumer-casual voice |
 | **K · Dispatch Yellow** | marketing, booking | taxi, courier, trades, plant hire | minimal or none supplied | medium | the work is premium, understated or editorial |
 | **L · Gallery White** | marketing, launch page | hardware, devices, premium apps, software launches | the user's own product shots | airy | the surface is data-dense, operator-facing, or has no product to show |
+| **M · Folio Split** | marketing, portfolio, in-app index | design and product studios, freelancers, case studies, app galleries | the user's own work at 2× (screens, device shots, photographs) | airy | there is no sharp imagery of the work, the items are not visual, or there are fewer than four |
+| **N · Sprint Stage** | storefront, launch page | sportswear, footwear, sports equipment | cut-out product on black, action photographs | medium | the brand is quiet, formal or restrained, or there is no cut-out product photography |
+| **O · Olive Outfitter** | storefront, marketing | outdoor and lifestyle apparel, footwear, home goods, wellness | rich lifestyle plus product shots | medium | the work is analytical, or the brand is dark, loud or technical |
+| **P · Chamfer Spec** | launch page, product page | gaming hardware, audio, peripherals, components, tools | the user's own product renders | medium | the product has no measurable specifications, or the brand wants warmth |
+| **Q · Market Shelf** | storefront, marketplace home | multi-category retail, electronics, department stores | many small product shots on white | dense | the catalogue has fewer than about fifteen products, or the brand sells on story |
+| **R · Mono Catalogue** | storefront, marketing | gadgets, accessories, design objects | cut-out product shots, desaturated | airy | colour is what the product sells (fashion, food, cosmetics), or the surface is dense |
 
 Two signals is the recommendation threshold. One signal is a coincidence:
 render it beside a stronger candidate rather than assume. "No imagery supplied" is never a disqualifier by itself:
 the slots get generated per [ai-atmosphere.md](ai-atmosphere.md). Two things
-generation cannot supply are the user's own products and people — E, F and H
-need those from the user or lose that device.
+generation cannot supply are the user's own products and people — E, F, H and
+the five shop presets N to R need those from the user or lose that device. **M is the one preset where
+missing imagery does disqualify:** its tiles are windows onto real work, and a
+generated picture of work that does not exist is a fabricated proof.
 
 ### Worked calls
 
@@ -1105,6 +1849,23 @@ Each call names what Step 0a does next: render a sample set for a web page ([dir
   retail pulls **E**, material photography pulls **D**. Render both, and
   recommend by the differentiator — E if the job is selling individual
   products, D if it is presenting a point of view.
+- *"Portfolio for a product designer: six case studies, device mockups and
+  screens for each"* → portfolio + case studies + own work at 2× + airy =
+  **M**, four signals, no disqualifier. Recommended sample, beside **L** (if
+  one project deserves the whole first screen) or **G** (if the entries are
+  better listed than shown).
+- *"Online shop for our running-shoe brand: forty models, studio cut-outs of
+  every one"* → storefront + footwear + cut-out product = **N**, three
+  signals. Recommended sample, beside **O** (if the brand is calm and has
+  lifestyle photography) or **R** (if it would rather be quiet than loud).
+- *"Homepage for an electronics retailer with nine departments"* →
+  storefront + multi-category retail + many small shots + dense = **Q**, four
+  signals, no disqualifier. Recommended sample, beside **E** only if the
+  range is really a few dozen products.
+- *"Launch page for our new gaming headset, we have the renders and the full
+  spec sheet"* → launch page + gaming hardware + own renders = **P**, three
+  signals. Recommended sample, beside **L** (the calm version of the same
+  job).
 - *"Dashboard for our logistics platform"* → in-app + dense, and A, C and E are
   all disqualified. B survives on density but has no accent to encode state.
   **No preset**: an in-app screen, so no samples: announce a fresh brief,
@@ -1127,6 +1888,26 @@ this file. They are not interchangeable — the ground and the job separate them
 Chroma is the fastest tell: C and I sit around 60–70% saturation and behave
 like brand colour; K is near-maximum and behaves like signage. If the client
 says "friendly", that is I. If they say "you can't miss us", that is K.
+
+### Eight of these sell products. Picking between them
+
+E, F, L, N, O, P, Q and R are all shops or product pages, and five of them
+are white. The number of products and the voice separate them:
+
+| | Ground | Voice | The picture | Reach for it when |
+|---|---|---|---|---|
+| **E · Terracotta** | Warm white + timber band | Serif, soft shadows | Lifestyle rooms, products on cards | A small range sold with atmosphere |
+| **F · Midnight** | Near-black throughout | Caps, hard edges, amber | Cut-outs floating on the dark | One luxury object category |
+| **L · Gallery White** | White + black stage bands | Centred, sentence case, blue pill | One product on studio light | One product, one idea per screen |
+| **N · Sprint Stage** | Black first screen, then white | Slanted heavy caps, no accent | Bright cut-outs on tiles and on black | A sports range that should feel fast |
+| **O · Olive Outfitter** | Warm sheet of nested panels | Caps sans, olive pills | Lifestyle photographs fading into panels | A lifestyle range sold calmly |
+| **P · Chamfer Spec** | White and silver | Wide caps, cut corners, no accent | Large renders beside numbers | One device bought on its specifications |
+| **Q · Market Shelf** | Pale blue-grey aisle | Plain, dense, no accent | Many small shots on white cards | Hundreds of products in many categories |
+| **R · Mono Catalogue** | White + grey tiles | Light weight, no colour anywhere | Greyscale cut-outs leaning off tiles | A small range of objects compared by form |
+
+Count the products first. One → L or P (calm or technical). A few dozen → E,
+N, O or R. Hundreds → Q. Then ask whether the brand's colour matters: if it
+does, R is out; if the brand is loud, N; if it is warm, E or O.
 
 ### If you find yourself arguing for a preset
 
@@ -1151,9 +1932,20 @@ skill exists to prevent.
 | **J · Charter Navy** | Navy + white | Red | Hairline | Medium | Corporate | Aviation, marine, logistics, finance | Warmth, informality |
 | **K · Dispatch Yellow** | White + black | Safety yellow | Flat block | Medium | Minimal | Taxi, courier, trades, hire | Premium or understated work |
 | **L · Gallery White** | White + black stage | Deep blue | **Tone** | Airy | Product on studio light | Devices, premium apps, launches | Dense or operator screens |
+| **M · Folio Split** | White + grey tiles | None | **Tone** | Airy | The work itself, large and sharp | Portfolios, case-study indexes, app galleries | Text-led or data-dense content |
+| **N · Sprint Stage** | Black stage, then white | None | **Tone** | Medium | Cut-out product, action photographs | Sportswear, footwear, sports equipment | Quiet or formal brands |
+| **O · Olive Outfitter** | Warm sheet on a desk | Dark olive | Hairline | Medium | Lifestyle plus product | Outdoor, lifestyle apparel, home goods | Analytical or aggressive work |
+| **P · Chamfer Spec** | White + silver | None | Hairline | Medium | Product renders | Gaming hardware, audio, components | Warmth, products with no numbers |
+| **Q · Market Shelf** | Pale blue-grey aisle | None | **Tone** | Dense | Many small product shots | Marketplaces, electronics, department stores | Small ranges, brand storytelling |
+| **R · Mono Catalogue** | White + grey tiles | None | **Tone** | Airy | Greyscale cut-outs | Gadgets, accessories, design objects | Products sold on colour |
 
-Preset L separates by **tone** alone: tiles and bands are a step lighter or
-darker than their ground, with neither borders nor shadows on them.
+Presets L, M, N, Q and R separate by **tone** alone: tiles, cards and bands
+are a step lighter or darker than their ground, with neither borders nor
+shadows on them. (M's nav pill is its one shadow: white on white has no tone
+step to use.)
+
+**L or M?** Both are white and product-led. One thing to show, given a whole
+screen → L. Many things of equal standing, compared at a glance → M.
 
 Presets E and H use shadows for separation rather than hairlines. Both are
 considered exceptions: retail wants objects that look liftable, and Studio
@@ -1169,7 +1961,7 @@ Anti-Template Policy exists to prevent.
 ## Verifying an applied preset
 
 `scripts/verify-preset.mjs` runs a preset's gates against a live page.
-`scripts/preset-gates.json` holds the declaration for all twelve — accent and
+`scripts/preset-gates.json` holds the declaration for all eighteen — accent and
 radii transcribed from each token block, separation from the comparison table,
 traps from each direction's own trap paragraph. Change a preset here, change it
 there.
@@ -1194,10 +1986,28 @@ or `alt=""` images, CSS `url()` layers, `aria-hidden` SVG outside controls). At
 zero it warns "state the reason in the brief" — zero is allowed with a reason;
 the ≤30 KB asset gate stays hard.
 
-**Per-preset gates:** the accent (or, for B/D/G/H, its declared absence) ·
+**The showcase lane, for a preset that declares it (M, and N to R):** images
+marked `data-showcase` leave the 30 KB gate and meet three of their own —
+`showcase-markup` (real `alt`, `width`/`height`, a `srcset`, never
+`aria-hidden`, lazy below the first screen), `showcase-sharpness` (no browser
+upscaling at 1440 px @2× and 390 px @3×) and `showcase-weight` (per file and
+for the first screen). **M requires the lane:** a Folio Split page with no
+showcase image fails, because the lane is the preset. **N, O, P, Q and R
+allow it** (`"required": false`): their large product photographs and renders
+are content too and may be marked, while a page whose photographs have not
+arrived yet still passes. On any other preset `data-showcase` changes nothing
+and the 30 KB cap applies. Contract:
+[folio-modules.md](folio-modules.md#6-the-showcase-lane); the shop modules
+that use it: [storefront-modules.md](storefront-modules.md).
+
+**Per-preset gates:** the accent (or, for B/D/G/H/M/N/P/Q/R, its declared absence) ·
 the separation strategy — E and H separate with shadows, everything else does
 not, and the file already forbids mixing the two · each direction's stated
-trap, including the universal *white is never the accent's partner*.
+trap, including the universal *white is never the accent's partner*. A trap
+is one of four kinds: a forbidden colour pairing, a geometry rule (one thing
+must not overlap another), a minimum background opacity, or a computed style
+that must hold on every matching element (P: no `clip-path` on a control;
+Q: a shelf's `overflow-x`; R: the greyscale filter).
 
 **Deviations are handled.** The accent gate resolves `--accent-fill`/`--accent`
 from the page and falls back to the published hex, so a stated deviation (say,
