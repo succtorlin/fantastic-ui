@@ -123,6 +123,13 @@ describe("exam: composition (measure, cover, fold)", { skip }, () => {
     assert.ok(!c.some((p) => p.includes("Closed menu option")), c.join("\n"));
   });
 
+  test("a list item holding a closed <details> is not covered by the next item", async () => {
+    // The hidden explanation still reports line boxes, and they fall on the next item.
+    const { problems } = await audit("closed-details-list.html");
+    const c = problems.filter((p) => p.startsWith("text under another element"));
+    assert.deepEqual(c, []);
+  });
+
   test("a button inside a closed <details> menu at the right edge is not reported as cut off", async () => {
     const { problems } = await audit("closed-details-wide.html");
     const c = problems.filter((p) => p.startsWith("content cut off"));

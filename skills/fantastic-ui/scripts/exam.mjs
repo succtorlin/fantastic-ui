@@ -260,6 +260,21 @@ async function coverChecks(page, width) {
     const h = new Function(`return (${src})()`)();
     const out = [];
     const chrome = (el) => { for (let e = el; e; e = e.parentElement) if (/^(fixed|sticky)$/.test(getComputedStyle(e).position)) return true; return false; };
+    // The line boxes of text that is actually painted. Text inside a closed
+    // <details> (content-visibility: hidden) still reports boxes, laid over
+    // whatever follows it, so a visible item that holds one would otherwise be
+    // tested at points where it paints nothing.
+    const textRects = (root) => {
+      const rects = [];
+      const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      for (let t = walk.nextNode(); t; t = walk.nextNode()) {
+        const parent = t.parentElement;
+        if (!t.textContent.trim() || !parent || (parent.checkVisibility && !parent.checkVisibility())) continue;
+        const rg = document.createRange(); rg.selectNodeContents(t);
+        rects.push(...rg.getClientRects());
+      }
+      return rects;
+    };
     // A transparent layer (a stretched link's ::after) hides nothing; its own
     // text covers only where that text actually is.
     const paints = (el, x, y) => {
@@ -267,8 +282,7 @@ async function coverChecks(page, width) {
       if (el.matches("img, svg, canvas, video, picture, iframe")) return true;
       const cs = getComputedStyle(el), bg = h.parse(cs.backgroundColor);
       if ((bg && bg.a > 0.5) || cs.backgroundImage !== "none") return true;
-      const rg = document.createRange(); rg.selectNodeContents(el);
-      return [...rg.getClientRects()].some((q) => x >= q.left && x <= q.right && y >= q.top && y <= q.bottom);
+      return textRects(el).some((q) => x >= q.left && x <= q.right && y >= q.top && y <= q.bottom);
     };
     for (const el of document.querySelectorAll("h1, h2, h3, h4, p, li, a, button, label, figcaption, td, th, dt, dd, blockquote")) {
       if (el.closest("[aria-hidden=true], dialog:not([open]), [hidden]") || chrome(el)) continue;
@@ -282,8 +296,7 @@ async function coverChecks(page, width) {
       if (ecs.textOverflow === "ellipsis" || (ecs.webkitLineClamp && ecs.webkitLineClamp !== "none")) continue;
       const text = el.textContent.replace(/\s+/g, " ").trim();
       if (!text) continue;
-      const range = document.createRange(); range.selectNodeContents(el);
-      for (const r of [...range.getClientRects()].slice(0, 6)) {
+      for (const r of textRects(el).slice(0, 6)) {
         if (r.width < 3 || r.height < 3) continue;
         const x = r.left + r.width / 2, y = r.top + r.height / 2;
         if (x < 0 || y < 0 || x > innerWidth || y > innerHeight) continue;
