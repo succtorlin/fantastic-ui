@@ -168,15 +168,15 @@ layout, and excellent when the layout is strong.
   --hair-lit:  #c9c9c9;
 
   --ink:       #0f0f0f;  /* 19.2:1 on --panel                    */
-  --ink-2:     #6b6b6b;  /* 5.33:1 on --panel                    */
-  --muted:     #707070;  /* 4.6:1 on every text ground; AA as text */
+  --ink-2:     #6b6b6b;  /* 5.33:1 on --panel, 4.51:1 on --ground */
+  --muted:     #686868;  /* 4.72:1 on --ground, the darkest ground; AA as text */
   --ink-on-invert:   #ffffff;
   --ink-2-on-invert: #a8a8a8;  /* 7.75:1 on --invert             */
 
   /* No accent. Emphasis is inversion, not color. Semantics are the only
      hues permitted, and only when they carry meaning. */
-  --up:   #2f7d32;
-  --down: #b3261e;
+  --up:   #2d7730;  /* 4.69:1 on --ground */
+  --down: #b3261e;  /* 5.53:1 on --ground */
 
   --sans:    "Manrope", "Inter", system-ui, -apple-system, sans-serif;
   --display: "Manrope", "Inter", system-ui, sans-serif;
@@ -191,9 +191,13 @@ layout, and excellent when the layout is strong.
 }
 ```
 
-Every pair above clears AA by a wide margin — this direction's risk is not
-contrast, it is monotony. Guard against it with scale contrast and the
-light/dark alternation below, never by sneaking in a color.
+Every text colour above clears AA on all four grounds. The margin is thin on
+`--ground` (`--ink-2` 4.51:1, `--up` 4.69:1, `--muted` 4.72:1), so do not
+lighten these three. On that ground `--ink-2` and `--muted` are the same tone
+to the eye: tell secondary text from muted text by size, weight and case. This
+direction's larger risk is not contrast, it is monotony. Guard against it with
+scale contrast and the light/dark alternation below, never by sneaking in a
+color.
 
 **Imagery.** Specimen plates: the user's project photos via `compress`, desaturated; else `ai` greyscale material close-ups (concrete, steel, drafting paper) or `plate --style contour`. No accent, so map the plate's `accent` role to `--hair-lit`.
 

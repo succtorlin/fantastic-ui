@@ -54,6 +54,18 @@ test("presets without an accent fall back to an ink button", () => {
   assert.equal(d.ctaBgName, "ink");
 });
 
+test("Blueprint Mono's text colours clear AA on every ground it publishes", () => {
+  // The preset has no accent, so its greys and its two semantic hues carry all
+  // the text. Each must read on the backdrop too, which is the darkest ground.
+  const map = parseTokens(presetBlock("B").decls);
+  for (const ink of ["ink", "ink-2", "muted", "up", "down"]) {
+    for (const ground of ["ground", "ground-2", "panel", "panel-2"]) {
+      const ratio = contrast(map[ink], map[ground]);
+      assert.ok(ratio >= 4.5, `--${ink} on --${ground} is ${ratio.toFixed(2)}:1`);
+    }
+  }
+});
+
 test("colour helpers", () => {
   assert.equal(Math.round(contrast("#000000", "#ffffff")), 21);
   assert.equal(contrast("not-a-colour", "#fff"), null);
