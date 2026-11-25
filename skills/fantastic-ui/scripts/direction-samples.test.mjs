@@ -66,6 +66,24 @@ test("Blueprint Mono's text colours clear AA on every ground it publishes", () =
   }
 });
 
+test("every preset's text colours clear AA on every ground that carries text", () => {
+  // Two grounds never carry text, by their own description: A's backdrop
+  // outside the sheet and C's screen surface behind the printed page.
+  const noText = { A: ["ground"], C: ["ground"] };
+  const failures = [];
+  for (const L of "ABCDEFGHIJKLMNOPQR") {
+    const map = parseTokens(presetBlock(L).decls);
+    for (const ink of ["ink", "ink-2", "muted", "up", "down"]) {
+      for (const ground of ["ground", "ground-2", "panel", "panel-2"]) {
+        if (map[ink] == null || map[ground] == null || noText[L]?.includes(ground)) continue;
+        const ratio = contrast(resolveVar(map[ink], map), resolveVar(map[ground], map));
+        if (ratio == null || ratio < 4.5) failures.push(`${L} --${ink} on --${ground} is ${ratio?.toFixed(2)}:1`);
+      }
+    }
+  }
+  assert.deepEqual(failures, []);
+});
+
 test("colour helpers", () => {
   assert.equal(Math.round(contrast("#000000", "#ffffff")), 21);
   assert.equal(contrast("not-a-colour", "#fff"), null);
