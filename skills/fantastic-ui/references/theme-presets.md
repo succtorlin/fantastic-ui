@@ -86,8 +86,8 @@ a data screen feel empty.
   --accent-ink: #55658f;  /* 5.76:1 white-on; 4.6:1 on --panel   */
   --accent-dim: rgba(154, 169, 201, 0.16);
 
-  --up:   #2f8f6b;
-  --down: #c2453a;
+  --up:   #287a5b;  /* 4.57:1 on --ground-2, the darkest ground inside the sheet */
+  --down: #bd4339;  /* 4.57:1 on --ground-2 */
 
   --sans:    "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --display: "Archivo", "Inter", system-ui, sans-serif;
@@ -324,12 +324,12 @@ filled; `ai` material close-ups qualify.
 
   --ink:       #473c33;  /* 8.66:1 on --ground-2                         */
   --ink-2:     #5c5046;  /* 6.32:1 on --ground-2                         */
-  --muted:     #746455;  /* 4.6:1 on every text ground; AA as text */
+  --muted:     #6e5e50;  /* 4.58:1 on --ground, the darkest ground; AA as text */
   --ink-on-invert:   #efe6da;  /* 8.66:1 on --invert                     */
   --ink-2-on-invert: #c9b9a6;  /* large text only on --invert            */
 
-  --up:   #5c7a52;
-  --down: #a85a4a;
+  --up:   #4f6846;  /* 4.55:1 on --ground */
+  --down: #924e40;  /* 4.57:1 on --ground */
 
   --sans:    "Inter", system-ui, -apple-system, sans-serif;
   --display: "Archivo Condensed", "Oswald", "Inter", system-ui, sans-serif;
@@ -403,7 +403,7 @@ analytical, where the softness reads as imprecision.
   --accent-ink: #9c5329;  /* 5.70:1 white-on; the compliant CTA          */
   --accent-dim: rgba(217, 139, 95, 0.14);
 
-  --up:   #4a7a52;
+  --up:   #47754f;  /* 4.56:1 on --ground-2, the darkest ground */
   --down: #b3453a;
 
   --sans:    "DM Sans", "Inter", system-ui, -apple-system, sans-serif;
@@ -488,7 +488,7 @@ reports a number.
   --accent-dim:  rgba(242, 160, 45, 0.12);
 
   --up:   #4caf7d;
-  --down: #e05a4a;
+  --down: #e15f4f;  /* 4.56:1 on --panel-2, the lightest ground */
 
   --sans:    "Inter", system-ui, -apple-system, sans-serif;
   --display: "Archivo", "Inter", system-ui, sans-serif;
@@ -562,7 +562,7 @@ an index of episodes rather than an argument.
 
   /* Deliberately no chromatic accent: thumbnails are the color. Emphasis is
      the black band. Adding a hue here makes every thumbnail fight it. */
-  --up:   #2f7d52;
+  --up:   #2e7b51;  /* 4.56:1 on --ground-2, the darkest ground */
   --down: #b3453a;
 
   --sans:    "Inter", system-ui, -apple-system, sans-serif;
